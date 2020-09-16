@@ -149,3 +149,115 @@ void Compare4Resolutions(){
 
    //c1.SaveAs(name.c_str());
 }
+
+void Compare5Fitters(){
+
+  //  TCanvas c1("c1", "c1", 1024, 768);
+
+  std::string title = "Electrons Simulated in Whole Scintillator";
+  //  std::string title = "Electrons with R > 1.5m";
+  //std::string title = "Electrons with R < 1.5m";
+
+  //  std::string name = "Rgt1.5_RecoordBiases1000.png";
+  //  std::string name = "Rlt1.5_RecoordBiases1000.png";
+  std::string name = "AllR_RecoordBiases1000.png";
+
+  TFile *_fileScint = TFile::Open("scintFitterY_1000e.root");
+  TFile *_fileAll = TFile::Open("partialTestFitterY_1Z_1000e.root");
+  TFile *_file2Z = TFile::Open("partialTestFitterY_2Z_1000e.root");
+  TFile *_file4Z = TFile::Open("partialTestFitterY_4Z_1000e.root");
+  TFile *_file8PDFs = TFile::Open("partialTestFitterY_8PDFs_1000e.root");
+
+  TGraphErrors* hScint = (TGraphErrors*)_fileScint->Get("y_bias")->Clone();
+  TGraphErrors* hAll = (TGraphErrors*)_fileAll->Get("y_bias")->Clone();
+  TGraphErrors* h2Z = (TGraphErrors*)_file2Z->Get("y_bias")->Clone();
+  TGraphErrors* h4Z = (TGraphErrors*)_file4Z->Get("y_bias")->Clone();
+  TGraphErrors* h8PDFs = (TGraphErrors*)_file8PDFs->Get("y_bias")->Clone();
+
+  hScint->SetLineColor(kRed);
+  hAll->SetLineColor(kBlack);
+  h2Z->SetLineColor(kBlue);
+  h4Z->SetLineColor(kGreen);
+  h8PDFs->SetLineColor(kMagenta);
+
+  TLegend* t1 = new TLegend( 0.6, 0.7, 0.9, 0.9 );
+  //t1->AddEntry( hScint, "ScintFitter", "l" );
+  t1->AddEntry( hAll, "1 PDF", "l" );
+  t1->AddEntry( h2Z, "2 PDFs", "l" );
+  t1->AddEntry( h4Z, "4 PDFs", "l" );
+  t1->AddEntry( h8PDFs, "8 PDFs", "l" );
+
+  hAll->GetYaxis()->SetRangeUser(-200,200);
+  //hAbove->GetXaxis()->SetTitle("Hit time residuals [ns]");
+  //hAbove->GetYaxis()->SetTitle("Normalised Counts");
+  hAll->SetTitle(title.c_str());
+
+  //  hScint->Draw("AP");
+  hAll->Draw("AP");
+  h2Z->Draw("same P");
+  h4Z->Draw("same P");
+  h8PDFs->Draw("same P");
+  t1->Draw("same");
+  
+  //  TLine *line = new TLine(hAll->GetXaxis()->GetXmax(),0,hAll->GetXaxis()->GetXmin(),0);
+  TLine *line = new TLine(-6050,0,6050,0);
+  line->Draw("same");
+
+  //  c1.SaveAs(name.c_str());
+}
+
+void Compare5Resolutions(){
+
+  std::string title = "Electrons Simulated in Whole Scintillator";
+  //  std::string title = "Electrons with R > 1.5m";
+  //std::string title = "Electrons with R < 1.5m";
+
+  //  std::string name = "Rgt1.5_RecoordBiases1000.png";
+  //  std::string name = "Rlt1.5_RecoordBiases1000.png";
+  std::string name = "AllR_RecoordBiases1000.png";
+
+  TFile *_fileScint = TFile::Open("scintFitter_1000e.root");
+  TFile *_fileAll = TFile::Open("partialTestFitter_1Z_1000e.root");
+  TFile *_file2Z = TFile::Open("partialTestFitter_2Z_1000e.root");
+  TFile *_file4Z = TFile::Open("partialTestFitter_4Z_1000e.root");
+  TFile *_file8PDFs = TFile::Open("partialTestFitter_8PDFs_1000e.root");
+
+  TGraphErrors* hScint = (TGraphErrors*)_fileScint->Get("z_resolution")->Clone();
+  TGraphErrors* hAll = (TGraphErrors*)_fileAll->Get("z_resolution")->Clone();
+  TGraphErrors* h2Z = (TGraphErrors*)_file2Z->Get("z_resolution")->Clone();
+  TGraphErrors* h4Z = (TGraphErrors*)_file4Z->Get("z_resolution")->Clone();
+  TGraphErrors* h8PDFs = (TGraphErrors*)_file8PDFs->Get("z_resolution")->Clone();
+
+  //  hScint->SetLineColor(kRed);
+  hAll->SetLineColor(kBlack);
+  h2Z->SetLineColor(kBlue);
+  h4Z->SetLineColor(kGreen);
+  h8PDFs->SetLineColor(kMagenta);
+
+  TLegend* t1 = new TLegend( 0.6, 0.7, 0.9, 0.9 );
+  //  t1->AddEntry( hScint, "ScintFitter", "l" );
+  t1->AddEntry( hAll, "1 PDF", "l" );
+  t1->AddEntry( h2Z, "2 PDFs", "l" );
+  t1->AddEntry( h4Z, "4 PDFs", "l" );
+  t1->AddEntry( h8PDFs, "8 PDFs", "l" );
+
+  hAll->GetYaxis()->SetRangeUser(0,200);
+  //hAbove->GetXaxis()->SetTitle("Hit time residuals [ns]");
+  //hAbove->GetYaxis()->SetTitle("Normalised Counts");
+  hAll->SetTitle(title.c_str());
+
+  // hScint->Draw("AP");
+  hAll->Draw("AP");
+  h2Z->Draw("same P");
+  h4Z->Draw("same P");
+  h8PDFs->Draw("same P");
+  t1->Draw("same");
+
+  TLine *line = new TLine(300,0,6050,0);
+  line->Draw("same");
+
+  //  c1.SaveAs(name.c_str());
+}
+
+void Compare5Resolutions(){
+
