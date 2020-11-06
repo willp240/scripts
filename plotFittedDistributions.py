@@ -10,6 +10,12 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gErrorIgnoreLevel = ROOT.kWarning
 
+try:
+    import numpy as np
+except:
+    print("Failed to import numpy.")
+    exit()
+
 import rat
 
 from timeit import default_timer as timer
@@ -38,6 +44,42 @@ def plot_fitted_distributions(fname, outfile):
     xEvents=[]
     yEvents=[]
     zEvents=[]
+    xPos=[]
+    yPos=[]
+    zPos=[]
+    xBias=[]
+    yBias=[]
+    zBias=[]
+    posTree=[]
+    trueX=[]
+    trueY=[]
+    trueZ=[]
+    eveNum=[]
+    recoX=[]
+
+    posTree=ROOT.TTree("biasTree","biasTree")
+    trueX = np.empty((1), dtype="float32")
+    posTree.Branch("trueX", trueX, "trueX/F")
+    trueY = np.empty((1), dtype="float32")
+    posTree.Branch("trueY", trueY, "trueY/F")
+    trueZ = np.empty((1), dtype="float32")
+    posTree.Branch("trueZ", trueZ, "trueZ/F")
+    eveNum = np.empty((1), dtype="int32")
+    posTree.Branch("eveNum", eveNum, "eveNum/I")
+
+    recoX_1 = np.empty((1), dtype="float32")
+    posTree.Branch("recoX_4PDFs", recoX_1, "recoX_1/F")
+    recoX_2 = np.empty((1), dtype="float32")
+    posTree.Branch("recoX_8PDFs", recoX_2, "recoX_2/F")
+    recoY_1 = np.empty((1), dtype="float32")
+    posTree.Branch("recoY_4PDFs", recoY_1, "recoY_1/F")
+    recoY_2 = np.empty((1), dtype="float32")
+    posTree.Branch("recoY_8PDFs", recoY_2, "recoY_2/F")
+    recoZ_1 = np.empty((1), dtype="float32")
+    posTree.Branch("recoZ_4PDFs", recoZ_1, "recoZ_1/F")
+    recoZ_2 = np.empty((1), dtype="float32")
+    posTree.Branch("recoZ_8PDFs", recoZ_2, "recoZ_2/F")
+
     for i_fitter in range(len(fullFitterNames)):
 
         # Fit valid histograms
@@ -50,25 +92,57 @@ def plot_fitted_distributions(fname, outfile):
         zEvents.append(ROOT.TH1D("nEventsZ_"+fullFitterNames[i_fitter], abvFitterNames[i_fitter]+" Fitted positions", nbins, axisMin, axisMax))
         zEvents[i_fitter].GetXaxis().SetTitle("z [mm]")
 
+        xPos.append(ROOT.TH1D("posEventsX_"+fullFitterNames[i_fitter], abvFitterNames[i_fitter]+" Fitted positions", 100, 0, 100))
+        xPos[i_fitter].GetXaxis().SetTitle("x [mm]")
+
+        yPos.append(ROOT.TH1D("posEventsY_"+fullFitterNames[i_fitter], abvFitterNames[i_fitter]+" Fitted positions", 100, 0, 100))
+        yPos[i_fitter].GetXaxis().SetTitle("y [mm]")
+
+        zPos.append(ROOT.TH1D("posEventsZ_"+fullFitterNames[i_fitter], abvFitterNames[i_fitter]+" Fitted positions", 100, 0, 100))
+        zPos[i_fitter].GetXaxis().SetTitle("z [mm]")
+        
+        xBias.append(ROOT.TH1D("biasX_"+fullFitterNames[i_fitter], abvFitterNames[i_fitter]+" Fitted position bias", 100000, 0, 100000))
+        xBias[i_fitter].GetXaxis().SetTitle("Event Number")
+
+        yBias.append(ROOT.TH1D("biasY_"+fullFitterNames[i_fitter], abvFitterNames[i_fitter]+" Fitted position bias", 100000, 0, 100000))
+        yBias[i_fitter].GetXaxis().SetTitle("Event Number")
+
+        zBias.append(ROOT.TH1D("biasZ_"+fullFitterNames[i_fitter], abvFitterNames[i_fitter]+" Fitted position bias", 100000, 0, 100000))
+        zBias[i_fitter].GetXaxis().SetTitle("Event Number")
+
+       
     simCounter, evCounter = 0, 0
     for ds, run in rat.dsreader(fname):
         if simCounter == 0:
             loopStart=timer()
             print("Beginning event loop...")
-            simCounter += 1
+        simCounter += 1
             
+   #     if simCounter > 100:
+   #         print "simCounter >100"
+   #         break
+        
         for iev in range(0, ds.GetEVCount()):
 
             # Use retriggers?
             if use_retriggers == 0 and iev > 0:
                 continue
-                
+
             # Increment counter
             evCounter += 1
             
             # Get DS variables
             ev = ds.GetEV(iev)
             mc = ds.GetMC()
+
+            if mc.GetMCParticle(0).GetPosition().Z() > 6000:
+                continue
+
+            trueX[0] = mc.GetMCParticle(0).GetPosition().X()
+            trueY[0] = mc.GetMCParticle(0).GetPosition().Y()
+            trueZ[0] = mc.GetMCParticle(0).GetPosition().Z()
+            eveNum[0] = simCounter
+            posTree.Fill()
         
             for i_fitter in range(len(fullFitterNames)):
         
@@ -76,6 +150,9 @@ def plot_fitted_distributions(fname, outfile):
                     xEvents[i_fitter].Fill(mc.GetMCParticle(0).GetPosition().X())
                     yEvents[i_fitter].Fill(mc.GetMCParticle(0).GetPosition().Y())
                     zEvents[i_fitter].Fill(mc.GetMCParticle(0).GetPosition().Z())
+                    xPos[i_fitter].SetBinContent(iev, mc.GetMCParticle(0).GetPosition().X())
+                    yPos[i_fitter].SetBinContent(iev, mc.GetMCParticle(0).GetPosition().Y())
+                    zPos[i_fitter].SetBinContent(iev, mc.GetMCParticle(0).GetPosition().Z())
                     continue
                 # Get fitter vertex
                 try:
@@ -102,6 +179,24 @@ def plot_fitted_distributions(fname, outfile):
                 yEvents[i_fitter].Fill(fitVertex.GetPosition().Y())
                 zEvents[i_fitter].Fill(fitVertex.GetPosition().Z())
 
+                xPos[i_fitter].SetBinContent(evCounter, fitVertex.GetPosition().X())
+                yPos[i_fitter].SetBinContent(evCounter, fitVertex.GetPosition().Y())
+                zPos[i_fitter].SetBinContent(evCounter, fitVertex.GetPosition().Z())
+
+                xBias[i_fitter].SetBinContent(evCounter, fitVertex.GetPosition().X()-mc.GetMCParticle(0).GetPosition().X())
+                yBias[i_fitter].SetBinContent(evCounter, fitVertex.GetPosition().Y()-mc.GetMCParticle(0).GetPosition().Y())
+                zBias[i_fitter].SetBinContent(evCounter, fitVertex.GetPosition().Z()-mc.GetMCParticle(0).GetPosition().Z())
+
+                if( i_fitter == 3):
+                    recoX_1[0] = fitVertex.GetPosition().X()
+                    recoY_1[0] = fitVertex.GetPosition().Y()
+                    recoZ_1[0] = fitVertex.GetPosition().Z()
+                elif ( i_fitter == 4):
+                    recoX_2[0] = fitVertex.GetPosition().X()
+                    recoY_2[0] = fitVertex.GetPosition().Y()
+                    recoZ_2[0] = fitVertex.GetPosition().Z()
+            posTree.Fill()
+                
     xCanv = ROOT.TCanvas("X","X")
     yCanv = ROOT.TCanvas("Y","Y")
     zCanv = ROOT.TCanvas("Z","Z")
@@ -121,7 +216,9 @@ def plot_fitted_distributions(fname, outfile):
         else:
             xEvents[i_fitter].Draw("same")
         xEvents[i_fitter].Write()
-        
+        xPos[i_fitter].Write()
+        xBias[i_fitter].Write()
+
         yCanv.cd()
         yEvents[i_fitter].SetLineColor(i_fitter)
         yEvents[i_fitter].GetYaxis().SetTitle("Fitted Events")
@@ -132,6 +229,8 @@ def plot_fitted_distributions(fname, outfile):
         else:
             yEvents[i_fitter].Draw("same")
         yEvents[i_fitter].Write()
+        yPos[i_fitter].Write()
+        yBias[i_fitter].Write()
        
         zCanv.cd()
         zEvents[i_fitter].SetLineColor(i_fitter)
@@ -143,6 +242,9 @@ def plot_fitted_distributions(fname, outfile):
         else:
             zEvents[i_fitter].Draw("same")
         zEvents[i_fitter].Write()
+        zPos[i_fitter].Write()
+        zBias[i_fitter].Write()
+        #        posTree[i_fitter].Write()
 
     xCanv.cd()
     Leg.Draw()
@@ -154,7 +256,7 @@ def plot_fitted_distributions(fname, outfile):
     xCanv.Write()
     yCanv.Write()
     zCanv.Write()
-
+    posTree.Write()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser() #formatter_class=argparse.ArgumentDefaultsHelpFormatter
