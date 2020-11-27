@@ -313,29 +313,30 @@ void Compare5Efficiency(){
 
 void Compare2Fitters(){
 
-  std::string title = "Bias in Y";
+  std::string title = "Bias in Z";
 
-  TFile *_Old = TFile::Open("RecoordPDFs27Oct.root");
-  TFile *_New = TFile::Open("RecoordPDFs28OctQuadOnly.root");
+  TFile *_Old = TFile::Open("Nov9_multipdf_E0.root");
+  TFile *_New = TFile::Open("Nov9_multipath_E0.root");
 
-  TGraphErrors* hOld = (TGraphErrors*)_Old->Get("y_bias")->Clone();
-  TGraphErrors* hNew = (TGraphErrors*)_New->Get("y_bias")->Clone();
+  TGraphErrors* hOld = (TGraphErrors*)_Old->Get("z_bias")->Clone();
+  TGraphErrors* hNew = (TGraphErrors*)_New->Get("z_bias")->Clone();
 
   hOld->SetLineColor(kRed);
   hNew->SetLineColor(kBlue);
 
   TLegend* t1 = new TLegend( 0.6, 0.7, 0.9, 0.9 );
-  t1->AddEntry( hOld, "4PDF as seed near boundary", "l" );
-  t1->AddEntry( hNew, "Quad seed only", "l" );
+  t1->AddEntry( hOld, "MultiPDF", "l" );
+  t1->AddEntry( hNew, "MultiPath", "l" );
  
-  hOld->GetYaxis()->SetRangeUser(-25,25);
+  hOld->GetYaxis()->SetRangeUser(-50,50);
   hOld->SetTitle(title.c_str());
   
   hOld->Draw("AP");
   hNew->Draw("same P");
   t1->Draw("same");
 
-  TLine *line = new TLine(200,0,6050,0);
+  // TLine *line = new TLine(200,0,6050,0);
+  TLine *line = new TLine(0,0,10,0);
   line->Draw("same");
 
 }
@@ -344,20 +345,26 @@ void Compare2Fitters(){
 
 void Compare2Resolutions(){
 
-  std::string title = "Resolution in Y";
+  std::string coord[3] = {"x", "y", "z"};
 
-  TFile *_Old = TFile::Open("RecoordPDFs27Oct.root");
-  TFile *_New = TFile::Open("RecoordPDFs28OctQuadOnly.root");
+  std::string title = "Resolution in ";
 
-  TGraphErrors* hOld = (TGraphErrors*)_Old->Get("y_resolution")->Clone();
-  TGraphErrors* hNew = (TGraphErrors*)_New->Get("y_resolution")->Clone();
+  TFile *_Old = TFile::Open("Nov17Test_multipdf.root");
+  TFile *_New = TFile::Open("Nov19_multipdf_R.root");
+
+  for(int i=0; i<3; i++){
+
+    std::string 
+
+  TGraphErrors* hOld = (TGraphErrors*)_Old->Get("z_resolution")->Clone();
+  TGraphErrors* hNew = (TGraphErrors*)_New->Get("z_resolution")->Clone();
   
   hOld->SetLineColor(kRed);
   hNew->SetLineColor(kBlue);
 
   TLegend* t1 = new TLegend( 0.6, 0.7, 0.9, 0.9 );
-  t1->AddEntry( hOld, "4PDF as seed near boundary", "l" );
-  t1->AddEntry( hNew, "Quad seed only", "l" );
+  t1->AddEntry( hOld, "MultiPDF", "l" );
+  t1->AddEntry( hNew, "MultiPath", "l" );
   
   hOld->GetYaxis()->SetRangeUser(80,160);
   hOld->SetTitle(title.c_str());
@@ -366,8 +373,8 @@ void Compare2Resolutions(){
   hNew->Draw("same P");
   t1->Draw("same");
   
-  TLine *line = new TLine(300,0,6050,0);
-  line->Draw("same");
+  //  TLine *line = new TLine(300,0,6050,0);
+  //line->Draw("same");
   
 }
 
