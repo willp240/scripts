@@ -717,3 +717,109 @@ TH1D* PlotHitTimeResidualsMCPositionCompFiles( const string& fileName, const str
   return hHitTimeResiduals1;
 }
 
+
+TCanvas* PlotHitTimeResidualsMCPositionZCut1m( const string& fileName )
+{
+
+  TCanvas *c = new TCanvas("c1", "c1", 1580, 1080);
+  c->SetTopMargin(0.07);
+  c->SetBottomMargin(0.11);
+  c->SetLeftMargin(0.10);
+  c->SetRightMargin(0.1);
+  c->cd();
+
+  int numHistos = 12;
+  TH1D* hHitTimeResiduals[numHistos];
+  for (int i=0; i<numHistos; i++){
+    hHitTimeResiduals[i] = new TH1D( Form("h%d",i), "Hit time residuals using the MC position", 700, -200.0, 500.0 );
+  }
+
+ // If this is being done on data that does not require remote database connection
+  // eg.: a simple simulation with default run number (0)
+  // We can disable the remote connections:
+  //
+  // NOTE: Don't do this if you are using real data!!!
+  RAT::DB::Get()->SetAirplaneModeStatus(true);
+
+  RAT::DU::DSReader dsReader( fileName );
+
+  // RAT::DU::Utility::Get()->GetLightPathCalculator() must be called *after* the RAT::DU::DSReader constructor.
+  RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPathCalculator(); // To calculate the light's path
+  const RAT::DU::GroupVelocity& groupVelocity = RAT::DU::Utility::Get()->GetGroupVelocity(); // To get the group velocity
+  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo(); // The PMT positions etc..
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ )
+    {
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
+      const TVector3 eventPosition = rDS.GetMC().GetMCParticle(0).GetPosition(); // At least 1 is somewhat guaranteed
+      for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
+        {
+          const RAT::DS::EV& rEV = rDS.GetEV( iEV );
+          const RAT::DS::CalPMTs& calibratedPMTs = rEV.GetCalPMTs();
+          for( size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++ )
+            {
+              const RAT::DS::PMTCal& pmtCal = calibratedPMTs.GetPMT( iPMT );
+
+	      lightPath.CalcByPositionPartial( eventPosition, pmtInfo.GetPosition( pmtCal.GetID() ) );
+
+              double distInAV = lightPath.GetDistInAV();
+              double distInWater = lightPath.GetDistInWater();
+              double distInUpperTarget = lightPath.GetDistInUpperTarget();
+              double distInLowerTarget = lightPath.GetDistInLowerTarget();
+              const double transitTime = groupVelocity.CalcByDistance( distInUpperTarget, distInAV, distInWater+distInLowerTarget );
+
+	      //lightPath.CalcByPosition( eventPosition, pmtInfo.GetPosition( pmtCal.GetID() ) );
+              //double distInInnerAV = lightPath.GetDistInInnerAV();
+              //double distInAV = lightPath.GetDistInAV();
+              //double distInWater = lightPath.GetDistInWater();
+              //const double transitTime = groupVelocity.CalcByDistance( distInInnerAV, distInAV, distInWater ); // Assumes a 400nm photon
+
+              // Time residuals estimate the photon emission time relative to the event start so subtract off the transit time
+              // hit times are relative to the trigger time, which will depend on event time and detector position so correct for that to line up events
+              // The 390ns corrects for the electronics delays and places the pulse in the middle of the window
+
+	      //round up height to nearest m to find boundary. /1000 to get in m, add 3 to index histos from 0
+	      int histnum = ceil(pmtInfo.GetPosition( pmtCal.GetID() ).Z()/1000) + 6;
+	      if(histnum<0)
+		histnum=0;
+	      if(histnum>numHistos-1)
+		histnum=numHistos-1;
+
+	      hHitTimeResiduals[histnum]->Fill( pmtCal.GetTime() - transitTime - 390 + rDS.GetMCEV(iEV).GetGTTime());
+            }
+        }
+    }
+
+  double max = 0.0;
+  for(int i=0; i<numHistos; i++){
+    hHitTimeResiduals[i]->Scale(1/hHitTimeResiduals[i]->Integral());
+    if(hHitTimeResiduals[i]->GetMaximum() > max)
+      max=hHitTimeResiduals[i]->GetMaximum();
+  }
+  hHitTimeResiduals[0]->GetYaxis()->SetTitle( "Normalised Counts" );
+  hHitTimeResiduals[0]->GetXaxis()->SetTitle( "Hit time residuals [ns]" );
+  hHitTimeResiduals[0]->GetYaxis()->SetRangeUser(0,max*1.1);
+  hHitTimeResiduals[0]->GetXaxis()->SetRangeUser(-5,100);
+
+  int col[8] = {1,4,7,3,5,6,2,28}; 
+  int col[16] = {1,13,4,9,38,7,29,8,32,41,5,6,46,48,2,28}
+
+  for(int i=0; i<numHistos; i++){
+    hHitTimeResiduals[i]->SetLineColor(col[i]);
+  }
+
+  hHitTimeResiduals[0]->Draw();
+  for(int i=0; i<numHistos; i++){
+    hHitTimeResiduals[i]->Draw("same");
+  }
+
+  TLegend* t1 = new TLegend( 0.5, 0.6, 0.88, 0.9);
+  t1->AddEntry( hHitTimeResiduals[0], "PMTs with z<-3m", "l" );
+  for(int i=1; i<numHistos-1; i++){
+    t1->AddEntry( hHitTimeResiduals[i], Form("PMTs with %dm<z<%dm",i-4,i-3), "l" );
+  }
+  t1->AddEntry( hHitTimeResiduals[numHistos-1], "PMTs with z>3m", "l" );
+
+  t1->Draw();
+
+  return c;
+}

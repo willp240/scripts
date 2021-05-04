@@ -9,8 +9,8 @@
 int Getters() {
 
   // Read in file
-  //  RAT::DU::DSReader dsreader("./testPartialFitter.root");
-  RAT::DU::DSReader dsreader("/data/snoplus/parkerw/ratSimulations/batch/Nov9_multipdf_multipath/multiPDF_0.root");
+  RAT::DU::DSReader dsreader("/home/parkerw/Software/rat_b/testpartialmpdf.root");
+  ///  RAT::DU::DSReader dsreader("/data/snoplus/parkerw/ratSimulations/batch/Nov9_multipdf_multipath/multiPDF_0.root");
 
   //Get pmtInfo
   //  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
