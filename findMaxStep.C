@@ -3,7 +3,7 @@
 
 void findMaxStep( ) {
 
-  std::string filepath = "/data/snoplus/parkerw/bb_sigex/Sep9_allbg_shift0.1/Sep9_20000_allbg_scaleshift_fdshift0.1/Sep9_20000_allbg_scaleshift_fdshift0.1";
+  std::string filepath = "/data/snoplus/parkerw/bb_sigex/Sep14_3bg_shift0.1_scale1.0/Sep14_10000_3bg_shift0.1_scale1.0/Sep14_10000_3bg_shift0.1_scale1.0";
 
   double maxLLH = -999;
   int maxFile = -999;
@@ -11,7 +11,7 @@ void findMaxStep( ) {
   //Loop over files
   for(int i=0; i<20; i++){    
     TString fname = Form("%s_%d_.root",filepath.c_str(),i);
-
+    std::cout << fname << std::endl;
     if(!gSystem->AccessPathName(fname)){
       TFile *File = new TFile(fname , "OPEN");
       TChain* chain = new TChain("posteriors","");
