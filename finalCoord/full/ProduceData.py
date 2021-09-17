@@ -4,9 +4,9 @@ import os, sys, string, ConfigParser
 #        K Majumdar - 11/09/2014 - Cleanup of Coordinators for new DS
 
 totalEvents = 100000
-eventsPerFile = 2000
-totalEvents = 10
-eventsPerFile = 5
+eventsPerFile = 5000
+totalEvents = 100
+eventsPerFile = 10
 
 def ProduceRunMacros(options):
 

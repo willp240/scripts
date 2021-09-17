@@ -5,7 +5,8 @@ import os, sys, string, ConfigParser
 
 totalEvents = 100000
 eventsPerFile = 5000
-
+totalEvents = 100
+eventsPerFile = 10
 
 def ProduceRunMacros(options):
 

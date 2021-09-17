@@ -37,6 +37,7 @@ def AnalyseRootFiles(options):
 		
     # Else run the macro locally on an interactive machine				
     else:
+        print("h0")
         os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + str(int(numberOfRuns)) + ", " + str(options.velocity) + ", \"" + options.coord + "\", \"" + options.boundaries + "\")'")
 
 
@@ -44,7 +45,8 @@ def AnalyseRootFiles(options):
 def AnalysisFunction(material, numberOfRuns, velocity, coordinate, boundaries):
     ROOT.gROOT.ProcessLine(".L Coordinate.cpp+");
 
-    ROOT.GetFullPDF(material, numberOfRuns, velocity, "\""+coordinate+"\"", "\""+boundaries+"\"");
+    ROOT.GetFullPDF(material, numberOfRuns, velocity, coordinate, boundaries);
+
     ROOT.gROOT.ProcessLine(".q");
 
 	
@@ -55,7 +57,7 @@ if __name__ == '__main__':
     parser.add_option("-s", type = "string", dest = "scintMaterial", help = "Scintillator Material to use, default = labppo_scintillator", default = "labppo_scintillator")
     parser.add_option("-v", type = "float", dest = "velocity", help = "Use an updated group velocity for the scintillator material, default = -999", default = -999)
     parser.add_option("-m", type = "choice", choices = ("r","d","z"), dest = "coord", help = "Coordinate the PDFs are split in (r,d,z) ", default = "r")
-    parser.add_option("-r", type = "string", dest = "boundaries", help = "List of boundaries between PDFs", default = "-40000, 40000")
+    parser.add_option("-r", type = "string", dest = "boundaries", help = "List of boundaries between PDFs", default = "")
 
     (options, args) = parser.parse_args()
 

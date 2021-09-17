@@ -55,8 +55,8 @@ if __name__ == '__main__':
     parser.add_option("-b", type = "string", dest = "batch", help = "Run the analysis in Batch mode")
     parser.add_option("-s", type = "string", dest = "scintMaterial", help = "Scintillator Material to use, default = labppo_scintillator", default = "labppo_scintillator")
     parser.add_option("-v", type = "float", dest = "velocity", help = "Use an updated group velocity for the scintillator material, default = -999", default = -999)
-    parser.add_option("-p", type = "string", dest = "zboundaries", help = "List of pmt height boundaries in mm, relative to fill level", default = "-40000, 40000")
-    parser.add_option("-r", type = "string", dest = "rboundaries", help = "List of event radius boundaries in mm, relative to centre of fill level", default = "-40000, 40000")
+    parser.add_option("-p", type = "string", dest = "zboundaries", help = "List of pmt height boundaries in mm, relative to fill level", default = "")
+    parser.add_option("-r", type = "string", dest = "rboundaries", help = "List of event radius boundaries in mm, relative to centre of fill level", default = "")
     parser.add_option( "-z", type="float", dest="splitLevel", help="Fill level in mm", default="696")
     (options, args) = parser.parse_args()
 

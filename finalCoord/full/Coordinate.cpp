@@ -30,6 +30,7 @@ void FillFullTimeResidualsPlot(std::string material, std::vector <TH1D*> histogr
 
 void GetFullPDF(std::string material, unsigned int numberOfRuns, double velocity=-999, std::string coordinate = "r", std::string boundaries = "" )
 {
+
   const float binWidth = 1.0;      // ns - width of bins in PDF
   const float lowLim = -100.0;     // ns - lower end of PDF
   const float upLim  =  300.0;     // ns - upper end of PDF
@@ -45,18 +46,21 @@ void GetFullPDF(std::string material, unsigned int numberOfRuns, double velocity
   std::size_t pos = 0;
   std::vector< double > bounds;
   bounds.push_back(-40000);
-  double d = 0.0;
+  double r = 0.0;
 
   // convert ',' to ' '
   while (pos < boundaries.size ())
     if ((pos = boundaries.find_first_of (',',pos)) != std::string::npos)
       boundaries[pos] = ' ';
 
+  std::cout << boundaries << std::endl;
   std::stringstream ss(boundaries);
-  while (ss >> d)
-    bounds.push_back (d);
-  bounds.push_back(40000);
+  
+  while(ss >> r)
+    bounds.push_back(r);
 
+  bounds.push_back(40000);
+  
   std::string coordname;
   if(coordinate == "r")
     coordname = "vertex_r_range";
