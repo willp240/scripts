@@ -15,7 +15,7 @@ def check_dir(dname):
         print "Made directory %s...." % dname
     return dname
 
-def pycondor_submit(job_batch, job_id, run_path, asmv_dir, fit_dir, dim, fit_config, cut_config, pdf_config, sleep_time = 1, priority = 5):
+def pycondor_submit(job_batch, job_id, run_path, asmv_dir, fit_dir, dim, fit_config, cut_config, pdf_config, syst_config, sleep_time = 1, priority = 5):
     '''
     submit a job to condor, write a sh file to source environment and execute command
     then write a submit file to be run by condor_submit
@@ -28,22 +28,23 @@ def pycondor_submit(job_batch, job_id, run_path, asmv_dir, fit_dir, dim, fit_con
     condor_path = "{0}/".format(fit_dir)
     exec_path = run_path + "/bin/fit_dataset"
 
-    ### write sh file (which sources environments, runs commands)
-    base_filename = "{0}/condor_base.mac".format(run_path)
-    in_macro_file = open(base_filename, "r")
-    raw_text = string.Template(in_macro_file.read())
-    in_macro_file.close()
+    configs_path = os.path.abspath('{0}/cfg'.format(condor_path))
+    check_dir(configs_path)
+    os.system("cp " + str(fit_config) + " " + str(configs_path) + "/" + os.path.basename(fit_config) )
+    os.system("cp " + str(pdf_config) + " " + str(configs_path) + "/" + os.path.basename(pdf_config) )
+    os.system("cp " + str(cut_config) + " " + str(configs_path) + "/" + os.path.basename(cut_config) )
+    os.system("cp " + str(syst_config) + " " + str(configs_path) + "/" + os.path.basename(syst_config) )
 
-    #asmvfile = asmv_dir + "/asimovdata.h5"
-    asmvfile = asmv_dir + "/fd_escale1.00.h5"
+
+    asmvfile = asmv_dir + "/asimovdata.h5"
+    #asmvfile = asmv_dir + "/fdShift0.1Scale1.05.h5"
     other_commands = 'sleep $[($RANDOM%' + str(sleep_time+1) + ')+1]s'
-    #    out_macro_text = raw_text.substitute(run_directory_sub=run_path, other_commands_sub=other_commands, asimovfile=asmvfile, dims=dim, outdir=fit_dir)
 
     out_macro_text = "#!/usr/bin/sh  \n" + \
                      "source " + "/home/parkerw/Software/env-dev.sh" + "\n" + \
                      "cd " + str(run_path) + "\n" + \
                      str(other_commands) + "\n" + \
-                     str(exec_path) + " " + str(fit_config) + " " + str(pdf_config) + " " + str(cut_config) + " " + str(asmvfile) + " " + str(dim) + " " + str(fit_dir) + "\n"
+                     str(exec_path) + " " + str(configs_path) + "/" + os.path.basename(fit_config) + " " + str(configs_path) + "/" + os.path.basename(pdf_config) + " " + str(configs_path) + "/" + os.path.basename(cut_config) + " " + str(configs_path) + "/" + os.path.basename(syst_config) + " " + str(asmvfile) + " " + str(dim) + " " + str(fit_dir) + "\n"
 
     sh_filepath = "{0}/sh/".format(condor_path) + str(job_id).replace("/", "") + '.sh'
     if not os.path.exists(os.path.dirname(sh_filepath)):
@@ -58,7 +59,7 @@ def pycondor_submit(job_batch, job_id, run_path, asmv_dir, fit_dir, dim, fit_con
     output_path = os.path.abspath('{0}/output'.format(condor_path))
     log_path = os.path.abspath('{0}/log'.format(condor_path))
     submit_path = os.path.abspath('{0}/submit'.format(condor_path))
-    configs_path = os.path.abspath('{0}/cfg'.format(condor_path))
+    #configs_path = os.path.abspath('{0}/cfg'.format(condor_path))
 
     universe = "vanilla"
     notification = "never"
@@ -84,12 +85,12 @@ def pycondor_submit(job_batch, job_id, run_path, asmv_dir, fit_dir, dim, fit_con
     out_submit_file.write(out_submit_text)
     out_submit_file.close()
 
-    print(fit_config)
-    print(configs_path)
-    check_dir(configs_path)
-    os.system("cp " + str(fit_config) + " " + str(configs_path) + "/" + os.path.basename(fit_config) )
-    os.system("cp " + str(pdf_config) + " " + str(configs_path) + "/" + os.path.basename(pdf_config) )
-    os.system("cp " + str(cut_config) + " " + str(configs_path) + "/" + os.path.basename(cut_config) )
+    
+    #check_dir(configs_path)
+    #os.system("cp " + str(fit_config) + " " + str(configs_path) + "/" + os.path.basename(fit_config) )
+    #os.system("cp " + str(pdf_config) + " " + str(configs_path) + "/" + os.path.basename(pdf_config) )
+    #os.system("cp " + str(cut_config) + " " + str(configs_path) + "/" + os.path.basename(cut_config) )
+    #os.system("cp " + str(syst_config) + " " + str(configs_path) + "/" + os.path.basename(syst_config) )
 
     command = 'condor_submit -batch-name \"' + job_batch+'\" ' + submit_filepath
     print "executing job: " + command
@@ -105,6 +106,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', "--fit_cfg", type=str, help='fit config path')
     parser.add_argument('-c', "--cut_cfg", type=str, help='cut config path')
     parser.add_argument('-p', "--pdf_cfg", type=str, help='pdf config path')
+    parser.add_argument('-s', "--syst_cfg", type=str, help='pdf config path')
     parser.add_argument("-n", "--no_sims", type=int,
                        default=10,
                        help="how many identical fits would you like to run?")
@@ -121,6 +123,7 @@ if __name__ == "__main__":
     fit_config = bb_dir + "results/" + args.fit_cfg
     cut_config = bb_dir + "cuts/" + args.cut_cfg
     pdf_config = bb_dir + "pdfs/" + args.pdf_cfg
+    syst_config = bb_dir + "systs/" + args.syst_cfg
 
     dims = (args.dims)
 
@@ -142,4 +145,4 @@ if __name__ == "__main__":
 
         job_id = "{0}_{1}".format(base_name,i)
         batch_id = "{0}".format(args.fit_dir)
-        pycondor_submit(batch_id, job_id, sub_dir, asmv_dir, fit_dir, dims, fit_config, cut_config, pdf_config, sleep_time = 1, priority = 5)
+        pycondor_submit(batch_id, job_id, sub_dir, asmv_dir, fit_dir, dims, fit_config, cut_config, pdf_config, syst_config, sleep_time = 1, priority = 5)

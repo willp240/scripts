@@ -18,7 +18,7 @@ void findMaxStep( ) {
       chain->Add(fname);
 
       // Get max LLH
-      double llh = chain->GetMinimum("LogL");
+      double llh = chain->GetMaximum("LogL");
 
       // If LLH > current max LLH
       if(llh > maxLLH){

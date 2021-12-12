@@ -29,12 +29,13 @@ def saveTree(fname, outfile):
     Plot the fitted positiions in x y and z
 
     '''
-    #fname = "/home/parkerw/Software/rat/testOldPDFAllDMinuit.root"
-    fname = "/data/snoplus/parkerw/ratSimulations/batch/Apr15_fixBeginOfRunFullSF/input_*.root"
+    #fname = "/home/parkerw/Software/rat_dirPos/scintDiPoFit2.root"
+    fname = "/data/snoplus/parkerw/ratSimulations/batch/Dec6_MinuitBinnedPDF/*.root"
 
     #    fname = "/home/parkerw/Software/rat_b/testpartialmpdf.root"
     outFile = ROOT.TFile(outfile, "RECREATE")
     use_retriggers = 0
+    use_dir = 1
     legend_coords = (0.7, 0.65, 0.9, 0.9)
     
     xTrue=[]
@@ -72,6 +73,25 @@ def saveTree(fname, outfile):
     zBias = np.empty((1), dtype="float32")
     posTree.Branch("zBias", zBias, "zBias/F")
     
+    if use_dir:
+        xdirTrue = np.empty((1), dtype="float32")
+        posTree.Branch("xdirTrue", xdirTrue, "xdirTrue/F")
+        ydirTrue = np.empty((1), dtype="float32")
+        posTree.Branch("ydirTrue", ydirTrue, "ydirTrue/F")
+        zdirTrue = np.empty((1), dtype="float32")
+        posTree.Branch("zdirTrue", zdirTrue, "zdirTrue/F")
+        tTrue = np.empty((1), dtype="float32")
+        posTree.Branch("tTrue", tTrue, "tTrue/F")
+
+        xdirFit = np.empty((1), dtype="float32")
+        posTree.Branch("xdirFit", xdirFit, "xdirFit/F")
+        ydirFit = np.empty((1), dtype="float32")
+        posTree.Branch("ydirFit", ydirFit, "ydirFit/F")
+        zdirFit = np.empty((1), dtype="float32")
+        posTree.Branch("zdirFit", zdirFit, "zdirFit/F")
+        tFit = np.empty((1), dtype="float32")
+        posTree.Branch("tFit", tFit, "tFit/F")
+
     scaledLLH = np.empty((1), dtype="float32")
     posTree.Branch("scaledLLH", scaledLLH, "scaledLLH/F")
     LLH = np.empty((1), dtype="float32")
@@ -107,16 +127,23 @@ def saveTree(fname, outfile):
             mc = ds.GetMC()
             
             if mc.GetMCParticle(0).GetPosition().Z() > 6000:
+                print("bad z")
                 continue
                                 
             xTrue[0] = mc.GetMCParticle(0).GetPosition().X()
             yTrue[0] = mc.GetMCParticle(0).GetPosition().Y()
             zTrue[0] = mc.GetMCParticle(0).GetPosition().Z()
+            if use_dir:
+                xdirTrue[0] = mc.GetMCParticle(0).GetMomentum().X()
+                ydirTrue[0] = mc.GetMCParticle(0).GetMomentum().Y()
+                zdirTrue[0] = mc.GetMCParticle(0).GetMomentum().Z()
+                tTrue[0] = mc.GetMCParticle(0).GetMomentum().Theta()
             eveNum[0] = simCounter
-            
+
             # Get fitter vertex
             try:
-                fitResult = ev.GetFitResult("scintFitter")
+                fitResult = ev.GetFitResult("diPoFit")
+                #fitResult = ev.GetFitResult("scintFitter")
                 fitVertex = fitResult.GetVertex(0)
                                     
             except Exception as e:
@@ -126,7 +153,7 @@ def saveTree(fname, outfile):
                 continue
                 
             if not fitVertex.ValidPosition():
-                print ("not valid pos ",fitVertex.GetPosition().X(), " ", fitVertex.GetPosition().Y(), " ", fitVertex.GetPosition().Z())
+                #print ("not valid pos ",fitVertex.GetPosition().X(), " ", fitVertex.GetPosition().Y(), " ", fitVertex.GetPosition().Z())
                 continue
             if not fitVertex.ContainsTime():
                 print ("not contains time")
@@ -142,7 +169,12 @@ def saveTree(fname, outfile):
             xFit[0] = fitVertex.GetPosition().X()
             yFit[0] = fitVertex.GetPosition().Y()
             zFit[0] = fitVertex.GetPosition().Z()
-            
+            if use_dir:
+                xdirFit[0] = fitVertex.GetDirection().X()
+                ydirFit[0] = fitVertex.GetDirection().Y()
+                zdirFit[0] = fitVertex.GetDirection().Z()
+                tFit[0] = fitVertex.GetDirection().Theta()
+
             xBias[0] = xFit[0] - xTrue[0]
             yBias[0] = yFit[0] - yTrue[0]
             zBias[0] = zFit[0] - zTrue[0]
@@ -151,14 +183,19 @@ def saveTree(fname, outfile):
             #            for i_names in range(fomnames.size()):
             #                print(fomnames.at(i_names))
             
-            LLH[0] = fitResult.GetFOM("PositionPositionLogL")
-            scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionPositionSelectedNHit")
+            #LLH[0] = fitResult.GetFOM("PositionPositionLogL")
+            #scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionPositionSelectedNHit")
 
+            #scintfitter
             #LLH[0] = fitResult.GetFOM("PositionLogL")
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionSelectedNHit")
             
             #LLH[0] = fitResult.GetFOM("Positionmultipath_scintwater")
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("Positionmultipath_SelectedNHit_scintwater")
+
+            #dipo
+            LLH[0] = fitResult.GetFOM("LogL")
+            scaledLLH[0] = LLH[0]/fitResult.GetFOM("SelectedNHit")
             
             posTree.Fill()
 
