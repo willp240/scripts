@@ -8,7 +8,7 @@ import json
 buffer = StringIO()
 # Aproach with search api
 
-headers = { 'Authorization' : 'Basic %s' % base64.b64encode("willp240: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"), 'Accept' : 'application/vnd.github.mercy-preview+json'}
+headers = { 'Authorization' : 'Basic %s' % base64.b64encode("willp240:"), 'Accept' : 'application/vnd.github.mercy-preview+json'}
 base_url="https://api.github.com/search/issues"
 repo = "snoplus/rat"
 date = "2021-09-28"
