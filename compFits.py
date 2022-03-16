@@ -29,9 +29,8 @@ def saveTree(fname, outfile):
     Plot the fitted positiions in x y and z
 
     '''
-    #fname = "/home/parkerw/Software/rat_master/test.root"
-    #fname = "/data/snoplus/parkerw/ratSimulations/batch/Mar2_StraightPath_Powell/*.root"
-    fname = "/data/snoplus/parkerw/ratSimulations/batch/Mar6_dirpos_fitposPDF_fitPos_20bins25eve/*.root"
+    #fname = "/home/parkerw/Software/rat_dirPos/test.root"
+    fname = "/data/snoplus/parkerw/ratSimulations/batch/Jan26_adaptivegrid_2ang/*.root"
 
     #    fname = "/home/parkerw/Software/rat_b/testpartialmpdf.root"
     outFile = ROOT.TFile(outfile, "RECREATE")
@@ -47,14 +46,16 @@ def saveTree(fname, outfile):
     yFit=[]
     zFit=[]
     tiFit=[]
+    xFit2=[]
+    yFit2=[]
+    zFit2=[]
+    tiFit2=[]
     xBias=[]
     yBias=[]
     zBias=[]
     eveNum=[]
     scaledLLH=[]
     LLH=[]
-    numScint=[]
-    numCerenk=[]
     
     posTree=ROOT.TTree("eveTree","eveTree")
     xTrue = np.empty((1), dtype="float32")
@@ -74,6 +75,15 @@ def saveTree(fname, outfile):
     posTree.Branch("zFit", zFit, "zFit/F")
     tiFit = np.empty((1), dtype="float32")
     posTree.Branch("tiFit", tiFit, "tiFit/F")
+
+    xFit2 = np.empty((1), dtype="float32")
+    posTree.Branch("xFit2", xFit2, "xFit2/F")
+    yFit2 = np.empty((1), dtype="float32")
+    posTree.Branch("yFit2", yFit2, "yFit2/F")
+    zFit2 = np.empty((1), dtype="float32")
+    posTree.Branch("zFit2", zFit2, "zFit2/F")
+    tiFit2 = np.empty((1), dtype="float32")
+    posTree.Branch("tiFit2", tiFit2, "tiFit2/F")
     
     xBias = np.empty((1), dtype="float32")
     posTree.Branch("xBias", xBias, "xBias/F")
@@ -114,11 +124,6 @@ def saveTree(fname, outfile):
     eveNum = np.empty((1), dtype="int32")
     posTree.Branch("eveNum", eveNum, "eveNum/I")
     
-    numScint = np.empty((1), dtype="int32")
-    posTree.Branch("numScint", numScint, "numScint/I")
-    numCerenk = np.empty((1), dtype="int32")
-    posTree.Branch("numCerenk", numCerenk, "numCerenk/I")
-
     simCounter, evCounter = 0, 0
     for ds, run in rat.dsreader(fname):
         if simCounter == 0:
@@ -144,7 +149,6 @@ def saveTree(fname, outfile):
             # Get DS variables
             ev = ds.GetEV(iev)
             mc = ds.GetMC()
-            mceve = ds.GetMCEV(iev)
             
             if mc.GetMCParticle(0).GetPosition().Z() > 6000:
                 print("bad z")
@@ -153,8 +157,8 @@ def saveTree(fname, outfile):
             xTrue[0] = mc.GetMCParticle(0).GetPosition().X()
             yTrue[0] = mc.GetMCParticle(0).GetPosition().Y()
             zTrue[0] = mc.GetMCParticle(0).GetPosition().Z()
-            tiTrue[0] = 390 - mceve.GetGTTime()
-
+            tiTrue[0] = mc.GetMCParticle(0).GetTime()
+    
             xdirTrue[0] = mc.GetMCParticle(0).GetMomentum().X()
             ydirTrue[0] = mc.GetMCParticle(0).GetMomentum().Y()
             zdirTrue[0] = mc.GetMCParticle(0).GetMomentum().Z()
@@ -167,10 +171,11 @@ def saveTree(fname, outfile):
             try:
                 fitResult = ev.GetFitResult("diPoFit")
                 #fitResult = ev.GetFitResult("scintFitter")
-                #fitResult = ev.GetFitResult("multiPDFFit")
+                fitResult2 = ev.GetFitResult("multiPDFFit")
                 #fitResult = ev.GetFitResult("multiPathScint")
                 fitVertex = fitResult.GetVertex(0)
-                                    
+                fitVertex2 = fitResult2.GetVertex(0)
+           
             except Exception as e:
                 msg = "No {0} for event {1:d}, GTID {2:d} : {3}"
                 msg = msg.format("MultiPDFFitter", evCounter, ev.GetGTID(), e)
@@ -195,6 +200,12 @@ def saveTree(fname, outfile):
             yFit[0] = fitVertex.GetPosition().Y()
             zFit[0] = fitVertex.GetPosition().Z()
             tiFit[0] = fitVertex.GetTime()
+            
+            xFit2[0] = fitVertex2.GetPosition().X()
+            yFit2[0] = fitVertex2.GetPosition().Y()
+            zFit2[0] = fitVertex2.GetPosition().Z()
+            tiFit2[0] = fitVertex2.GetTime()
+
             if use_dir:
                 xdirFit[0] = fitVertex.GetDirection().X()
                 ydirFit[0] = fitVertex.GetDirection().Y()
@@ -206,8 +217,8 @@ def saveTree(fname, outfile):
             yBias[0] = yFit[0] - yTrue[0]
             zBias[0] = zFit[0] - zTrue[0]
 
-            #print(xFit, phiFit, tiFit)
-            #print(xFit, yFit, zFit, tiFit, tFit, phiFit, tiTrue)
+            print(xFit, yFit, zFit, tiFit, tFit, phiFit)
+
             fomnames = fitResult.GetFOMNames()
             #            for i_names in range(fomnames.size()):
             #                print(fomnames.at(i_names))
@@ -223,11 +234,9 @@ def saveTree(fname, outfile):
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("multipath_SelectedNHit_scint")
 
             #dipo
-            #LLH[0] = fitResult.GetFOM("LogL")
-            #scaledLLH[0] = LLH[0]/fitResult.GetFOM("SelectedNHit")
+            LLH[0] = fitResult.GetFOM("LogL")
+            scaledLLH[0] = LLH[0]/fitResult.GetFOM("SelectedNHit")
             
-            numScint[0] = mc.GetNScintPhotons()
-            numCerenk[0] = mc.GetNCherPhotons()
 
             posTree.Fill()
 

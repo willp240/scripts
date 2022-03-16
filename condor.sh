@@ -1,10 +1,4 @@
-executable              = /home/parkerw/Software/bb-likelihood-analysis/fit/bin/split_half
-arguments               = /home/parkerw/Software/bb-likelihood-analysis/rates/event_config_nosig.ini /0.5
-universe                = vanilla
-output                  = /data/snoplus/parkerw/bb_sigex_all_3Feb/split_half.output
-error                   = /data/snoplus/parkerw/bb_sigex_all_3Feb/split_half.error
-log                     = /data/snoplus/parkerw/bb_sigex_all_3Feb/split_half.log
-notification            = never
-priority                = 5
-getenv                  = True
-queue 1
+#!/usr/bin/sh
+source /home/parkerw/Software/env-dev.sh
+cd /home/parkerw/Software/bb-likelihood-analysis/fit/
+#bin/auto_corrs /data/snoplus/parkerw/bb_sigex/Jan12/Jan12_mcmc1m_noBB/Jan12_mcmc1m_noBB_91/Jan12_mcmc1m_noBB_91_.root

@@ -82,11 +82,12 @@ void Compare2RFits(){
   double ymin[8] = {-30, 0, -30, 0, -50, 0, -100, 0};
 
 
-  //  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Mar4_ScintFitter_1to10MeV_0R_E.root");
-  //TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Mar4_StraightPath_1to10MeV_0R_E.root");
+  //  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/final/Mar4_StraightPath_1to10MeV_0R_E.root");
+  //TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Jun8SFang_exp_E.root");
 
-  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Apr15_fixBeginOfRunFullSF.root");
-  TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Apr25_5GausNorm_dist15.root");
+  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/final/Mar2_StraightPath_Powell.root");
+  //  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/final/Mar2_StraightPath_Powell_Z.root");
+  TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Jul5_PMTEff.root");
 
   TCanvas* c1 = new TCanvas("c1", "c1", 1500,700);
   c1->Divide(4,2,0.01,0.05);
@@ -105,8 +106,10 @@ void Compare2RFits(){
       hNew->SetLineColor(kRed);
 
       TLegend* t1 = new TLegend( 0.4, 0.75, 0.9, 0.9 );
-      t1->AddEntry( hOld, "Histogram PDF", "l" );
-      t1->AddEntry( hNew, "Full Functional MultiPDF", "l" );
+      //t1->AddEntry( hOld, "ScintFitter", "l" );
+      t1->AddEntry( hOld, "ScintFitter", "l" );
+      //      t1->AddEntry( hNew, "Functional PDF / d", "l" );
+      t1->AddEntry( hNew, "ScintFitter * PMT Efficiency", "l" );
 
       hOld->GetYaxis()->SetRangeUser(ymin[2*i+j],ymax[2*i+j]);
       gname = coord[i] + " " + title[j];
@@ -120,7 +123,7 @@ void Compare2RFits(){
 
       if(j==0){
 	TLine *line = new TLine(hOld->GetXaxis()->GetXmin(),0,hOld->GetXaxis()->GetBinUpEdge(92),0);
-	//	TLine *line = new TLine(-6048,0,hOld->GetXaxis()->GetBinUpEdge(92),0);
+	//TLine *line = new TLine(-6048,0,hOld->GetXaxis()->GetBinUpEdge(92),0);
 	line->Draw("same");
       }
       else{
@@ -182,8 +185,8 @@ void Compare4Fits(){
       t1->Draw("same");
 
       if(j==0){
-        TLine *line = new TLine(hOldPath->GetXaxis()->GetXmin(),0,hOldPDF->GetXaxis()->GetBinUpEdge(92),0);
-        //TLine *line = new TLine(-6048,0,hOldPDF->GetXaxis()->GetBinUpEdge(92),0);
+        //TLine *line = new TLine(hOldPath->GetXaxis()->GetXmin(),0,hOldPDF->GetXaxis()->GetBinUpEdge(92),0);
+        TLine *line = new TLine(-6048,0,hOldPDF->GetXaxis()->GetBinUpEdge(92),0);
 	line->Draw("same");
       }
       else{
@@ -270,7 +273,7 @@ void CompareEfficiencies(){
 
 void Compare1Fit(){
 
-  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Mar31_FunctionalPDF_7m.root");
+  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/May10_FuncExp_x.root");
   TCanvas* c1 = new TCanvas("c1", "c1", 1600,800);
   c1->Divide(2,2);
 
@@ -313,4 +316,136 @@ void CompareRecoRad(){
   h2->Draw("same");
   t1->Draw();
 
+}
+
+
+void Compare6Fits(){
+
+  std::string coord[4] = {"x", "y", "z", "r"};
+  std::string title[2] = {"bias", "resolution"};
+  double ymax[8] = {20, 150, 20, 150, 20, 150, 150, 150};
+  double ymin[8] = {-20, 0, -20, 0, -20, 0, -60, 0};
+
+
+  TFile *file1 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/May5_Table3m_b.root");
+  TFile *file2 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/May5_Table3m.root");
+  TFile *file3 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/May5_Table7m_b.root");
+  TFile *file4 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/May5_Table9m_b.root");
+  TFile *file5 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/May5_Table9m.root");
+  TFile *file6 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/final/Mar2_StraightPath_Powell.root");
+
+  TCanvas* c1 = new TCanvas("c1", "c1", 1500,700);
+  c1->Divide(4,2,0.01,0.05);
+
+  for(int j=0; j<2; j++){
+
+    for(int i=0; i<4; i++){
+
+      std::string gname = coord[i] + "_" + title[j];
+      std::cout << "getting " << gname << " " << 4*j+i+1 << std::endl;
+
+      TGraphErrors* h1 = (TGraphErrors*)file1->Get(gname.c_str())->Clone();
+      TGraphErrors* h2 = (TGraphErrors*)file2->Get(gname.c_str())->Clone();
+      TGraphErrors* h3 = (TGraphErrors*)file3->Get(gname.c_str())->Clone();
+      TGraphErrors* h4 = (TGraphErrors*)file4->Get(gname.c_str())->Clone();
+      TGraphErrors* h5 = (TGraphErrors*)file5->Get(gname.c_str())->Clone();
+      TGraphErrors* h6 = (TGraphErrors*)file6->Get(gname.c_str())->Clone();
+
+      h1->SetLineColor(kBlack);
+      h2->SetLineColor(kBlue);
+      h3->SetLineColor(kCyan);
+      h4->SetLineColor(kGreen);
+      h5->SetLineColor(kYellow);
+      h6->SetLineColor(kPink);
+
+      TLegend* t1 = new TLegend( 0.4, 0.65, 0.9, 0.9 );
+      t1->AddEntry( h1, "3m PDF", "l" );
+      t1->AddEntry( h2, "5m PDF", "l" );
+      t1->AddEntry( h3, "7m PDF", "l" );
+      t1->AddEntry( h4, "9m PDF", "l" );
+      t1->AddEntry( h5, "11m PDF", "l" );
+      t1->AddEntry( h6, "Full PDF", "l" );
+
+      h1->GetYaxis()->SetRangeUser(ymin[2*i+j],ymax[2*i+j]);
+      gname = coord[i] + " " + title[j];
+      h1->SetTitle(gname.c_str());
+
+      c1->cd(4*j + i + 1);
+
+      h1->Draw("ap");
+      h2->Draw("same p");
+      h3->Draw("same p");
+      h4->Draw("same p");
+      h5->Draw("same p");
+      h6->Draw("same p");
+      t1->Draw("same");
+
+      if(j==0){
+        TLine *line = new TLine(h1->GetXaxis()->GetXmin(),0,h1->GetXaxis()->GetBinUpEdge(92),0);
+        //TLine *line = new TLine(-6048,0,hOldPDF->GetXaxis()->GetBinUpEdge(92),0);
+        line->Draw("same");
+      }
+      else{
+        h1->GetYaxis()->SetTitleOffset(1.1);
+      }
+    }
+  }
+}
+
+void Compare3RFits(){
+
+  std::string coord[4] = {"x", "y", "z", "r"};
+  std::string title[2] = {"bias", "resolution"};
+  double ymax[8] = {30, 125, 30, 125, 30, 125, 100, 125};
+  double ymin[8] = {-30, 0, -30, 0, -30, 0, -100, 0};
+  
+  TFile *f1 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/final/Mar2_StraightPath_Powell.root");
+  TFile *f2 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/May24_2DistTables.root");
+  TFile *f3 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/May24_2DistTables_exp.root");
+
+  TCanvas* c1 = new TCanvas("c1", "c1", 1500,700);
+  c1->Divide(4,2,0.01,0.05);
+  
+  for(int j=0; j<2; j++){
+    
+    for(int i=0; i<4; i++){
+      
+      std::string gname = coord[i] + "_" + title[j];
+      std::cout << "getting " << gname << " " << 3*j+i+1 << std::endl;
+      
+      TGraphErrors* h1 = (TGraphErrors*)f1->Get(gname.c_str())->Clone();
+      TGraphErrors* h2 = (TGraphErrors*)f2->Get(gname.c_str())->Clone();
+      TGraphErrors* h3 = (TGraphErrors*)f3->Get(gname.c_str())->Clone();      
+
+      h1->SetLineColor(kBlue);
+      h2->SetLineColor(kRed);
+      h3->SetLineColor(kGreen);      
+
+      TLegend* t1 = new TLegend( 0.4, 0.75, 0.9, 0.9 );
+      t1->AddEntry( h1, "ScintFitter", "l" );
+      //      t1->AddEntry( hNew, "Functional PDF * exp(-d/#lambda)", "l" );
+      t1->AddEntry( h2, "2 Distance PDFs", "l" );
+      t1->AddEntry( h3, "2 Distance PDFs * exp(-d/#lambda)", "l" );
+
+      h1->GetYaxis()->SetRangeUser(ymin[2*i+j],ymax[2*i+j]);
+      gname = coord[i] + " " + title[j];
+      h1->SetTitle(gname.c_str());
+      
+      c1->cd(4*j + i + 1);
+      
+      h1->Draw("ap");
+      h2->Draw("same p");
+      h3->Draw("same p");
+      t1->Draw("same");
+      
+      if(j==0){
+	TLine *line = new TLine(h1->GetXaxis()->GetXmin(),0,h1->GetXaxis()->GetBinUpEdge(92),0);
+	//      TLine *line = new TLine(-6048,0,hOld->GetXaxis()->GetBinUpEdge(92),0);
+	line->Draw("same");
+      }
+      else{
+	h1->GetYaxis()->SetTitleOffset(1.1);
+      }
+    }
+  }
 }

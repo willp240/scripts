@@ -10,8 +10,11 @@ void compAsmv() {
   //  TFile *File1 = new TFile("/data/snoplus/parkerw/bb_sigex/Jul26_noescale/asimov.root", "OPEN");
   // TFile *File2 = new TFile("/data/snoplus/parkerw/bb_sigex/Jul26_escale/asimov.root", "OPEN");
   
-  TFile *File1 = new TFile("/data/snoplus/parkerw/bb_sigex/Aug3_3Bg_1.00/fd_escale1.00.root", "OPEN");
-  TFile *File2 = new TFile("/data/snoplus/parkerw/bb_sigex/Aug3_3Bg_1.05/fd_escale1.05.root", "OPEN");
+  //  TFile *File1 = new TFile("/data/snoplus/parkerw/bb_sigex/Sep6_3bg_shift0.5/fd_noshift.root", "OPEN");
+  //TFile *File2 = new TFile("/data/snoplus/parkerw/bb_sigex/Jan10_Asmv_wGen/Jan10_mcmc1m_noBB/Jan10_mcmc1m_noBB_96/scaled_dists/postfitdist.root", "OPEN");
+  TFile *File2 = new TFile("/data/snoplus/parkerw/bb_sigex/Jan12/asimovdata.root", "OPEN");
+  TFile *File1 = new TFile("/data/snoplus/parkerw/bb_sigex/Jan10_Asmv_wGen/asimovdata.root");
+
 
   TIter next1(File1->GetListOfKeys());
   TKey *key1;
@@ -38,16 +41,17 @@ void compAsmv() {
   TH1D* h2x = (TH1D*)h2->ProjectionX()->Clone();
   TH1D* h2y = (TH1D*)h2->ProjectionY()->Clone();
 
-  h1y->GetYaxis()->SetTitle("Events");
-  h1y->GetYaxis()->SetTitleOffset(1.4);
-  h1y->Draw();
-  h2y->Draw("same");
+  h1x->GetYaxis()->SetTitle("Events");
+  h1x->GetYaxis()->SetTitleOffset(1.4);
+  h1x->Draw();
+  h2x->SetLineStyle(2);
+  h2x->Draw("same");
 
-  //TLegend* t1 = new TLegend( 0.5, 0.6, 0.88, 0.88);
-  TLegend* t1 = new TLegend( 0.2, 0.6, 0.58, 0.88);
-  t1->AddEntry( h1x, "Energy Scale = 1.0", "l" );
-  t1->AddEntry( h2x, "Energy Scale = 1.05", "l" );
+  TLegend* t1 = new TLegend( 0.5, 0.6, 0.88, 0.88);
+  //TLegend* t1 = new TLegend( 0.2, 0.6, 0.58, 0.88);
+  t1->AddEntry( h1x, "Prev", "l" );
+  t1->AddEntry( h2x, "New", "l" );
   t1->Draw();
 
-  h1->Draw("colz");
+  //  h2->Draw("colz");
 }

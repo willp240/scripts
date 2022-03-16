@@ -23,15 +23,14 @@ import argparse
 import os
 import sys
 
-def saveTree(fname, outfile):
+def saveTree(fname, outfile, nfile):
 
     '''
     Plot the fitted positiions in x y and z
 
     '''
-    #fname = "/home/parkerw/Software/rat_master/test.root"
-    #fname = "/data/snoplus/parkerw/ratSimulations/batch/Mar2_StraightPath_Powell/*.root"
-    fname = "/data/snoplus/parkerw/ratSimulations/batch/Mar6_dirpos_fitposPDF_fitPos_20bins25eve/*.root"
+    #fname = "/home/parkerw/Software/rat_dirPos/test.root"
+    fname = "/data/snoplus/parkerw/ratSimulations/batch/Jan26_adaptivegrid_sepgridbugfix/*"+str(nfile)+".root"
 
     #    fname = "/home/parkerw/Software/rat_b/testpartialmpdf.root"
     outFile = ROOT.TFile(outfile, "RECREATE")
@@ -53,8 +52,6 @@ def saveTree(fname, outfile):
     eveNum=[]
     scaledLLH=[]
     LLH=[]
-    numScint=[]
-    numCerenk=[]
     
     posTree=ROOT.TTree("eveTree","eveTree")
     xTrue = np.empty((1), dtype="float32")
@@ -114,11 +111,6 @@ def saveTree(fname, outfile):
     eveNum = np.empty((1), dtype="int32")
     posTree.Branch("eveNum", eveNum, "eveNum/I")
     
-    numScint = np.empty((1), dtype="int32")
-    posTree.Branch("numScint", numScint, "numScint/I")
-    numCerenk = np.empty((1), dtype="int32")
-    posTree.Branch("numCerenk", numCerenk, "numCerenk/I")
-
     simCounter, evCounter = 0, 0
     for ds, run in rat.dsreader(fname):
         if simCounter == 0:
@@ -126,7 +118,10 @@ def saveTree(fname, outfile):
             print("Beginning event loop...")
         simCounter += 1
 
-        if simCounter % 100 == 0:
+        if(simCounter > 1):
+            continue
+                
+        if simCounter % 1 == 0:
             print("event ", simCounter)
             #     if simCounter > 100:
             #         print "simCounter >100"
@@ -144,7 +139,6 @@ def saveTree(fname, outfile):
             # Get DS variables
             ev = ds.GetEV(iev)
             mc = ds.GetMC()
-            mceve = ds.GetMCEV(iev)
             
             if mc.GetMCParticle(0).GetPosition().Z() > 6000:
                 print("bad z")
@@ -153,8 +147,8 @@ def saveTree(fname, outfile):
             xTrue[0] = mc.GetMCParticle(0).GetPosition().X()
             yTrue[0] = mc.GetMCParticle(0).GetPosition().Y()
             zTrue[0] = mc.GetMCParticle(0).GetPosition().Z()
-            tiTrue[0] = 390 - mceve.GetGTTime()
-
+            tiTrue[0] = mc.GetMCParticle(0).GetTime()
+    
             xdirTrue[0] = mc.GetMCParticle(0).GetMomentum().X()
             ydirTrue[0] = mc.GetMCParticle(0).GetMomentum().Y()
             zdirTrue[0] = mc.GetMCParticle(0).GetMomentum().Z()
@@ -205,9 +199,8 @@ def saveTree(fname, outfile):
             xBias[0] = xFit[0] - xTrue[0]
             yBias[0] = yFit[0] - yTrue[0]
             zBias[0] = zFit[0] - zTrue[0]
-
-            #print(xFit, phiFit, tiFit)
-            #print(xFit, yFit, zFit, tiFit, tFit, phiFit, tiTrue)
+            print(nFile, xFit, yFit, zFit, tiFit, tFit, phiFit)
+            
             fomnames = fitResult.GetFOMNames()
             #            for i_names in range(fomnames.size()):
             #                print(fomnames.at(i_names))
@@ -223,11 +216,9 @@ def saveTree(fname, outfile):
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("multipath_SelectedNHit_scint")
 
             #dipo
-            #LLH[0] = fitResult.GetFOM("LogL")
-            #scaledLLH[0] = LLH[0]/fitResult.GetFOM("SelectedNHit")
+            LLH[0] = fitResult.GetFOM("LogL")
+            scaledLLH[0] = LLH[0]/fitResult.GetFOM("SelectedNHit")
             
-            numScint[0] = mc.GetNScintPhotons()
-            numCerenk[0] = mc.GetNCherPhotons()
 
             posTree.Fill()
 
@@ -257,7 +248,7 @@ if __name__ == "__main__":
         directory = os.path.dirname(sys.argv[0])
         args.outfile = os.path.join(directory, args.outfile)
 
-    saveTree(args.infile, args.outfile);
+    for i in range(0,99):        saveTree(args.infile, args.outfile, i);
     
     mm, ss = divmod(timer() - start, 60)
     print("######################################")
