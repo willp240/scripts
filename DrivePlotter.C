@@ -14,12 +14,12 @@
 
 
 void DrivePlotter(){
-
+  
   gStyle->SetOptStat(0);
   gStyle->SetFrameLineWidth(2);
 
-  TFile *file1 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Mar6_dirpos_fitposPDF_fitPos_20bins25eve+Tree.root");
-  TTree* tree1 = (TTree*)file1->Get("eveTree")->Clone("tree1");
+  TFile *file1 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Jun7_6MeV_fullvolume_6MeV_wScattering_jointFit_Tree.root");
+  TTree* tree1 = (TTree*)file1->Get("eveTree")->Clone("tree");
 
   TCanvas* c1 = new TCanvas("c1", "c1", 1000,600);
 
@@ -29,7 +29,8 @@ void DrivePlotter(){
   htemp1->GetYaxis()->SetTitle("Events");
   htemp1->GetYaxis()->SetTitleOffset(1.3);
   htemp1->GetXaxis()->SetRangeUser(-800,800);
-  htemp1->SetTitle("6 MeV e- at Center (Random Directions): True Position in PDF, Fit Position Seed");
+  //htemp1->SetTitle("6 MeV e- at Center (Random Directions) 2g/l: True Position in PDF, Fit Position Seed");
+  htemp1->SetTitle("Scattering: Joint Fit");
   htemp1->SetLineColor(kGreen);
   htemp1->SetLineWidth(2);
   //  TPaveText *title = (TPaveText*)gPad->GetPrimitive("title");
@@ -43,7 +44,7 @@ void PlotCorr(){
   gStyle->SetFrameLineWidth(2);
   gStyle->SetPalette(55);
 
-  TFile *file1 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Feb21_dirpos_trueposPDF_fitPos_smalltresid_Tree.root");
+  TFile *file1 = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/Jun7_6MeV_fullvolume_6MeV_noScattering_jointFit_Tree.root");
   TTree* tree1 = (TTree*)file1->Get("eveTree")->Clone("tree1");
 
   TCanvas* c1 = new TCanvas("c1", "c1", 1000,600);
@@ -55,7 +56,8 @@ void PlotCorr(){
   htemp1->GetYaxis()->SetTitleOffset(1.3);
   htemp1->GetXaxis()->SetRangeUser(-800,800);
   htemp1->GetYaxis()->SetRangeUser(-1,1);
-  htemp1->SetTitle("6 MeV e- at Center (Random Directions): True Position in PDF, Fit Position Seed");
+  //htemp1->SetTitle("6 MeV e- at Center (Random Directions): True Position in PDF, Fit Position Seed");
+  htemp1->SetTitle("No Scattering: Joint Fit");
   htemp1->SetLineColor(kGreen);
   htemp1->SetLineWidth(2);
   //  TPaveText *title = (TPaveText*)gPad->GetPrimitive("title");

@@ -44,7 +44,7 @@ void* Make2dPDF( const std::string& fileName)
 
   gStyle->SetOptStat(0);
 
-  TH2D* hnewPDF = new TH2D( "newPDF", "True cos(#theta_{#gamma}) - Time Residual of PMT Hits", 400, -100, 300, 10, -1.0, 1.0 );
+  TH2D* hnewPDF = new TH2D( "newPDF", "Fit cos(#theta_{#gamma}) - Time Residual of PMT Hits", 400, -100, 300, 20, -1.0, 1.0 );
 
   // If this is being done on data that does not require remote database connection
   // eg.: a simple simulation with default run number (0)
@@ -72,14 +72,14 @@ void* Make2dPDF( const std::string& fileName)
               const RAT::DS::PMTCal& pmtCal = calibratedPMTs.GetPMT( iPMT );
 
 	      //Get fit position
-	      //	      const RAT::DS::FitVertex& rVertex = rEV.GetFitResult("multiPDFFit").GetVertex(0);
+	      const RAT::DS::FitVertex& rVertex = rEV.GetFitResult("multiPDFFit").GetVertex(0);
 
 	      TVector3 truePos = rDS.GetMC().GetMCParticle(0).GetPosition();
 	      double trueTime = 390 - rDS.GetMCEV(0).GetGTTime();
 	      TVector3 trueDirection = rDS.GetMC().GetMCParticle(0).GetMomentum().Unit();
 
-	      //TVector3 fitPos = rVertex.GetPosition();
-              //double fitTime = rVertex.GetTime();
+	      TVector3 fitPos = rVertex.GetPosition();
+              double fitTime = rVertex.GetTime();
 
 	      double distInAV = 0.0;
               double distInWater = 0.0;
@@ -87,10 +87,10 @@ void* Make2dPDF( const std::string& fileName)
 
 	      TVector3 pmtpos = pmtInfo.GetPosition( pmtCal.GetID() );
 
-	      //RAT::LP::LightPathStraightScint::GetPath(pmtpos, fitPos, distInTarget, distInWater);
+	      RAT::LP::LightPathStraightScint::GetPath(pmtpos, fitPos, distInTarget, distInWater);
 
-              //float fitTransitTime = RAT::DU::Utility::Get()->GetEffectiveVelocity().CalcByDistance( distInTarget, distInAV, distInWater );
-              //float fitCorrectedTime = pmtCal.GetTime() - fitTransitTime - fitTime;
+              float fitTransitTime = RAT::DU::Utility::Get()->GetEffectiveVelocity().CalcByDistance( distInTarget, distInAV, distInWater );
+              float fitCorrectedTime = pmtCal.GetTime() - fitTransitTime - fitTime;
 
 	      RAT::LP::LightPathStraightScint::GetPath(pmtpos, truePos, distInTarget, distInWater);
 
@@ -100,7 +100,7 @@ void* Make2dPDF( const std::string& fileName)
               TVector3 truePhotonDir = (pmtpos - truePos).Unit();
               double trueCosAngle = truePhotonDir.Dot(trueDirection);
 
-	      double TimeResidual = timeResCalc.CalcTimeResidual(pmtCal, truePos, 390 - rDS.GetMCEV(0).GetGTTime(), true);
+	      double TimeResidual = timeResCalc.CalcTimeResidual(pmtCal, fitPos, 390 - rDS.GetMCEV(0).GetGTTime(), true);
 
 	      //	      std::cout << pmtCal.GetTime() << " " << trueTransitTime << " " << trueTime << " " << TimeResidual << std::endl;
 
@@ -135,7 +135,7 @@ void* Make2dPDF( const std::string& fileName)
   //  hnewPDF->Smooth();
   hnewPDF->Draw("colz");
 
-  TFile* file = new TFile("newPDF_centre_fitPos_10dirbins_tresidcalc.root","RECREATE");
+  TFile* file = new TFile("newPDF6MeV_0.5gl_centre_fitPos_20dirbins.root","RECREATE");
   hnewPDF->Write();
 
   // return hHitTimeResiduals;

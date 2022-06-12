@@ -29,9 +29,9 @@ def saveTree(fname, outfile):
     Plot the fitted positiions in x y and z
 
     '''
-    #fname = "/home/parkerw/Software/rat_master/test.root"
-    #fname = "/data/snoplus/parkerw/ratSimulations/batch/Mar2_StraightPath_Powell/*.root"
-    fname = "/data/snoplus/parkerw/ratSimulations/batch/Mar6_dirpos_fitposPDF_fitPos_20bins25eve/*.root"
+    #fname = "/home/parkerw/Software/rat_master/multiPDFPartial.root"
+    #fname = "/home/parkerw/Software/rat_newdipo/test_0p5_fit_fv.root"
+    fname = "/data/snoplus/parkerw/ratSimulations/batch/Jun7_6MeV_fullvolume_6MeV_noScattering_jointFit/*.root"
 
     #    fname = "/home/parkerw/Software/rat_b/testpartialmpdf.root"
     outFile = ROOT.TFile(outfile, "RECREATE")
@@ -43,6 +43,7 @@ def saveTree(fname, outfile):
     yTrue=[]
     zTrue=[]
     tiTrue=[]
+    eTrue=[]
     xFit=[]
     yFit=[]
     zFit=[]
@@ -65,7 +66,20 @@ def saveTree(fname, outfile):
     posTree.Branch("zTrue", zTrue, "zTrue/F")
     tiTrue = np.empty((1), dtype="float32")
     posTree.Branch("tiTrue", tiTrue, "tiTrue/F")
-    
+    eTrue = np.empty((1), dtype="float32")
+    posTree.Branch("eTrue", eTrue, "eTrue/F")
+
+    xSol = np.empty((1), dtype="float32")
+    posTree.Branch("xSol", xSol, "xSol/F")
+    ySol = np.empty((1), dtype="float32")
+    posTree.Branch("ySol", ySol, "ySol/F")
+    zSol = np.empty((1), dtype="float32")
+    posTree.Branch("zSol", zSol, "zSol/F")
+    tSol = np.empty((1), dtype="float32")
+    posTree.Branch("tSol", tSol, "tSol/F")
+    phiSol = np.empty((1), dtype="float32")
+    posTree.Branch("phiSol", phiSol, "phiSol/F")
+
     xFit = np.empty((1), dtype="float32")
     posTree.Branch("xFit", xFit, "xFit/F")
     yFit = np.empty((1), dtype="float32")
@@ -154,7 +168,15 @@ def saveTree(fname, outfile):
             yTrue[0] = mc.GetMCParticle(0).GetPosition().Y()
             zTrue[0] = mc.GetMCParticle(0).GetPosition().Z()
             tiTrue[0] = 390 - mceve.GetGTTime()
-
+            eTrue[0] = mc.GetMCParticle(0).GetKineticEnergy()
+            
+            fTime = ev.GetUniversalTime()
+            xSol[0] = ROOT.RAT.SunDirection( int(fTime.GetDays()), int(fTime.GetSeconds()), int(fTime.GetNanoSeconds()) ).Unit().X()
+            ySol[0] = ROOT.RAT.SunDirection( int(fTime.GetDays()), int(fTime.GetSeconds()), int(fTime.GetNanoSeconds()) ).Unit().Y()
+            zSol[0] = ROOT.RAT.SunDirection( int(fTime.GetDays()), int(fTime.GetSeconds()), int(fTime.GetNanoSeconds()) ).Unit().Z()
+            tSol[0] = ROOT.RAT.SunDirection( int(fTime.GetDays()), int(fTime.GetSeconds()), int(fTime.GetNanoSeconds()) ).Unit().Theta()
+            phiSol[0] = ROOT.RAT.SunDirection( int(fTime.GetDays()), int(fTime.GetSeconds()), int(fTime.GetNanoSeconds()) ).Unit().Phi()
+            
             xdirTrue[0] = mc.GetMCParticle(0).GetMomentum().X()
             ydirTrue[0] = mc.GetMCParticle(0).GetMomentum().Y()
             zdirTrue[0] = mc.GetMCParticle(0).GetMomentum().Z()
