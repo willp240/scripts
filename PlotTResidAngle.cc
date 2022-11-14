@@ -91,7 +91,7 @@ void* PlotTResid( const std::string& fileName)
   hTResid->GetYaxis()->SetTitle( "Events" );
   hTResid->Draw();
 
-  TFile* file = new TFile("timeResid1.root","RECREATE");
+  TFile* file = new TFile("timeResid2.root","RECREATE");
   hTResid->Write();
 
   // return hHitTimeResiduals;
@@ -273,16 +273,10 @@ void* PlotAngles( const std::string& fileName)
   //  gStyle->SetPalette(55);
   TCanvas* c1 = new TCanvas();
   hnewPDF->GetXaxis()->SetTitle( "Time Residual, ns" );
-  hnewPDF->GetXaxis()->SetRangeUser(-50,200);
-  // hnewPDF->GetZaxis()->SetRangeUser(0,16000);
-  hnewPDF->GetYaxis()->SetTitle( "cos(#theta_{#gamma})" );
-  hnewPDF->GetZaxis()->SetTitle( "Events" );
-  hnewPDF->GetXaxis()->SetTitleOffset(1.8);
-  hnewPDF->GetYaxis()->SetTitleOffset(1.8);
-  hnewPDF->GetZaxis()->SetTitleOffset(1.4);
+  hnewPDF->GetYaxis()->SetTitle( "Events" );
   hnewPDF->Draw("lego");
 
-  TFile* file = new TFile("timeResidAngle2NoCerenk.root","RECREATE");
+  TFile* file = new TFile("timeResidAngle.root","RECREATE");
   hnewPDF->Write();
 
   // return hHitTimeResiduals;

@@ -20,21 +20,27 @@
 
 void Compare2PDFs(){
 
-  TFile *_file1 = TFile::Open("Dec10FVCut_1PDFBand0.root");
-  TFile *_file2 = TFile::Open("Dec10NoFVCut_1PDFBand0.root");
+  TFile *_file1 = TFile::Open("MultiPDF_Plots_Oct17_Round3.root");
+  TFile *_file2 = TFile::Open("MultiPDF_Plots_Nov2_Round1.root");
 
-  TH1D* h1 = (TH1D*)_file1->Get("PDF")->Clone();
-  TH1D* h2 = (TH1D*)_file2->Get("PDF")->Clone();
+  TH1D* h1 = (TH1D*)_file1->Get("PDF_0")->Clone();
+  TH1D* h2 = (TH1D*)_file2->Get("PDF_0")->Clone();
 
   h1->SetLineColor(kRed);
   h2->SetLineColor(kBlue);
+
+  h1->SetLineStyle(1);
+  h2->SetLineStyle(1);
+
+  h1->SetLineWidth(2);
+  h2->SetLineWidth(2);
 
   h1->Scale(1/h1->Integral());
   h2->Scale(1/h2->Integral());
 
   TLegend* t1 = new TLegend( 0.5, 0.6, 0.9, 0.9 );
-  t1->AddEntry( h1, "FV Cut", "l" );
-  t1->AddEntry( h2, "No FV Cut", "l" );
+  t1->AddEntry( h1, "Original", "l" );
+  t1->AddEntry( h2, "Round 1", "l" );
 
   h2->GetXaxis()->SetRangeUser(-5,100);
   h2->GetXaxis()->SetTitle("Hit time residuals [ns]");
@@ -51,35 +57,43 @@ void Compare3PDFs(){
 
   gStyle->SetOptStat(0);
 
-  TFile *_fileAll = TFile::Open("ET1D_PMTZAll_Rlt1.5.root");
-  TFile *_fileAbove = TFile::Open("ET1D_PMTZAbove0_Rlt1.5.root");
-  TFile *_fileBelow = TFile::Open("ET1D_PMTZBelow0_Rlt1.5.root");
+  TFile *_file1 = TFile::Open("MultiPDF_Plots_Oct17_Round3.root");
+  TFile *_file2 = TFile::Open("MultiPDF_Plots_Nov2_Round1.root");
+  TFile *_file3 = TFile::Open("MultiPDF_Plots_Nov2_Round2.root");
 
-  TH1D* hAll = (TH1D*)_fileAll->Get("PDF")->Clone();
-  TH1D* hAbove = (TH1D*)_fileAbove->Get("PDF")->Clone();
-  TH1D* hBelow = (TH1D*)_fileBelow->Get("PDF")->Clone();
+  TH1D* h1 = (TH1D*)_file1->Get("PDF_0")->Clone();
+  TH1D* h2 = (TH1D*)_file2->Get("PDF_0")->Clone();
+  TH1D* h3 = (TH1D*)_file3->Get("PDF_0")->Clone();
 
-  hAll->SetLineColor(kRed);
-  hAbove->SetLineColor(kBlack);
-  hBelow->SetLineColor(kBlue);
+  h1->SetLineColor(kRed);
+  h2->SetLineColor(kBlue);
+  h3->SetLineColor(kBlack);
 
-  hAll->Scale(1/hAll->Integral());
-  hAbove->Scale(1/hAbove->Integral());
-  hBelow->Scale(1/hBelow->Integral());
+  h1->SetLineWidth(2);
+  h2->SetLineWidth(2);
+  h3->SetLineWidth(2);
+
+  h1->SetLineStyle(2);
+  h2->SetLineStyle(2);
+  h3->SetLineStyle(2);
+
+  h1->Scale(1/h1->Integral());
+  h2->Scale(1/h2->Integral());
+  h3->Scale(1/h3->Integral());
 
   TLegend* t1 = new TLegend( 0.5, 0.6, 0.9, 0.9 );
-  t1->AddEntry( hAll, "All PMTs", "l" );
-  t1->AddEntry( hAbove, "PMT Z > 0", "l" );
-  t1->AddEntry( hBelow, "PMT Z < 0", "l" );
+  t1->AddEntry( h1, "Original", "l" );
+  t1->AddEntry( h2, "Round 1", "l" );
+  t1->AddEntry( h3, "Round 2", "l" );
 
-  hAbove->GetXaxis()->SetRangeUser(-5,100);
-  hAbove->GetXaxis()->SetTitle("Hit time residuals [ns]");
-  hAbove->GetYaxis()->SetTitle("Normalised Counts");
-  hAbove->GetYaxis()->SetTitleOffset(1.2);
+  h3->GetXaxis()->SetRangeUser(-5,100);
+  h3->GetXaxis()->SetTitle("Hit time residuals [ns]");
+  h3->GetYaxis()->SetTitle("Normalised Counts");
+  h1->GetYaxis()->SetTitleOffset(1.2);
 
-  hAbove->Draw();
-  hAll->Draw("same");
-  hBelow->Draw("same");
+  h3->Draw();
+  h2->Draw("same");
+  h1->Draw("same");
   t1->Draw("same");
 
 }
@@ -88,41 +102,51 @@ void Compare4PDFs(){
 
   gStyle->SetOptStat(0);
 
-  TFile *_fileBelow = TFile::Open("/data/snoplus/parkerw/pdfs/recoord_Nov2020/Recoord_8PDFBand4.root");
-  TFile *_fileMidBelow = TFile::Open("/data/snoplus/parkerw/pdfs/recoord_Nov2020/Recoord_8PDFBand5.root");
-  TFile *_fileMidAbove = TFile::Open("/data/snoplus/parkerw/pdfs/recoord_Nov2020/Recoord_8PDFBand6.root");
-  TFile *_fileAbove = TFile::Open("/data/snoplus/parkerw/pdfs/recoord_Nov2020/Recoord_8PDFBand7.root");
+  TFile *_file0 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitCoordination/MultiPDFFull/MultiPDF_Plots_Oct17_Round3.root");
+  TFile *_file1 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitCoordination/MultiPDFFull/MultiPDF_Plots_Nov2_Round1.root");
+  TFile *_file2 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitCoordination/MultiPDFFull/MultiPDF_Plots_Nov2_Round2.root");
+  TFile *_file3 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitCoordination/MultiPDFFull/MultiPDF_Plots_Nov4_Round3.root");
 
-  TH1D* hBelow = (TH1D*)_fileBelow->Get("PDF")->Clone();
-  TH1D* hMidBelow = (TH1D*)_fileMidBelow->Get("PDF")->Clone();
-  TH1D* hMidAbove = (TH1D*)_fileMidAbove->Get("PDF")->Clone();
-  TH1D* hAbove = (TH1D*)_fileAbove->Get("PDF")->Clone();
+  TH1D* h0 = (TH1D*)_file0->Get("PDF_0")->Clone("h0");
+  TH1D* h1 = (TH1D*)_file1->Get("PDF_0")->Clone("h1");
+  TH1D* h2 = (TH1D*)_file2->Get("PDF_0")->Clone("h2");
+  TH1D* h3 = (TH1D*)_file3->Get("PDF_0")->Clone("h3");
 
-  hBelow->SetLineColor(kRed);
-  hMidBelow->SetLineColor(kBlack);
-  hMidAbove->SetLineColor(kBlue);
-  hAbove->SetLineColor(kGreen);
+  h0->SetLineColor(kRed);
+  h1->SetLineColor(kBlue);
+  h2->SetLineColor(kBlack);
+  h3->SetLineColor(kGreen);
 
-  hBelow->Scale(1/hBelow->Integral());
-  hMidBelow->Scale(1/hMidBelow->Integral());
-  hMidAbove->Scale(1/hMidAbove->Integral());
-  hAbove->Scale(1/hAbove->Integral());
+  h0->SetLineStyle(2);
+  h1->SetLineStyle(2);
+  h2->SetLineStyle(2);
+  h3->SetLineStyle(2);
+
+  h0->SetLineWidth(2);
+  h1->SetLineWidth(2);
+  h2->SetLineWidth(2);
+  h3->SetLineWidth(2);
+
+  h0->Scale(1/h0->Integral());
+  h1->Scale(1/h1->Integral());
+  h2->Scale(1/h2->Integral());
+  h3->Scale(1/h3->Integral());
 
   TLegend* t1 = new TLegend( 0.5, 0.6, 0.9, 0.9 );
-  t1->AddEntry( hBelow, "PMT Z < -1.5m", "l" );
-  t1->AddEntry( hMidBelow, "-1.5m < PMT Z < 0m", "l" );
-  t1->AddEntry( hMidAbove, "0m < PMT Z < 1.5m", "l" );
-  t1->AddEntry( hAbove, "PMT Z > 1.5m", "l" );
+  t1->AddEntry( h0, "Original", "l" );
+  t1->AddEntry( h1, "Round 1", "l" );
+  t1->AddEntry( h2, "Round 2", "l" );
+  t1->AddEntry( h3, "Round 3", "l" );
 
-  hMidAbove->GetXaxis()->SetRangeUser(-5,100);
-  hMidAbove->GetXaxis()->SetTitle("Hit time residuals [ns]");
-  hMidAbove->GetYaxis()->SetTitle("Normalised Counts");
-  hMidAbove->GetYaxis()->SetTitleOffset(1.2);
+  h0->GetXaxis()->SetRangeUser(-5,100);
+  h0->GetXaxis()->SetTitle("Hit time residuals [ns]");
+  h0->GetYaxis()->SetTitle("Normalised Counts");
+  h0->GetYaxis()->SetTitleOffset(1.3);
 
-  hMidAbove->Draw();
-  hAbove->Draw("same");
-  hMidBelow->Draw("same");
-  hBelow->Draw("same");
+  h0->Draw();
+  h2->Draw("same");
+  h3->Draw("same");
+  h1->Draw("same");
   t1->Draw("same");
 
 }

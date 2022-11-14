@@ -1,0 +1,190 @@
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+// Default parameters from labppo_2p2_scintillator
+inner_av_velocity: 185.647227491,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+
+//*********************************************************
+//****************Coordinated Feb 2020*********************
+//*********************************************************
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 183.875161044,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+//*********************************************************
+//****************Coordinated Jul 2022*********************
+//*********************************************************
+/*{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.647227491,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+// Round 1 with tgraph
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.384646268,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}*/
+/*
+//Round2b
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.095632016,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+
+
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.148919836,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+*/
+// Round 4
+/*{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.124095711,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}*/
+/*
+//4m Round 1
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.224172017,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+*/
+/*
+//4m Round 2
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.218064251,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}*/
+
+//4m round 4
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.254722235,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+
+
+// 4m round 5
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.225629434,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}

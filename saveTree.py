@@ -29,21 +29,21 @@ def saveTree(fname, outfile):
     Plot the fitted positiions in x y and z
 
     '''
-    #fname = "/home/parkerw/Software/rat_master/multiPDFPartial.root"
-    #fname = "/home/parkerw/Software/rat_newdipo/test_0p5_fit_fv.root"
-    fname = "/data/snoplus/parkerw/ratSimulations/batch/Jun7_6MeV_fullvolume_6MeV_noScattering_jointFit/*.root"
+    fname = "/home/parkerw/Software/rat-tools_master/FitPerformance/scintFit_185.root"
+    #fname = "/data/snoplus/parkerw/ratSimulations/batch/Sep27_recoordScintEffVelMPDF_Perf_ds/*.root"
+    #fname = "/data/snoplus/parkerw/ratSimulations/batch/Sep27_SES_fill/scintEff_0.root"
 
     #    fname = "/home/parkerw/Software/rat_b/testpartialmpdf.root"
     outFile = ROOT.TFile(outfile, "RECREATE")
     use_retriggers = 0
-    use_dir = 1
+    use_dir = 0
+    use_energy = 0
     legend_coords = (0.7, 0.65, 0.9, 0.9)
     
     xTrue=[]
     yTrue=[]
     zTrue=[]
     tiTrue=[]
-    eTrue=[]
     xFit=[]
     yFit=[]
     zFit=[]
@@ -66,19 +66,8 @@ def saveTree(fname, outfile):
     posTree.Branch("zTrue", zTrue, "zTrue/F")
     tiTrue = np.empty((1), dtype="float32")
     posTree.Branch("tiTrue", tiTrue, "tiTrue/F")
-    eTrue = np.empty((1), dtype="float32")
-    posTree.Branch("eTrue", eTrue, "eTrue/F")
-
-    xSol = np.empty((1), dtype="float32")
-    posTree.Branch("xSol", xSol, "xSol/F")
-    ySol = np.empty((1), dtype="float32")
-    posTree.Branch("ySol", ySol, "ySol/F")
-    zSol = np.empty((1), dtype="float32")
-    posTree.Branch("zSol", zSol, "zSol/F")
-    tSol = np.empty((1), dtype="float32")
-    posTree.Branch("tSol", tSol, "tSol/F")
-    phiSol = np.empty((1), dtype="float32")
-    posTree.Branch("phiSol", phiSol, "phiSol/F")
+    ETrue = np.empty((1), dtype="float32")
+    posTree.Branch("ETrue", ETrue, "ETrue/F")    
 
     xFit = np.empty((1), dtype="float32")
     posTree.Branch("xFit", xFit, "xFit/F")
@@ -88,7 +77,7 @@ def saveTree(fname, outfile):
     posTree.Branch("zFit", zFit, "zFit/F")
     tiFit = np.empty((1), dtype="float32")
     posTree.Branch("tiFit", tiFit, "tiFit/F")
-    
+
     xBias = np.empty((1), dtype="float32")
     posTree.Branch("xBias", xBias, "xBias/F")
     yBias = np.empty((1), dtype="float32")
@@ -107,6 +96,10 @@ def saveTree(fname, outfile):
     phiTrue = np.empty((1), dtype="float32")
     posTree.Branch("phiTrue", phiTrue, "phiTrue/F")
     
+    if use_energy:
+        EFit = np.empty((1), dtype="float32")
+        posTree.Branch("EFit", EFit, "EFit/F")
+
     if use_dir:
         xdirFit = np.empty((1), dtype="float32")
         posTree.Branch("xdirFit", xdirFit, "xdirFit/F")
@@ -160,23 +153,16 @@ def saveTree(fname, outfile):
             mc = ds.GetMC()
             mceve = ds.GetMCEV(iev)
             
-            if mc.GetMCParticle(0).GetPosition().Z() > 6000:
-                print("bad z")
-                continue
+            #if mc.GetMCParticle(0).GetPosition().Z() > 6000:
+            #    print("bad z")
+            #    continue
                                 
             xTrue[0] = mc.GetMCParticle(0).GetPosition().X()
             yTrue[0] = mc.GetMCParticle(0).GetPosition().Y()
             zTrue[0] = mc.GetMCParticle(0).GetPosition().Z()
             tiTrue[0] = 390 - mceve.GetGTTime()
-            eTrue[0] = mc.GetMCParticle(0).GetKineticEnergy()
-            
-            fTime = ev.GetUniversalTime()
-            xSol[0] = ROOT.RAT.SunDirection( int(fTime.GetDays()), int(fTime.GetSeconds()), int(fTime.GetNanoSeconds()) ).Unit().X()
-            ySol[0] = ROOT.RAT.SunDirection( int(fTime.GetDays()), int(fTime.GetSeconds()), int(fTime.GetNanoSeconds()) ).Unit().Y()
-            zSol[0] = ROOT.RAT.SunDirection( int(fTime.GetDays()), int(fTime.GetSeconds()), int(fTime.GetNanoSeconds()) ).Unit().Z()
-            tSol[0] = ROOT.RAT.SunDirection( int(fTime.GetDays()), int(fTime.GetSeconds()), int(fTime.GetNanoSeconds()) ).Unit().Theta()
-            phiSol[0] = ROOT.RAT.SunDirection( int(fTime.GetDays()), int(fTime.GetSeconds()), int(fTime.GetNanoSeconds()) ).Unit().Phi()
-            
+            ETrue[0] =  mc.GetMCParticle(0).GetKineticEnergy()
+
             xdirTrue[0] = mc.GetMCParticle(0).GetMomentum().X()
             ydirTrue[0] = mc.GetMCParticle(0).GetMomentum().Y()
             zdirTrue[0] = mc.GetMCParticle(0).GetMomentum().Z()
@@ -187,10 +173,11 @@ def saveTree(fname, outfile):
 
             # Get fitter vertex
             try:
-                fitResult = ev.GetFitResult("diPoFit")
+                #fitResult = ev.GetFitResult("direction2DFit")
                 #fitResult = ev.GetFitResult("scintFitter")
                 #fitResult = ev.GetFitResult("multiPDFFit")
-                #fitResult = ev.GetFitResult("multiPathScint")
+                fitResult = ev.GetFitResult("positionTimeFit")
+                #fitResult = ev.GetFitResult("diPoFit")
                 fitVertex = fitResult.GetVertex(0)
                                     
             except Exception as e:
@@ -217,12 +204,16 @@ def saveTree(fname, outfile):
             yFit[0] = fitVertex.GetPosition().Y()
             zFit[0] = fitVertex.GetPosition().Z()
             tiFit[0] = fitVertex.GetTime()
+
             if use_dir:
                 xdirFit[0] = fitVertex.GetDirection().X()
                 ydirFit[0] = fitVertex.GetDirection().Y()
                 zdirFit[0] = fitVertex.GetDirection().Z()
                 tFit[0] = fitVertex.GetDirection().Theta()
                 phiFit[0] = fitVertex.GetDirection().Phi()
+
+            if use_energy:
+                EFit[0] = fitVertex.GetEnergy()
 
             xBias[0] = xFit[0] - xTrue[0]
             yBias[0] = yFit[0] - yTrue[0]
@@ -231,8 +222,8 @@ def saveTree(fname, outfile):
             #print(xFit, phiFit, tiFit)
             #print(xFit, yFit, zFit, tiFit, tFit, phiFit, tiTrue)
             fomnames = fitResult.GetFOMNames()
-            #            for i_names in range(fomnames.size()):
-            #                print(fomnames.at(i_names))
+            #for i_names in range(fomnames.size()):
+            #    print(fomnames.at(i_names))
             
             #LLH[0] = fitResult.GetFOM("PositionPositionLogL")
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionPositionSelectedNHit")

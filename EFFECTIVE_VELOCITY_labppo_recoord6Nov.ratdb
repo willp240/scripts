@@ -1,0 +1,145 @@
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+// Default parameters from labppo_2p2_scintillator
+inner_av_velocity: 185.647227491,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+
+//*********************************************************
+//****************Coordinated Feb 2020*********************
+//*********************************************************
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 183.875161044,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+/*
+//*********************************************************
+//****************Coordinated Jul 2022*********************
+//*********************************************************
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.647227491,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}*/
+
+/*
+/// Nov1 22 Round 1
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 186.576369524,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}*/
+
+/*
+//Nov2 22 Round 2
+{
+
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 186.201191058,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}*/
+
+/*
+//Nov2 22 Round 3 
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 186.161352799,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+*/
+
+//Nov4 22 Round 4
+/*
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 186.347560578,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+*/
+//Nov4 22 Round 5
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 186.262692413,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}

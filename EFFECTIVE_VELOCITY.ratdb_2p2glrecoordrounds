@@ -1,0 +1,164 @@
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+// Default parameters from labppo_scintillator
+inner_av_velocity: 183.875161044,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "internalwater_snoplus",
+run_range: [0, 0],
+pass: 0,
+comment: "",
+timestamp: "",
+inner_av_velocity: 2.17554021555098529e+02,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "externalwater_snoplus",
+run_range: [0, 0],
+pass: 0,
+comment: "",
+timestamp: "",
+inner_av_velocity: 2.17554021555098529e+02,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "heavywater_snoman_salt",
+run_range: [0, 0],
+pass: 0,
+comment: "",
+timestamp: "",
+inner_av_velocity: 2.17554021555098529e+02,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "heavywater_sno",
+run_range: [0, 0],
+pass: 0,
+comment: "",
+timestamp: "",
+inner_av_velocity: 2.17554021555098529e+02,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "lightwater_snoman_salt",
+run_range: [0, 0],
+pass: 0,
+comment: "",
+timestamp: "",
+inner_av_velocity: 2.17554021555098529e+02,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+
+{
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "lightwater_sno",
+run_range: [0, 0],
+pass: 0,
+comment: "",
+timestamp: "",
+inner_av_velocity: 2.17554021555098529e+02,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+/*{///Round 1
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 186.480422176,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}*/
+/*
+{///Round 2
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.672495209,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+*/
+/*
+{///Round 3
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.499070704,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}
+*/
+{///Round 4
+type: "EFFECTIVE_VELOCITY",
+version: 1,
+index: "labppo_2p2_scintillator",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: "",
+comment: "",
+
+inner_av_velocity: 185.647227491,
+av_velocity: 1.93109181500140664e+02,
+water_velocity: 2.17554021555098529e+02,
+offset: 0.6,
+}

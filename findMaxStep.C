@@ -4,8 +4,10 @@
 void findMaxStep( ) {
 
   // std::string filepath = "/data/snoplus/parkerw/bb_sigex/Sep15_Allbg_Asimov/Oct21_mcmc10_hmc2000/Oct21_mcmc10_hmc2000";
-  std::string filepath = "/data/snoplus/parkerw/bb_sigex/Jan12/Jan12_mcmc1m_noBB/Jan12_mcmc1m_noBB";
-  std::string filename = "Jan12_mcmc1m_noBB";
+  //std::string filepath = "/data/snoplus/parkerw/bb_sigex/Jan12/Jan12_mcmc1m_noBB/Jan12_mcmc1m_noBB";
+  std::string filepath = "/data/snoplus/parkerw/bb_sigex/Nov4_22_testAllbg/Nov4_22_allbgFit_1mil/Nov4_22_allbgFit_1mil";
+    //std::string filename = "Jan12_mcmc1m_noBB";
+  std::string filename = "Nov4_22_allbgFit_1mil";
   double maxLLH = -999;
   int maxFile = -999;
   int step = -999;
