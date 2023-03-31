@@ -1,20 +1,17 @@
 #include <TStyle.h>
 #include <TTree.h>
 
-void findMaxStep( ) {
+void findMaxStep( std::string dataset_dir, std::string fit_dir ) {
 
-  // std::string filepath = "/data/snoplus/parkerw/bb_sigex/Sep15_Allbg_Asimov/Oct21_mcmc10_hmc2000/Oct21_mcmc10_hmc2000";
-  //std::string filepath = "/data/snoplus/parkerw/bb_sigex/Jan12/Jan12_mcmc1m_noBB/Jan12_mcmc1m_noBB";
-  std::string filepath = "/data/snoplus/parkerw/bb_sigex/Nov4_22_testAllbg/Nov4_22_allbgFit_1mil/Nov4_22_allbgFit_1mil";
-    //std::string filename = "Jan12_mcmc1m_noBB";
-  std::string filename = "Nov4_22_allbgFit_1mil";
+  std::string filepath = "/data/snoplus/parkerw/bb_sigex/" + dataset_dir + "/" + fit_dir + "/" + fit_dir;
+
   double maxLLH = -999;
   int maxFile = -999;
   int step = -999;
   //Loop over files
   for(int i=0; i<100; i++){
-    TString fname = Form("%s_%d/%s_%d_.root",filepath.c_str(),i,filename.c_str(),i);
-    //TString fname = Form("%s_%d_.root",filepath.c_str(),i);
+    TString fname = Form("%s_%d/%s_%d_.root",filepath.c_str(),i,fit_dir.c_str(),i);
+
     std::cout << fname << std::endl;
     if(!gSystem->AccessPathName(fname)){
       TFile *File = new TFile(fname , "OPEN");
