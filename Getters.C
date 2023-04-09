@@ -15,13 +15,13 @@ int Getters() {
   //Get pmtInfo
   //  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
   for(int i=0; i<dsreader.GetEntryCount();i++){
-    RAT::DS::Entry& rds = dsreader.GetEntry(i);
+    const RAT::DS::Entry& rds = dsreader.GetEntry(i);
 
     int nevC = rds.GetEVCount();
-    std::endl;
+
     for(int iev=0;iev<nevC; iev++){
 
-      RAT::DS::EV& rev = rds.GetEV(iev);
+      const RAT::DS::EV& rev = rds.GetEV(iev);
       std::cout << "event " << i << ", vertex " << iev << std::endl;
 
       std::vector<std::string> fittynames = rev.GetFitNames();

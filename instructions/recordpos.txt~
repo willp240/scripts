@@ -15,16 +15,10 @@ to make the gaussians, one for each velocity, all on one canvas.
 
 Update Utilities to use produced files and do:
 python AnalyseData.py -i "labppo_2p2_scintillator"
-to get the printed out table to put in the db file. (may need root 5.34.38 for this)
+to get the printed out table to put in the db file.
 
 
-In Utilities, reverse meanBias[0] and speed in oneDimTGraph.SetPoint, also add: oneDimTGraph.SetPointError(count, 0, meanBias[1]). 
-In AnalyseData.py change histograms = Utilities.ProducePlots() to histograms = Utilities.DrawPlot(). Comment out the next 3 lines and do:
-python AnalyseData.py -i "labppo_2p2_scintillator" (may need root 5.34.38 for this)
-
-Might have to double click the canvas once it's run to get the linear plot. Fit with tool panel on canvas.
-
-You could then run simulation for the fitted speed to check it comes out consistent with 0 bias. Then run Plot1RadialBias.C to make the single gaussian.
+In Utilities, reverse meanBias[0] and speed in oneDimTGraph.SetPoint, also add: oneDimTGraph.SetPointError(count, 0, meanBias[1])
 
 
 

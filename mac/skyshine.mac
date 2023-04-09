@@ -1,0 +1,37 @@
+
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
+
+/rat/db/set MC thin_factor 1.0
+/rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
+/rat/db/set GEO[inner_av] material "labppo_2p2_scintillator"
+
+/rat/db/set NOISE_MC noise_flag 1
+
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 1
+
+/rat/proc scintFitter
+
+/rat/proc outroot
+/rat/procset file "{0}"
+
+#/generator/add combo gun:plane
+#/generator/vtx/set e- 0 0 0 2.5
+#/generator/pos/set 0 0 10000 0 0 1 700 
+#/generator/rate/set 1
+
+/generator/add combo gun:fill
+/generator/vtx/set e- 0 0 0 2.5
+/generator/pos/set 0 0 0
+/generator/rate/set 1
+
+/rat/run/start 1000
+exit

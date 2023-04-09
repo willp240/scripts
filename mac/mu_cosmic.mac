@@ -1,0 +1,46 @@
+# Supply output file name as argument
+# rat -o output  muonGenFull.mac
+
+# speed up muon simulation and change the default cut (0.010 mm) to a higher value to limit the secondaries produced
+/rat/tracking/store full
+
+/rat/tracking/omit opticalphoton
+/rat/tracking/omit e-
+/rat/tracking/omit gamma
+
+/rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
+/rat/db/set GEO[inner_av] material "labppo_2p2_scintillator"
+/rat/db/set MC thin_factor 3.0
+/run/initialize
+
+# further speed up by reducing the number of optical photons tracked; if meanPhotonsPerSecondary leads to too many tracks, maxTracksPerStep takes over; the tracks are weighted according to the truly deposited energy
+#/rat/physics/scintillation/off
+#/rat/physics/scintillation/maxTracksPerStep 50
+#/rat/physics/scintillation/meanPhotonsPerSecondary 1
+
+# BEGIN EVENT LOOP
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc datacleaning
+/rat/proc calibratePMT
+/rat/proc scintFitter
+/rat/proc count
+/rat/procset update 1
+/rat/proclast outroot
+/rat/procset file "testmu.root"
+
+# END EVENTLOOP
+
+# Use the FLUX generator to create vertices of particles with a given angular and energy distribution on a spherical surface around the center
+/generator/add flux
+
+# you HAVE TO choose a flux spectrum (so far "cosmic" and "flat" are the options)
+/generator/flux/setspectrum cosmic
+
+/generator/flux/setposition [0.4394745113034516, 5.674083335059726]
+/generator/flux/setdirection [0.5644181205302323, 1.180038283496244]
+/generator/rate/set 1
+
+/rat/run/start 1
+exit

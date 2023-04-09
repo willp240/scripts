@@ -22,7 +22,7 @@ void CompareBias() {
 
   std::string coord[3] = {"x", "y", "z"};
 
-  TFile *_pdffile = TFile::Open("/home/parkerw/Software/rat-tools2/FitPerformance/May10_FuncExp_Tree.root");
+  TFile *_pdffile = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Apr8_2.5MeV_AllR_Tree.root");
   TTree* pdfTree = (TTree*)_pdffile->Get("eveTree")->Clone("pdftree");
 
   TCanvas* c1 = new TCanvas("c1", "c1", 1500,800);

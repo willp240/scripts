@@ -1,0 +1,9 @@
+executable              = /home/parkerw/Software/bb-likelihood-analysis/fit/condor.sh
+universe                = vanilla
+output                  = /data/snoplus/parkerw/bb_sigex/Jan12/Jan12_mcmc1m_noBB/Jan12_mcmc1m_noBB_91/output/autocorrTest.out
+error                   = /data/snoplus/parkerw/bb_sigex/Jan12/Jan12_mcmc1m_noBB/Jan12_mcmc1m_noBB_91/error/autocorrTest.err
+log                     = /data/snoplus/parkerw/bb_sigex/Jan12/Jan12_mcmc1m_noBB/Jan12_mcmc1m_noBB_91/log/autocorrTest.log
+notification            = never
+priority                = 5
+getenv                  = False
+queue 1

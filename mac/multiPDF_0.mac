@@ -1,0 +1,65 @@
+# File: scintFitter.mac
+# Brief: Short macro showing how to run the scintFitter
+#
+# Date: 19-05-2014
+# Contact: Dr M Mottram, <m.mottram@qmul.ac.uk>
+# Revisions:
+#       19-05-2014 I. Coulter <icoulter@hep.upenn.edu> Initial commit.
+#
+# This is a macro which shows how to run the scintFitter, which gives
+# the "best" fit for the scintillator phase, as defined by the
+# reconstruction group.
+# Currently, this will use different PDFs depending on the scintillator
+# material in use and so should work for both loaded and unloaded
+# scintillators. Details of what this contains can be found in the user
+# manual or within the code itself.
+#
+
+/rat/db/set MC thin_factor 1.0
+
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
+
+
+/rat/db/set NOISE_MC noise_flag 1
+
+/run/initialize
+
+# BEGIN EVENT LOOP
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc count
+/rat/procset update 1
+/rat/proc calibratePMT
+/rat/proc prune
+/rat/procset prune "mc.hits,mc.pmts.photons"
+
+/rat/proc fitter
+/rat/procset method "quad"
+
+/rat/proc fitter
+/rat/procset method "multipdf-scint"
+/rat/procset seed "quad"
+/rat/procset name "multiPDFFit"
+
+/rat/proc classifier
+/rat/procset classifier "nearAVAngular"
+
+/rat/proc outroot
+/rat/procset file "{0}"
+# END EVENTLOOP
+
+/generator/add combo gun:fill
+/generator/vtx/set e- 0 0 0 2.5
+/generator/pos/set  0.0 0.0 0.0
+/generator/rate/set 1
+
+#/generator/add combo gun2:fill
+#/generator/vtx/set e- 0 0 0 0 1 10
+#/generator/pos/set  0.0 0.0 0.0
+#/generator/rate/set 1
+
+/rat/run/start 1000
+
+exit

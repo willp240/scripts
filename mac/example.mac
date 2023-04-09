@@ -1,0 +1,25 @@
+/run/initialize
+
+# BEGIN EVENT LOOP
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc count
+/rat/procset update 10
+/rat/proc calibratePMT
+
+# Run the scintFitter
+/rat/proc scintFitter
+
+/rat/proclast outroot
+/rat/procset file "output.root"
+# END EVENTLOOP
+
+/generator/add combo gun:fill
+/generator/vtx/set e- 0 0 0 2.5
+/generator/pos/set 0 0 0
+/generator/rate/set 1
+
+/rat/run/start 10
+exit
+

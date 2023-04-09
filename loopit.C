@@ -25,14 +25,14 @@ void LoopDirectory(TDirectory *dir) {
     // Select only data plots
     std::cout << name << std::endl;
     if (classname == "TCanvas") {
-      TCanvas *canv = File->Get(name.c_str())->Clone();
+      TCanvas *canv = (TCanvas*)File->Get(name.c_str())->Clone();
       canv->SetTopMargin(0.06);
       canv->SetRightMargin(0.13);
       canv->Print((filename+".pdf").c_str());
       delete canv;
     } else if (classname == "TH2D") {
       std::cout << "in"<< std::endl;
-      TH2D *plot = File->Get(name.c_str())->Clone();
+      TH2D *plot = (TH2D*)File->Get(name.c_str())->Clone();
       c->cd();
       c->SetTopMargin(0.06);
       c->SetRightMargin(0.13);
@@ -41,7 +41,7 @@ void LoopDirectory(TDirectory *dir) {
       delete plot;
     } else if (classname == "TH1D") {
       std::cout << "in"<< std::endl;
-      TH1D *plot1 = File->Get(name.c_str())->Clone();
+      TH1D *plot1 = (TH1D*)File->Get(name.c_str())->Clone();
       plot1->GetYaxis()->SetTitleOffset(2.0);
       c->cd();
       c->SetGrid();

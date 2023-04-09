@@ -1,0 +1,49 @@
+#/**
+#*       Example Macro for simulating photonbombs (similar to laserball in SNO)
+#*
+#*       photonbomb.mac
+#*       Date:           01/12/2008
+#*       contact:        J. Wilson, Oxford
+#*/
+
+/rat/tracking/store full
+
+# Don't care about hadrons or muons so quicker not to initialise these processes
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
+
+/run/initialize
+
+# BEGIN EVENT LOOP
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc count
+/rat/procset update 10
+/rat/proc calibratePMT
+
+/rat/proc scintFitter
+
+/rat/proclast outroot
+/rat/procset file "test.root"
+
+# END EVENTLOOP
+
+# Choose the photonbomb generator from fixed point, uniform in time
+/generator/add combo pbomb:point:uniform
+# Choose 1000 photons, each of 400nm per pulse
+/generator/vtx/set 1000 400 0
+
+#######################
+# Note - an alternative way to simulate photon bombs is via the regular gun generator:
+#/generator/add combo gun:point
+## isotropic events (mom direction = 0,0,0) with 3.103 eV with 1000 photons
+#/generator/vtx/set opticalphoton 0 0 0  3.103e-6 0 0 0 1000
+#######################
+
+# Originating in the centre
+/generator/pos/set 0 0 0 mm
+/generator/rate/set 1
+
+/rat/run/start 1
+exit

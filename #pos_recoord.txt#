@@ -1,0 +1,19 @@
+Going to recoord ScintEffVel, then MultiPDF, and repeat
+
+For ScintEffVel:
+cd rat-tools_master/FitCoordination/ScinntEffectiveSpeed
+use Template_Macro.mac with rat_submission/submitVelJobs
+
+something like:
+ python submitVelJobs.py ../rat_root6/Template_Macro.mac /data/snoplus3/parkerw/ratSimulations/Apr8_5MeV_SEVRound1 -e /home/parkerw/Software/env-dev.sh -s /home/parkerw/Software/rat_submission/ -d /home/parkerw/Software/rat_root6/  -n 1
+
+update path in PlotRadialBias.C to make divided canvas of gaussians for each speed
+
+
+
+
+
+
+To Do:
+update Template Macro for ScintEffVel to be 4m, and use MultiPDF
+update Template Macro for MultiPDF to be 4m

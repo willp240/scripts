@@ -113,7 +113,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ## check if output and condor directories exist, create if they don't
-    bb_dir = "/home/parkerw/Software/bb-likelihood-analysis_gh/"
+    bb_dir = "/home/parkerw/Software/bb-likelihood-analysis/"
     data_dir = "/data/snoplus/parkerw/bb_sigex/"
     sub_dir = bb_dir + "fit/"
     asmv_dir = data_dir + args.asmv_dir
