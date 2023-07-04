@@ -20,8 +20,10 @@
 
 void Compare2PDFs(){
 
-  TFile *_file1 = TFile::Open("MultiPDF_Plots_Oct17_Round3.root");
-  TFile *_file2 = TFile::Open("MultiPDF_Plots_Nov2_Round1.root");
+  gStyle->SetOptStat(0);
+
+  TFile *_file1 = TFile::Open("/data/snoplus3/parkerw/rat_pdfs/May23_E_PDFs/MultiPDF_Plots_2.5MeV.root");
+  TFile *_file2 = TFile::Open("MultiPDF_Plots_2.5Te_Round1.root");
 
   TH1D* h1 = (TH1D*)_file1->Get("PDF_0")->Clone();
   TH1D* h2 = (TH1D*)_file2->Get("PDF_0")->Clone();
@@ -38,9 +40,9 @@ void Compare2PDFs(){
   h1->Scale(1/h1->Integral());
   h2->Scale(1/h2->Integral());
 
-  TLegend* t1 = new TLegend( 0.5, 0.6, 0.9, 0.9 );
-  t1->AddEntry( h1, "Original", "l" );
-  t1->AddEntry( h2, "Round 1", "l" );
+  TLegend* t1 = new TLegend( 0.5, 0.7, 0.88, 0.85 );
+  t1->AddEntry( h1, "LAB PPO 2.2 g/l", "l" );
+  t1->AddEntry( h2, "LAB PPO 6 g/l Te 2.5% Round 1", "l" );
 
   h2->GetXaxis()->SetRangeUser(-5,100);
   h2->GetXaxis()->SetTitle("Hit time residuals [ns]");
@@ -51,15 +53,20 @@ void Compare2PDFs(){
   h1->Draw("same");
   t1->Draw("same");
 
+  gPad->SetFrameLineWidth(2);
+  t1->SetLineWidth(2);
+  gPad->SetGrid(1);
+  gPad->Update();
+
 }
 
 void Compare3PDFs(){
 
   gStyle->SetOptStat(0);
 
-  TFile *_file1 = TFile::Open("MultiPDF_Plots_Oct17_Round3.root");
-  TFile *_file2 = TFile::Open("MultiPDF_Plots_Nov2_Round1.root");
-  TFile *_file3 = TFile::Open("MultiPDF_Plots_Nov2_Round2.root");
+  TFile *_file1 = TFile::Open("/data/snoplus3/parkerw/rat_pdfs/May23_E_PDFs/MultiPDF_Plots_2.5MeV.root");
+  TFile *_file2 = TFile::Open("MultiPDF_Plots_1.5Te_Round1.root");
+  TFile *_file3 = TFile::Open("MultiPDF_Plots_1.5Te_Round2.root");
 
   TH1D* h1 = (TH1D*)_file1->Get("PDF_0")->Clone();
   TH1D* h2 = (TH1D*)_file2->Get("PDF_0")->Clone();
@@ -81,20 +88,25 @@ void Compare3PDFs(){
   h2->Scale(1/h2->Integral());
   h3->Scale(1/h3->Integral());
 
-  TLegend* t1 = new TLegend( 0.5, 0.6, 0.9, 0.9 );
-  t1->AddEntry( h1, "Original", "l" );
-  t1->AddEntry( h2, "Round 1", "l" );
-  t1->AddEntry( h3, "Round 2", "l" );
+  TLegend* t1 = new TLegend( 0.5, 0.7, 0.88, 0.85 );
+  t1->AddEntry( h1, "LAB PPO 2.2 g/l", "l" );
+  t1->AddEntry( h2, "LAB PPO 6.0 g/l Te 1.5% Round 1", "l" );
+  t1->AddEntry( h3, "LAB PPO 6.0 g/l Te 1.5% Round 2", "l" );
 
   h3->GetXaxis()->SetRangeUser(-5,100);
   h3->GetXaxis()->SetTitle("Hit time residuals [ns]");
   h3->GetYaxis()->SetTitle("Normalised Counts");
-  h1->GetYaxis()->SetTitleOffset(1.2);
+  h3->GetYaxis()->SetTitleOffset(1.2);
 
   h3->Draw();
   h2->Draw("same");
   h1->Draw("same");
   t1->Draw("same");
+
+  gPad->SetFrameLineWidth(2);
+  t1->SetLineWidth(2);
+  gPad->SetGrid(1);
+  gPad->Update();
 
 }
 
@@ -102,52 +114,123 @@ void Compare4PDFs(){
 
   gStyle->SetOptStat(0);
 
-  TFile *_file0 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitCoordination/MultiPDFFull/MultiPDF_Plots_Oct17_Round3.root");
-  TFile *_file1 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitCoordination/MultiPDFFull/MultiPDF_Plots_Nov2_Round1.root");
-  TFile *_file2 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitCoordination/MultiPDFFull/MultiPDF_Plots_Nov2_Round2.root");
-  TFile *_file3 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitCoordination/MultiPDFFull/MultiPDF_Plots_Nov4_Round3.root");
+  TFile *_file1 = TFile::Open("/data/snoplus3/parkerw/rat_pdfs/May23_E_PDFs/MultiPDF_Plots_2.5MeV.root");
+  TFile *_file2 = TFile::Open("MultiPDF_Plots_1.5Te_Round1.root");
+  TFile *_file3 = TFile::Open("MultiPDF_Plots_1.5Te_Round2.root");
+  TFile *_file4 = TFile::Open("MultiPDF_Plots_1.5Te_Round3.root");
 
-  TH1D* h0 = (TH1D*)_file0->Get("PDF_0")->Clone("h0");
   TH1D* h1 = (TH1D*)_file1->Get("PDF_0")->Clone("h1");
   TH1D* h2 = (TH1D*)_file2->Get("PDF_0")->Clone("h2");
   TH1D* h3 = (TH1D*)_file3->Get("PDF_0")->Clone("h3");
+  TH1D* h4 = (TH1D*)_file4->Get("PDF_0")->Clone("h4");
 
-  h0->SetLineColor(kRed);
-  h1->SetLineColor(kBlue);
-  h2->SetLineColor(kBlack);
-  h3->SetLineColor(kGreen);
+  h1->SetLineColor(kRed);
+  h2->SetLineColor(kBlue);
+  h3->SetLineColor(kBlack);
+  h4->SetLineColor(kGreen);
 
-  h0->SetLineStyle(2);
   h1->SetLineStyle(2);
   h2->SetLineStyle(2);
   h3->SetLineStyle(2);
+  h4->SetLineStyle(2);
 
-  h0->SetLineWidth(2);
   h1->SetLineWidth(2);
   h2->SetLineWidth(2);
   h3->SetLineWidth(2);
+  h4->SetLineWidth(2);
 
-  h0->Scale(1/h0->Integral());
   h1->Scale(1/h1->Integral());
   h2->Scale(1/h2->Integral());
   h3->Scale(1/h3->Integral());
+  h4->Scale(1/h4->Integral());
 
-  TLegend* t1 = new TLegend( 0.5, 0.6, 0.9, 0.9 );
-  t1->AddEntry( h0, "Original", "l" );
-  t1->AddEntry( h1, "Round 1", "l" );
-  t1->AddEntry( h2, "Round 2", "l" );
-  t1->AddEntry( h3, "Round 3", "l" );
+  TLegend* t1 = new TLegend( 0.45, 0.65, 0.88, 0.85 );
+  t1->AddEntry( h1, "LAB PPO 2.2 g/l", "l" );
+  t1->AddEntry( h2, "LAB PPO 6.0 g/l Te 1.5% Round 1", "l" );
+  t1->AddEntry( h3, "LAB PPO 6.0 g/l Te 1.5% Round 2", "l" );
+  t1->AddEntry( h4, "LAB PPO 6.0 g/l Te 1.5% Round 3", "l" );
 
-  h0->GetXaxis()->SetRangeUser(-5,100);
-  h0->GetXaxis()->SetTitle("Hit time residuals [ns]");
-  h0->GetYaxis()->SetTitle("Normalised Counts");
-  h0->GetYaxis()->SetTitleOffset(1.3);
+  h4->GetXaxis()->SetRangeUser(-5,100);
+  h4->GetXaxis()->SetTitle("Hit time residuals [ns]");
+  h4->GetYaxis()->SetTitle("Normalised Counts");
+  h4->GetYaxis()->SetTitleOffset(1.2);
 
-  h0->Draw();
-  h2->Draw("same");
+  h4->Draw("");
   h3->Draw("same");
+  h2->Draw("same");
   h1->Draw("same");
   t1->Draw("same");
+
+  gPad->SetFrameLineWidth(2);
+  t1->SetLineWidth(2);
+  gPad->SetGrid(1);
+  gPad->Update();
+
+}
+
+void Compare5PDFs(){
+
+  gStyle->SetOptStat(0);
+
+  TFile *_file1 = TFile::Open("/data/snoplus3/parkerw/rat_pdfs/May23_E_PDFs/MultiPDF_Plots_2.5MeV.root");
+  TFile *_file2 = TFile::Open("MultiPDF_Plots_2.5Te_Round1.root");
+  TFile *_file3 = TFile::Open("MultiPDF_Plots_2.5Te_Round2.root");
+  TFile *_file4 = TFile::Open("MultiPDF_Plots_2.5Te_Round3.root");
+  TFile *_file5 = TFile::Open("MultiPDF_Plots_2.5Te_Round4.root");
+
+  TH1D* h1 = (TH1D*)_file1->Get("PDF_0")->Clone("h1");
+  TH1D* h2 = (TH1D*)_file2->Get("PDF_0")->Clone("h2");
+  TH1D* h3 = (TH1D*)_file3->Get("PDF_0")->Clone("h3");
+  TH1D* h4 = (TH1D*)_file4->Get("PDF_0")->Clone("h4");
+  TH1D* h5 = (TH1D*)_file5->Get("PDF_0")->Clone("h5");
+
+  h1->SetLineColor(kRed);
+  h2->SetLineColor(kBlue);
+  h3->SetLineColor(kBlack);
+  h4->SetLineColor(kGreen);
+  h5->SetLineColor(kYellow);
+
+  h1->SetLineStyle(2);
+  h2->SetLineStyle(2);
+  h3->SetLineStyle(2);
+  h4->SetLineStyle(2);
+  h5->SetLineStyle(2);
+
+  h1->SetLineWidth(2);
+  h2->SetLineWidth(2);
+  h3->SetLineWidth(2);
+  h4->SetLineWidth(2);
+  h5->SetLineWidth(2);
+
+  h1->Scale(1/h1->Integral());
+  h2->Scale(1/h2->Integral());
+  h3->Scale(1/h3->Integral());
+  h4->Scale(1/h4->Integral());
+  h5->Scale(1/h5->Integral());
+
+  TLegend* t1 = new TLegend( 0.45, 0.65, 0.88, 0.85 );
+  t1->AddEntry( h1, "LAB PPO 2.2 g/l", "l" );
+  t1->AddEntry( h2, "LAB PPO 6.0 g/l Te 2.5% Round 1", "l" );
+  t1->AddEntry( h3, "LAB PPO 6.0 g/l Te 2.5% Round 2", "l" );
+  t1->AddEntry( h4, "LAB PPO 6.0 g/l Te 2.5% Round 3", "l" );
+  t1->AddEntry( h5, "LAB PPO 6.0 g/l Te 2.5% Round 4", "l");
+
+  h5->GetXaxis()->SetRangeUser(-5,100);
+  h5->GetXaxis()->SetTitle("Hit time residuals [ns]");
+  h5->GetYaxis()->SetTitle("Normalised Counts");
+  h5->GetYaxis()->SetTitleOffset(1.2);
+
+  h5->Draw("");
+  h4->Draw("same");
+  h3->Draw("same");
+  h2->Draw("same");
+  h1->Draw("same");
+  t1->Draw("same");
+
+  gPad->SetFrameLineWidth(2);
+  t1->SetLineWidth(2);
+  gPad->SetGrid(1);
+  gPad->Update();
 
 }
 

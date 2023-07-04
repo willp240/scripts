@@ -9,6 +9,8 @@ import ROOT
 #Stop ROOT stealing our useage messages
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gErrorIgnoreLevel = ROOT.kWarning
+from ROOT import TVector3
+import math
 
 try:
     import numpy as np
@@ -31,7 +33,7 @@ def saveTree(fname, outfile):
     '''
     #fname = "/home/parkerw/Software/rat_master/test.root"
     #fname = "/data/snoplus/parkerw/ratSimulations/batch/Mar2_StraightPath_Powell/*.root"
-    fname = "/data/snoplus3/parkerw/ratSimulations/May19_Beta14_3MeV/*.root"
+    fname = "/data/snoplus3/parkerw/ratSimulations/Apr9_2.5MeV_AllR/*.root"
 
     #    fname = "/home/parkerw/Software/rat_b/testpartialmpdf.root"
     outFile = ROOT.TFile(outfile, "RECREATE")
@@ -56,7 +58,6 @@ def saveTree(fname, outfile):
     numScint=[]
     numCerenk=[]
     nearAV=[]
-    itr=[]
     nhits=[]
     
     posTree=ROOT.TTree("eveTree","eveTree")
@@ -83,12 +84,6 @@ def saveTree(fname, outfile):
     nearAV = np.empty((1), dtype="float32")
     posTree.Branch("nearAV", nearAV, "nearAV/F")
 
-    itr = np.empty((1), dtype="float32")
-    posTree.Branch("itr", itr, "itr/F")
-
-    beta14 = np.empty((1), dtype="float32")
-    posTree.Branch("beta14", beta14, "beta14/F")
-
     highOwl = np.empty((1), dtype="int32")
     posTree.Branch("highOwl", highOwl, "highOwl/I")
 
@@ -97,6 +92,16 @@ def saveTree(fname, outfile):
 
     nhits = np.empty((1), dtype="int32")
     posTree.Branch("neckHit", nhits, "nhits/I")
+
+    r0to30 = np.empty((1), dtype="float32")
+    posTree.Branch("r0to30", r0to30, "r0to30/F")
+    r60to90 = np.empty((1), dtype="float32")
+    posTree.Branch("r60to90", r60to90, "r60to90/F")
+    r130to160 = np.empty((1), dtype="float32")
+    posTree.Branch("r130to160", r130to160, "r130to160/F")
+
+    itr = np.empty((1), dtype="float32")
+    posTree.Branch("itr", itr, "itr/F")
 
     xBias = np.empty((1), dtype="float32")
     posTree.Branch("xBias", xBias, "xBias/F")
@@ -146,11 +151,18 @@ def saveTree(fname, outfile):
     posTree.Branch("numCerenk", numCerenk, "numCerenk/I")
 
     simCounter, evCounter = 0, 0
+
+    effective_velocity = rat.utility().GetEffectiveVelocity()
+    light_path = rat.utility().GetLightPathCalculator()
+
     for ds, run in rat.dsreader(fname):
         if simCounter == 0:
             loopStart=timer()
             print("Beginning event loop...")
         simCounter += 1
+
+        #if(simCounter < 96000):
+        #    continue
 
         if simCounter % 100 == 0:
             print("event ", simCounter)
@@ -172,9 +184,9 @@ def saveTree(fname, outfile):
             mc = ds.GetMC()
             mceve = ds.GetMCEV(iev)
             
-            #if mc.GetMCParticle(0).GetPosition().Mag() > 6000:
-                #print("bad z")
-                #continue
+            #if mc.GetMCParticle(0).GetPosition().Z() > 6000:
+            #    print("bad z")
+            #    continue
                                 
             xTrue[0] = mc.GetMCParticle(0).GetPosition().X()
             yTrue[0] = mc.GetMCParticle(0).GetPosition().Y()
@@ -193,8 +205,8 @@ def saveTree(fname, outfile):
             # Get fitter vertex
             try:
                 #fitResult = ev.GetFitResult("diPoFit")
-                fitResult = ev.GetFitResult("scintFitter")
-                #fitResult = ev.GetFitResult("multiPDFFit")
+                #fitResult = ev.GetFitResult("scintFitter")
+                fitResult = ev.GetFitResult("multiPDFFit")
                 #fitResult = ev.GetFitResult("multiPathScint")
                 fitVertex = fitResult.GetVertex(0)
                                     
@@ -227,6 +239,7 @@ def saveTree(fname, outfile):
             nOwlhighcount = 0
             pmts = ev.GetUncalPMTs()
             pmtInfo = rat.utility().GetPMTInfo()
+            light_path = rat.utility().GetLightPathCalculator()
             for i in range(pmts.GetOWLCount()) :
                 owl = pmts.GetOWLPMT(i);
                 z = pmtInfo.GetPosition(owl.GetID()).Z()
@@ -237,22 +250,83 @@ def saveTree(fname, outfile):
             neckHit[0] = pmts.GetNeckCount()
             nhits[0] = ev.GetNhitsCleaned()
 
+            calibratedPMTs = ev.GetCalPMTs()
+            #pmtStart = 0.1 * calibratedPMTs.GetCount()
+
+            #pmtTimes = np.empty(calibratedPMTs.GetCount(), dtype=float)
+            #for iPMT in range(calibratedPMTs.GetCount()):
+                #pmtCal = calibratedPMTs.GetPMT( iPMT );
+                #pmtTimes[iPMT] = pmtCal.GetTime();
+
+            #pmtTimes.sort()
+            #pmtStart = 0.1 * calibratedPMTs.GetCount()
+            #windowStart = pmtTimes[pmtStart] - 10
+            #windowEnd = pmtTimes[pmtStart] + 10
+
+            #eventAxis = TVector3(0,0,0)
+
+            #for iPMT in range(calibratedPMTs.GetCount()):
+                #pmtCal = calibratedPMTs.GetPMT( iPMT )
+                #pmtTime = pmtCal.GetTime()
+                
+               # if( pmtTime >= windowStart and pmtTime <= windowEnd ):
+                    #pmtPos = pmtInfo.GetPosition(pmtCal.GetID()).Unit()
+                    #eventAxis += pmtPos
+
+            #eventAxis.Unit()
+            #ang0to30 = 0
+            #ang60to90 = 0
+            #ang130to160 = 0
+            #tot = 0
+
+            inwindow = 0
+            tot=0
+
+            for i in range(calibratedPMTs.GetCount()) :
+                p = calibratedPMTs.GetPMT( i )
+                pmtPosition = pmtInfo.GetPosition( p.GetID() )
+             
+                light_path.CalcByPosition(fitVertex.GetPosition(), pmtInfo.GetPosition(p.GetID()))
+   
+                inner_av_distance = light_path.GetDistInInnerAV()
+                av_distance = light_path.GetDistInAV()
+                water_distance = light_path.GetDistInWater()
+                transit_time = effective_velocity.CalcByDistance(inner_av_distance, av_distance, water_distance)
+                
+                #if(simCounter > 9600):
+                #    print(simCounter, eventAxis.Dot(pmtPosition), eventAxis.Mag(), pmtPosition.Mag(), calibratedPMTs.GetCount(), eventAxis.X(), eventAxis.Y(), eventAxis.Z(), eventAxis.Mag(), (eventAxis.Dot(pmtPosition)) / (eventAxis.Mag() * pmtPosition.Mag()))
+            
+                #if(eventAxis.Dot(pmtPosition) / (eventAxis.Mag() * pmtPosition.Mag()) > 1):
+                    #angle=0
+                #else:
+                    #angle = math.acos((eventAxis.Dot(pmtPosition)) / (eventAxis.Mag() * pmtPosition.Mag())) * (180 / math.pi)
+                #tot += 1
+                
+                #if(angle < 30 and angle > 0):
+                    #ang0to30 += 1
+                #if(angle < 90 and angle > 60):
+                    #ang60to90 += 1
+                #if(angle < 160 and angle > 130):
+                    #ang130to160 += 1
+                
+                tresid = p.GetTime() - transit_time - tiFit
+        
+                if(tresid > -2.5 and tresid <5):
+                    inwindow+=1
+                tot+=1
+
+            r0to30[0] = 0#ang0to30/float(tot)
+            r60to90[0] = 0# ang60to90/float(tot)
+            r130to160[0] = 0 #ang130to160/float(tot)
+
+            itr[0] = inwindow / float(tot)
+
+            #print(r0to30,r60to90,r130to160)
+
             try :
                 nearAV[0] = ev.GetClassifierResult("nearAVAngular").GetClassification("ratio")
             except Exception as e:
-                nearAV[0] = -999;
-
-            try : 
-                itr[0] = ev.GetClassifierResult("ITR:scintFitter").GetClassification("ITR")
-            except Exception as e:
-                #print("no ITR")
-                itr[0] = -999
-
-            try : 
-                beta14[0] = ev.GetClassifierResult("beta14").GetClassification("beta14")
-            except Exception as e:
-                print("no beta14")
-                beta14[0] = -999
+                nearAV[0] = -999
 
             if use_dir:
                 xdirFit[0] = fitVertex.GetDirection().X()
@@ -275,21 +349,16 @@ def saveTree(fname, outfile):
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionPositionSelectedNHit")
 
             #scintfitter
-            LLH[0] = fitResult.GetFOM("PositionLogL")
-            scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionSelectedNHit")
-        
+            #LLH[0] = fitResult.GetFOM("PositionLogL")
+            #scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionSelectedNHit")
+            
             #LLH[0] = fitResult.GetFOM("multipath_scint")
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("multipath_SelectedNHit_scint")
 
             #dipo
-            # LLH[0] = fitResult.GetFOM("LogL")
-            #scaledLLH[0] = LLH[0]/fitResult.GetFOM("SelectedNHit")
-        
-
-            #if(scaledLLH[0] > 13.5 and zTrue[0] > 8000 and zFit[0] < 4000):
-            #    print("found a funny event ", ev.GetGTID())
-            #    return
-
+            LLH[0] = fitResult.GetFOM("LogL")
+            scaledLLH[0] = LLH[0]/fitResult.GetFOM("SelectedNHit")
+            
             numScint[0] = mc.GetNScintPhotons()
             numCerenk[0] = mc.GetNCherPhotons()
 

@@ -1,0 +1,33 @@
+
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
+
+/rat/db/set MC thin_factor 1.0
+/rat/db/set DETECTOR geo_file "geo/snoplusnative_te.geo"
+/rat/db/set GEO[inner_av] material "labppo_6p0_TeDiol_2p5_bismsb_dda_scintillator_directors_review"
+/rat/db/set QUAD_FIT light_speed {1}
+/rat/db/set GEO[av] position [0.,0.,186.5]
+
+/rat/db/set NOISE_MC noise_flag 0
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 100
+
+/rat/proc fitter
+/rat/procset method "quad"
+/rat/proc outroot
+/rat/procset file "{0}"
+
+/generator/add combo gun:fill
+/generator/vtx/set e- 0 0 0 2.5
+/generator/pos/set 0.0 0.0 0.0
+/generator/rate/set 1
+
+/rat/run/start 500
+exit

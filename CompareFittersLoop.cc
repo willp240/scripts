@@ -31,8 +31,8 @@ void Compare2Fits(){
   double ymin[6] = {-20, 0, -20, 0, -20, 0};
 
 
-  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_master/FitPerformance/");
-  TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools_master/FitPerformance/");
+  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Jun27_FitPerf_2.5MeV_1.5Terecoord_R.root");
+  TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Jun27_FitPerf_2.5MeV_2.5Terecoord_R.root");
   TCanvas* c1 = new TCanvas("c1", "c1", 1600,800);
   c1->Divide(3,2);
   
@@ -50,8 +50,8 @@ void Compare2Fits(){
       hNew->SetLineColor(kRed);
 
       TLegend* t1 = new TLegend( 0.45, 0.75, 0.9, 0.9 );
-      t1->AddEntry( hOld, "ScintFitter", "l" );
-      t1->AddEntry( hNew, "Straight Paths", "l" );
+      t1->AddEntry( hOld, "1.5% Te", "l" );
+      t1->AddEntry( hNew, "2.5% Te", "l" );
 
       hOld->GetYaxis()->SetRangeUser(ymin[2*i+j],ymax[2*i+j]);
       gname = coord[i] + " " + title[j];
@@ -81,12 +81,14 @@ void Compare2RFits(){
 
   std::string coord[4] = {"x", "y", "z", "r"};
   std::string title[2] = {"bias", "resolution"};
-  double ymax[8] = {30, 150, 30, 150, 30, 150, 75, 150};
-  double ymin[8] = {-30, 0, -30, 0, -30, 0, -20, 0};
+  double ymax[8] = {30, 90, 30, 90, 30, 90, 40, 90};
+  double ymin[8] = {-30, 0, -30, 0, -30, 0, -10, 0};
 
 
-  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_master/FitPerformance/./Oct18RecoordScintVel4m_perf1to10MeVAllR_E.root");
-  TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools_master/FitPerformance/./Nov5RecoordMPDF_perf_1to10MeV_E.root");
+  //  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Apr15_SEV_NoInterp_1to10MeV_E_Rlt4m.root");
+  //  TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/May20_1to10MeV_NoCerenk_oneSEV_E_lt4m.root");
+  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Jun28_FitPerf_2.5MeV_1.5Terecoord_Z.root");
+  TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Jun28_FitPerf_2.5MeV_2.5Terecoord_Z.root");
 
   TCanvas* c1 = new TCanvas("c1", "c1", 1500,700);
   c1->Divide(4,2,0.01,0.05);
@@ -102,12 +104,14 @@ void Compare2RFits(){
       TGraphErrors* hOld = (TGraphErrors*)_old->Get(gname.c_str())->Clone();
       TGraphErrors* hNew = (TGraphErrors*)_new->Get(gname.c_str())->Clone();
   
-      hOld->SetLineColor(kBlue);
-      hNew->SetLineColor(kRed);
+      hOld->SetLineColor(kBlue+2);
+      hNew->SetLineColor(kRed+2);
+      hOld->SetLineWidth(2);
+      hNew->SetLineWidth(2);
 
       TLegend* t1 = new TLegend( 0.4, 0.75, 0.9, 0.9 );
-      t1->AddEntry( hOld, "Original", "l" );
-      t1->AddEntry( hNew, "Recoordinated with New Optics", "l" );
+      t1->AddEntry( hOld, "1.5% Te", "l" );
+      t1->AddEntry( hNew, "2.5% Te", "l" );
       t1->SetLineWidth(2);
 
       hOld->GetYaxis()->SetRangeUser(ymin[2*i+j],ymax[2*i+j]);
@@ -123,8 +127,8 @@ void Compare2RFits(){
       if(j==0){
 	std::cout << hOld->GetXaxis()->GetNbins() << std::endl;
 	//TLine *line = new TLine(hOld->GetXaxis()->GetXmin()+1, 0, 6048, 0);//99
-	//TLine *line = new TLine(-6048, 0, 6048, 0);
-	TLine *line = new TLine(1,0,10,0);//99
+	TLine *line = new TLine(-6048, 0, 6048, 0);
+	//TLine *line = new TLine(1,0,10,0);//99
 	line->Draw("same");
       }
       else{

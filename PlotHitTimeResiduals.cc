@@ -1110,3 +1110,74 @@ TCanvas* FullFill_Dist( const string& fileName )
 
   return c;
 }
+
+
+TH1D* PlotHitTimeResidualsMCPositionCompFiles( const string& fileName, const string& fileName2 )
+{
+  TH1D* hHitTimeResiduals1 = new TH1D( "hHitTimeResidualsMC1", "Hit time residuals using the MC position", 401, -100.5, 300.5 );
+  TH1D* hHitTimeResiduals2 = new TH1D( "hHitTimeResidualsMC2", "Hit time residuals using the MC position", 401, -100.5, 300.5 );
+  TH1D* hHitTimeResiduals3 = PlotHitTimeResidualsMCPosition(fileName2);
+
+  // If this is being done on data that does not require remote database connection
+  // eg.: a simple simulation with default run number (0)
+  // We can disable the remote connections:
+  //
+  // NOTE: Don't do this if you are using real data!!!
+  RAT::DB::Get()->SetAirplaneModeStatus(true);
+
+  RAT::DU::DSReader dsReader( fileName );
+
+  // RAT::DU::Utility::Get()->GetLightPathCalculator() must be called *after* the RAT::DU::DSReader constructor.
+  RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPathCalculator(); // To calculate the light's path
+  const RAT::DU::GroupVelocity& groupVelocity = RAT::DU::Utility::Get()->GetGroupVelocity(); // To get the group velocity
+  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo(); // The PMT positions etc..
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ )
+    {
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
+      const TVector3 eventPosition = rDS.GetMC().GetMCParticle(0).GetPosition(); // At least 1 is somewhat guaranteed
+      for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
+        {
+          const RAT::DS::EV& rEV = rDS.GetEV( iEV );
+          const RAT::DS::CalPMTs& calibratedPMTs = rEV.GetCalPMTs();
+          for( size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++ )
+            {
+              const RAT::DS::PMTCal& pmtCal = calibratedPMTs.GetPMT( iPMT );
+
+              lightPath.CalcByPositionPartial( eventPosition, pmtInfo.GetPosition( pmtCal.GetID() ) );
+
+              double distInAV = lightPath.GetDistInAV();
+              double distInWater = lightPath.GetDistInWater();
+              double distInUpperTarget = lightPath.GetDistInUpperTarget();
+              double distInLowerTarget = lightPath.GetDistInLowerTarget();
+              const double transitTime = groupVelocity.CalcByDistance( distInUpperTarget, distInAV, distInWater+distInLowerTarget );
+
+              // Time residuals estimate the photon emission time relative to the event start so subtract off the transit time
+              // hit times are relative to the trigger time, which will depend on event time and detector position so correct for that to line up events
+              // The 390ns corrects for the electronics delays and places the pulse in the middle of the window
+
+              if(pmtInfo.GetPosition( pmtCal.GetID() ).Z()<0)
+                hHitTimeResiduals1->Fill( pmtCal.GetTime() - transitTime - 390 + rDS.GetMCEV(iEV).GetGTTime());
+              else
+                hHitTimeResiduals2->Fill( pmtCal.GetTime() - transitTime - 390 + rDS.GetMCEV(iEV).GetGTTime());
+            }
+        }
+    }
+  hHitTimeResiduals2->GetYaxis()->SetTitle( "Normalised Counts" );
+
+  hHitTimeResiduals1->Scale(1/hHitTimeResiduals1->Integral());
+  hHitTimeResiduals2->Scale(1/hHitTimeResiduals2->Integral());
+  hHitTimeResiduals3->Scale(1/hHitTimeResiduals3->Integral());
+
+  hHitTimeResiduals2->Draw();
+  hHitTimeResiduals1->SetLineColor(kRed);
+  hHitTimeResiduals2->SetLineColor(kBlue);
+  hHitTimeResiduals3->SetLineColor(kBlack);
+  hHitTimeResiduals1->Draw("same");
+  hHitTimeResiduals3->Draw("same");
+  //hHitTimeResiduals2->Draw("same");
+  TLegend* t1 = new TLegend( 0.5, 0.6, 0.9, 0.9 );
+  t1->AddEntry( hHitTimeResiduals1, "PMTs with z<Equator", "l" );
+  //  t1->AddEntry( hHitTimeResiduals2, "PMTs with Fill-Level<z<Fill-Level+100", "l" );
+  t1->AddEntry( hHitTimeResiduals2, "PMTs with z>Equator", "l" );
+  t1->AddEntry( hHitTimeResiduals3, "ScintFitter (ET1D PDF)", "l" );
+  t1->Draw();

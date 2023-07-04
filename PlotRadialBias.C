@@ -17,8 +17,9 @@ void PlotRadialBias() {
   for(int i=0; i<13; i++){
 
     c1->cd(i+1);
-    float vec = 182 + i*0.5;
-    TString fname = Form("/data/snoplus3/parkerw/ratSimulations/Apr7_5MeV_SEVRound1//Template_Macro_%.1f.root", vec);
+    //    float vec = 182 + i*0.5;
+    float vec = 185 + i*0.5;
+    TString fname = Form("/data/snoplus3/parkerw/ratSimulations/Jun26_SEV_2.5Terecoord_10MeV/Template_Macro_SEV_%.1f.root", vec);
     TString hname = Form("h%.1f", vec);
     TString htitle = Form("%.1f mm/ns", vec);
     TH1D* h1 = new TH1D(hname, htitle, 100, -500, 500);
@@ -55,7 +56,7 @@ void PlotRadialBias() {
     }
     h1->GetXaxis()->SetTitle("Fit R - True R, mm");
     h1->GetYaxis()->SetTitleOffset(1.3);
-    h1->GetYaxis()->SetRangeUser(0,250);
+    h1->GetYaxis()->SetRangeUser(0,300);
     h1->GetYaxis()->SetTitle("Events");
     h1->Fit("gaus");
     h1->Draw();
