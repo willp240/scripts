@@ -1,0 +1,46 @@
+
+# Load a water geometry
+/rat/db/set DETECTOR geo_file "geo/snoplusnative_water.geo"
+
+# Thin the number of photons by a factor of 2.5
+/rat/db/set MC thin_factor 2.5
+/rat/physics_list/OmitHadronicProcesses true
+
+#To simulate noise using the per-pmt rates:
+#/rat/db/set NOISE_MC noise_flag 2
+#To read the per-pmt noise rates from the NOISE_RUN_INTEGRATED table:
+#/rat/db/set NOISE_MC integ_noise_flag 1
+# Use realistic trigger
+#/rat/db/set DAQ realistic_trigger 1
+
+/run/initialize
+
+######## BEGIN EVENT LOOP ###########
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc triggerEfficiency
+/rat/proc count
+/rat/procset update 1000
+
+/rat/proc waterFitter
+
+/rat/proc outntuple
+/rat/proclast outroot
+
+######## END EVENT LOOP ###########
+
+# Use the FLUX generator to create vertices of particles with a given angular and energy distribution on a spherical surface around the center
+/generator/add flux
+# you HAVE TO choose a flux spectrum (so far "cosmic" and "flat" are the options)
+/generator/flux/setspectrum cosmic
+# change from poisson (default) to uniform time generator
+/generator/flux/settimegen uniform
+# only simulate muons within PSUP
+/generator/flux/setradius 8500.
+# rate = 25,000 events over 200 days
+/generator/rate/set 0.0014
+
+/rat/run/start 1 
+exit

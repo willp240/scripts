@@ -36,6 +36,12 @@ void plot_ITR(  )
   h->GetYaxis()->SetTitleOffset(1.3);
   h->SetLineWidth(2);
 
+  TH2D* h2 = new TH2D("FitvsTrueR", "FitvsTrueR", 200, 0, 14000, 200, 0, 14000);
+  h2->GetXaxis()->SetTitle("True R, mm");
+  h2->GetYaxis()->SetTitle("Fitted R, mm");
+  h2->GetYaxis()->SetTitleOffset(1.3);
+  h2->SetLineWidth(2);
+
   std::string fname = "/data/snoplus3/parkerw/ratSimulations/Apr7_3MeV_SF/skyshine_*.root";
   //std::string fname ="./test.root";
 
@@ -62,10 +68,13 @@ void plot_ITR(  )
       const TVector3 eventPosition = rDS.GetMC().GetMCParticle(0).GetPosition(); // At least 1 is somewhat guaranteed
       double eventz = eventPosition.Z();
 
+      const RAT::DS::FitVertex& rVertex = rEV.GetFitResult("scintFitter").GetVertex(0);
+
       h->Fill(eventz, ITR );
     
+      h2->Fill(eventPosition.Mag(), rVertex.GetPosition().Mag() );
     }
   TCanvas* c1 = new TCanvas("c1", "c1", 800,600);
-  h->Draw("colz");
+  h2->Draw("colz");
   
 }

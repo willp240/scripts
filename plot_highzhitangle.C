@@ -16,10 +16,10 @@
 #include <string>
 #include <math.h>
 
-void plot_hitangle(  )
+void plot_highzhitangle(  )
 {
  // TCanvas c1;
-  int col[10] = {2,6,5,3,8,7,9,4,12,1};
+  int col[14] = {49,46,2,6,5,3,8,29,7,40,9,4,12,1};
   gStyle->SetOptStat(0);
   gStyle->SetFrameLineWidth(2);
 
@@ -30,14 +30,14 @@ void plot_hitangle(  )
   leg->SetLineWidth(2);
 
   // Make ten histograms
-  for(int hist_num = 9; hist_num >= 0; hist_num--){
+  for(int hist_num = 6; hist_num < 13; hist_num++){
 
-    int minr = 5000 + hist_num*100;
-    int maxr = 5000 + (hist_num+1)*100;
+    int minr = 6000 + hist_num*500;
+    int maxr = 6000 + (hist_num+1)*500;
 
     TString hname = Form("Radius%dto%d", minr, maxr);
     TString htitle = Form("%dmm - %dmm", minr, maxr);
-    TH1D* h = new TH1D(hname, htitle, 180, 0, 180);
+    TH1D* h = new TH1D(hname, htitle, 90, 0, 180);
     h->GetXaxis()->SetTitle("Angle (degrees)");
     h->GetYaxis()->SetTitle("Number of PMT Hits");
     h->GetYaxis()->SetTitleOffset(1.3);
@@ -45,7 +45,7 @@ void plot_hitangle(  )
     h->SetLineWidth(2);
     hist_vec.push_back(h);
 
-    TString fname = Form("/data/snoplus3/parkerw/ratSimulations/Mar30_nearAV_0.5MeVe/nearav_%d_%d.root", minr, maxr);
+    TString fname = Form("/data/snoplus3/parkerw/ratSimulations/Apr11_highz_shells/highzshell_%d_%d.root", minr, maxr);
     std::cout << fname << std::endl;
     RAT::DU::DSReader dsReader( fname.Data() );
 
@@ -90,7 +90,7 @@ void plot_hitangle(  )
 	          const RAT::DS::PMTCal& pmtCal = calibratedPMTs.GetPMT( iPMT );
 	          TVector3 pmtPosition = pmtInfo.GetPosition( pmtCal.GetID() );
 
-	          double angle = acos((eventAxis.Dot(pmtPosition)) / (eventAxis.Mag() * pmtPosition.Mag())) * (180 / M_PI);
+	          double angle = acos((eventPosition.Dot(pmtPosition)) / (eventPosition.Mag() * pmtPosition.Mag())) * (180 / M_PI);
             
 	          h->Fill(angle);
           }

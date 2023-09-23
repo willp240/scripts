@@ -1,3 +1,7 @@
+#################################################################
+### Template macro for running e- simulation with a fixed energy
+### Options are written in by scripts in job_sub
+#################################################################
 
 /rat/physics_list/OmitMuonicProcesses true
 /rat/physics_list/OmitHadronicProcesses true
@@ -5,9 +9,7 @@
 /rat/db/set MC thin_factor 1.0
 /rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
 /rat/db/set GEO[inner_av] material "labppo_2p2_scintillator"
-/rat/db/set EFFECTIVE_VELOCITY[labppo_2p2_scintillator] inner_av_velocity {1}
 
-/rat/physics_list/OmitCerenkov true
 
 /run/initialize
 
@@ -23,17 +25,18 @@
 /rat/proc fitter
 /rat/procset method "multipdf-scint"
 /rat/procset seed "quad"
-/rat/procset name "multiPDFFit"
+/rat/procset selector "null"
+/rat/procset name "positionTimeFit"
 /rat/proc prune
 /rat/procset prune "mc.hits,mc.pmts.photons"
 
 /rat/proc outroot
-/rat/procset file "{0}"
+/rat/procset file "/data/snoplus3/parkerw/ratSimulations/Sep22_testdag_prevtag//e2p5MeV_sim/e2p5MeV_sim_120.root"
 
 /generator/add combo gun:fillshell
-/generator/vtx/set e- 0 0 0 10
-/generator/pos/set 0.0 0.0 0.0 0.0 4000.0 inner_av
+/generator/vtx/set e- 0 0 0 2.5 
+/generator/pos/set 0 0 0 0 0 0 0 4000
 /generator/rate/set 1
 
-/rat/run/start 5000
+/rat/run/start 500
 exit

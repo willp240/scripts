@@ -30,7 +30,7 @@ void LoopDirectory(TDirectory *dir) {
       canv->SetRightMargin(0.13);
       canv->Print((filename+".pdf").c_str());
       delete canv;
-    } else if (classname == "TH2D") {
+    } else if (classname == "TH2F") {
       std::cout << "in"<< std::endl;
       TH2D *plot = (TH2D*)File->Get(name.c_str())->Clone();
       c->cd();
@@ -39,7 +39,7 @@ void LoopDirectory(TDirectory *dir) {
       plot->Draw("colz");
       c->Print((filename+".pdf").c_str());
       delete plot;
-    } else if (classname == "TH1D") {
+    } else if (classname == "TH1F") {
       std::cout << "in"<< std::endl;
       TH1D *plot1 = (TH1D*)File->Get(name.c_str())->Clone();
       plot1->GetYaxis()->SetTitleOffset(2.0);

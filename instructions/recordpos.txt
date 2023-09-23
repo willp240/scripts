@@ -98,7 +98,7 @@ python fit_performance_tool.py "/data/snoplus3/parkerw/ratSimulations/Jun27_FitP
 
 And repeat for r and z for 2.5MeV, e, r, and z for 1-10MeV
 
-And to make plots update file paths in CompareFittersLoop.cc, also uupdate y axis ranges and TLine range.
+And to make plots update file paths in CompareFittersLoop.cc, also update y axis ranges and TLine range.
 
 root -l
 .L CompareFittersLoop.cc+

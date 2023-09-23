@@ -27,9 +27,9 @@ void plot_allskyshine(  )
 
   TString hname = "NeckHits";
   TString htitle = "NHits";
-  TH2D* h = new TH2D(hname, htitle, 200, -6000, 14000, 100, 0, 1500);
+  TH2D* h = new TH2D(hname, htitle, 200, -6000, 14000, 100, 0, 1500 );
   h->GetXaxis()->SetTitle("Event Z, mm");
-  h->GetYaxis()->SetTitle("N Hits");
+  h->GetYaxis()->SetTitle("NHits");
   h->GetYaxis()->SetTitleOffset(1.3);
   h->SetLineWidth(2);
   
@@ -41,6 +41,14 @@ void plot_allskyshine(  )
   h2->GetYaxis()->SetTitle("High Owl Hits / Total Hits");
   h2->GetYaxis()->SetTitleOffset(1.3);
   h2->SetLineWidth(2);
+
+  TString hname3 = "CleanedHits";
+  TString htitle3 = "Cleaned Hits";
+  TH2D* h3 = new TH2D(hname3, htitle3, 200, -6000, 14000, 1000, 0.995, 1);
+  h3->GetXaxis()->SetTitle("Event Z, mm");
+  h3->GetYaxis()->SetTitle("Ratio Cleaned NHits");
+  h3->GetYaxis()->SetTitleOffset(1.3);
+  h3->SetLineWidth(2);
 
   std::string fname = "/data/snoplus3/parkerw/ratSimulations/Mar31_nearAV_3.0MeV/nearav_*.root";
 
@@ -79,12 +87,16 @@ void plot_allskyshine(  )
       //double owlratio = (double)nOwl/(double)calibratedPMTs.GetCount();
       double neckratio = (double)pmts.GetNeckCount()/(double)calibratedPMTs.GetCount();
       //std::cout << owlhighratio << " " << neckratio << " " << pmts.GetOWLCount() << std::endl;
-      h->Fill(eventz, calibratedPMTs.GetCount());
+
+      //    h->Fill(eventz,calibratedPMTs.GetCount())
+      double ratio = (double)rEV.GetNhitsCleaned() / (double)rEV.GetNhits();
+      //      std::cout << ratio << std::endl;
+      h3->Fill(eventz, ratio);
       //h2->Fill(eventz, neckratio);
 
     }
   TCanvas* c1 = new TCanvas("c1", "c1", 800,600);
-  h->Draw("colz");
+  h3->Draw("colz");
   //TCanvas* c2 = new TCanvas("c2", "c2", 800,600);
   //c2->cd();
   //h2->Draw("colz");

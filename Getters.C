@@ -9,7 +9,7 @@
 int Getters() {
 
   // Read in file
-  RAT::DU::DSReader dsreader("/data/snoplus3/parkerw/ratSimulations/May31_10MeV_002m_10MeVPDF/*0.root");
+  RAT::DU::DSReader dsreader("/data/snoplus3/parkerw/ratSimulations/Sep5_testdag/perf_e2p5MeV_recon/*0.root");
   //RAT::DU::DSReader dsreader("/data/snoplus/parkerw/ratSimulations/batch/Jul21_recoordMPDF_2p2gl_perf_2p5MeV/recoord_MPDF_99.root");
 
   //Get pmtInfo
@@ -29,11 +29,11 @@ int Getters() {
 	std::cout << fittynames.at(i_fit) << std::endl;
 	RAT::DS::FitResult fitResult = rev.GetFitResult( fittynames.at(i_fit) );
 	RAT::DS::FitVertex fitVertex = fitResult.GetVertex(0);
-	std::vector<std::string> fomnames = fitResult.GetFOMNames();
-	const RAT::DS::FitVertex& rVertex = rev.GetFitResult("multiPDFFit").GetVertex(0);
-	for(int i_names=0; i_names<fomnames.size(); i_names++){
-	  std::cout << fomnames.at(i_names) << std::endl;
-	}
+	//std::vector<std::string> fomnames = fitResult.GetFOMNames();
+	//	const RAT::DS::FitVertex& rVertex = rev.GetFitResult("positionTimeFit").GetVertex(0);
+	//for(int i_names=0; i_names<fomnames.size(); i_names++){
+	//std::cout << fomnames.at(i_names) << std::endl;
+	//}
       }
     }
   }

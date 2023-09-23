@@ -125,8 +125,8 @@ if __name__ == "__main__":
     output_dir = check_dir("{0}/output/".format(out_dir))
     base_name = args.macro.split("/")[-1].replace(".mac","")
 
-    #for k in np.arange(182, 188.5, 0.5):
-    for k in np.arange(185, 191.5, 0.5):
+    for k in np.arange(182, 188.5, 0.5):
+    #for k in np.arange(185, 191.5, 0.5):
         #for i in range(args.no_sims):
         #    j=0.8+i*0.2
         #    j=i

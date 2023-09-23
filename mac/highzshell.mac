@@ -8,6 +8,7 @@
 
 /rat/db/set NOISE_MC noise_flag 1
 
+#/rat/inroot/load /data/snoplus3/parkerw/ratSimulations/Apr11_3MeV_12to13m/highzshell_0.root
 
 /run/initialize
 
@@ -18,23 +19,22 @@
 /rat/proc count
 /rat/procset update 1
 
-/rat/proc scintFitter
+/rat/proc fitter
+/rat/procset method "quad"
 
-/rat/proc classifier
-/rat/procset classifier "beta14"
+#/rat/proc fitter
+#/rat/procset method "multipdf-scint"
+#/rat/procset seed "quad"
+#/rat/procset name "multiPDFFit"
 
 /rat/proc outroot
 /rat/procset file "{0}"
 
-#/generator/add combo gun:plane
-#/generator/vtx/set e- 0 0 0 2.5
-#/generator/pos/set 0 0 10000 0 0 1 700 
-#/generator/rate/set 1
-
-/generator/add combo gun:fill
-/generator/vtx/set e- 0 0 0 3.0
-/generator/pos/set 0 0 0
+/generator/add combo gun:fillshell
+/generator/vtx/set e- 0 0 0 2.5
+/generator/pos/set 0 0 0 0 0 0 0 2000
 /generator/rate/set 1
 
-/rat/run/start 1000
+/rat/run/start 10
+#/rat/inroot/read
 exit

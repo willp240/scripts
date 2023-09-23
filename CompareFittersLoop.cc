@@ -81,14 +81,14 @@ void Compare2RFits(){
 
   std::string coord[4] = {"x", "y", "z", "r"};
   std::string title[2] = {"bias", "resolution"};
-  double ymax[8] = {30, 90, 30, 90, 30, 90, 40, 90};
+  double ymax[8] = {30, 150, 30, 150, 30, 150, 40, 150};
   double ymin[8] = {-30, 0, -30, 0, -30, 0, -10, 0};
 
 
-  //  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Apr15_SEV_NoInterp_1to10MeV_E_Rlt4m.root");
-  //  TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/May20_1to10MeV_NoCerenk_oneSEV_E_lt4m.root");
-  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Jun28_FitPerf_2.5MeV_1.5Terecoord_Z.root");
-  TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Jun28_FitPerf_2.5MeV_2.5Terecoord_Z.root");
+  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Apr15_SEV_Interp_2.5MeV_R_Rlt6m.root");
+  TFile *_new = TFile::Open("/data/snoplus3/parkerw/ratSimulations/Sep10_testdag/perf_e2p5MeV_tools/perf_e2p5MeV_tools_r.root");
+  //TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Jun28_FitPerf_2.5MeV_1.5Terecoord_Z.root");
+  //TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Jun28_FitPerf_2.5MeV_2.5Terecoord_Z.root");
 
   TCanvas* c1 = new TCanvas("c1", "c1", 1500,700);
   c1->Divide(4,2,0.01,0.05);
@@ -110,8 +110,8 @@ void Compare2RFits(){
       hNew->SetLineWidth(2);
 
       TLegend* t1 = new TLegend( 0.4, 0.75, 0.9, 0.9 );
-      t1->AddEntry( hOld, "1.5% Te", "l" );
-      t1->AddEntry( hNew, "2.5% Te", "l" );
+      t1->AddEntry( hOld, "Original", "l" );
+      t1->AddEntry( hNew, "Auto Recoordinated", "l" );
       t1->SetLineWidth(2);
 
       hOld->GetYaxis()->SetRangeUser(ymin[2*i+j],ymax[2*i+j]);
@@ -126,8 +126,8 @@ void Compare2RFits(){
 
       if(j==0){
 	std::cout << hOld->GetXaxis()->GetNbins() << std::endl;
-	//TLine *line = new TLine(hOld->GetXaxis()->GetXmin()+1, 0, 6048, 0);//99
-	TLine *line = new TLine(-6048, 0, 6048, 0);
+	TLine *line = new TLine(hOld->GetXaxis()->GetXmin()+1, 0, 6048, 0);//99
+	//TLine *line = new TLine(-6048, 0, 6048, 0);
 	//TLine *line = new TLine(1,0,10,0);//99
 	line->Draw("same");
       }
@@ -209,9 +209,10 @@ void Compare2EFits(){
   double ymax[6] = {60, 160, 30, 200, 30, 200};
   double ymin[6] = {-75, 80, -30, 130, -30, 130};
 
-
-  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Dec9_multipathE.root");
-  TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Dec9_multipdfE.root");
+  TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Apr15_SEV_Interp_2.5MeV_R_Rlt6m.root");
+  TFile *_new = TFile::Open("/data/snoplus3/parkerw/ratSimulations/Sep10_testdag/perf_e2p5MeV_tools/perf_e2p5MeV_tools_r.root");
+  //TFile *_old = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Dec9_multipathE.root");
+  //TFile *_new = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Dec9_multipdfE.root");
   TCanvas* c1 = new TCanvas("c1", "c1", 1500,800);
   c1->Divide(3,2);
   
@@ -465,23 +466,23 @@ void Compare3RFits(){
 
 void Compare4RFits(){
 
-  gStyle->SetGridStyle(3);
-  gStyle->SetFrameLineWidth(1);
+  gStyle->SetFrameLineWidth(2);
 
   std::string coord[4] = {"x", "y", "z", "r"};
   std::string title[2] = {"bias", "resolution"};
-  double ymax[8] = {30, 140, 30, 140, 30, 140, 220, 100};
-  double ymin[8] = {-30, 0, -30, 0, -30, 0, 0, 0};
-  
-  TFile *f1 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitPerformance/Aug24_MPDFRecoord_4m_perf1to10MeVpoint_E.root");
-  TFile *f2 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitPerformance/Oct9RecoordScintVel_1to10MeVcentre_E.root");
-  // TFile *f3 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitPerformance/Aug8_MPDFRecoord_3m_perf1to10MeVpoint_E_Mean.root");
-  //TFile *f4 = TFile::Open("/home/parkerw/Software/rat-tools_master/FitPerformance/Aug15_MPDFRecoordcentre_perf_1to10MeVcentre_E_Mean.root");
+  double ymax[8] = {30, 200, 30, 200, 120, 200, 100, 200};
+  double ymin[8] = {-30, 0, -30, 0, -120, 0, -20, 0};
+
+  TFile *f1 = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Apr15_SEV_Interp_2.5MeV_Z_Rlt6m.root");
+  TFile *f2 = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/file_2p5_dimz.root");
+  TFile *f3 = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Jun28_FitPerf_1to10MeV_1.5Terecoord_E.root");
+  TFile *f4 = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/Jun28_FitPerf_1to10MeV_2.5Terecoord_E.root");
 
   TCanvas* c1 = new TCanvas("c1", "c1", 1500,700);
   c1->Divide(4,2,0.01,0.05);
-  c1->SetGrid(1,1);
-  c1->Print("1to10MeV0R_E.pdf[");
+  c1->SetGrid(1);
+  gPad->SetGrid();
+  c1->Print("Comp2.5MeV_Z2.2.pdf[");
 
   for(int j=0; j<2; j++){
     
@@ -492,28 +493,31 @@ void Compare4RFits(){
       
       TGraphErrors* h1 = (TGraphErrors*)f1->Get(gname.c_str())->Clone();
       TGraphErrors* h2 = (TGraphErrors*)f2->Get(gname.c_str())->Clone();
-      //TGraphErrors* h3 = (TGraphErrors*)f3->Get(gname.c_str())->Clone();      
-      //TGraphErrors* h4 = (TGraphErrors*)f4->Get(gname.c_str())->Clone();
+      TGraphErrors* h3 = (TGraphErrors*)f3->Get(gname.c_str())->Clone();      
+      TGraphErrors* h4 = (TGraphErrors*)f4->Get(gname.c_str())->Clone();
 
-      h1->SetLineColor(kBlue+2);
-      h2->SetLineColor(kRed+2);
-      //h3->SetLineColor(kGreen+2);
-      //h4->SetLineColor(kBlack);
+      h1->SetLineColor(kRed+2);
+      h1->SetMarkerSize(2);
+      h2->SetLineColor(kBlue+2);
+      h2->SetMarkerSize(2);
+      h3->SetLineColor(kGreen+2);
+      h3->SetMarkerSize(2);
+      h4->SetLineColor(kBlack);
+      h4->SetMarkerSize(2);
 
-      TLegend* t1 = new TLegend( 0.4, 0.75, 0.9, 0.9 );
+      TLegend* t1 = new TLegend( 0.4, 0.65, 0.9, 0.9 );
       t1->AddEntry( h1, "Original", "l" );
-      //      t1->AddEntry( hNew, "Functional PDF * exp(-d/#lambda)", "l" );
       t1->AddEntry( h2, "Recoordinated", "l" );
-      //t1->AddEntry( h3, "R < 3.0 m", "l" );
-      //t1->AddEntry( h4, "Centre", "l" );
-      //      t1->SetLineWidth(2);
+      //t1->AddEntry( h3, "1.5% Te Loaded", "l" );
+      //t1->AddEntry( h4, "2.5% Te Loaded", "l" );
+      t1->SetLineWidth(2);
 
       h1->GetYaxis()->SetRangeUser(ymin[2*i+j],ymax[2*i+j]);
       gname = coord[i] + " " + title[j];
       h1->SetTitle(gname.c_str());
-      
+
       c1->cd(4*j + i + 1);
-      
+
       h1->Draw("ap");
       h2->Draw("same p");
       //h3->Draw("same p");
@@ -522,16 +526,14 @@ void Compare4RFits(){
       
       if(j==0){
 	//	TLine *line = new TLine(h1->GetXaxis()->GetXmin(),0,h1->GetXaxis()->GetBinUpEdge(92),0);
-	TLine *line = new TLine(1, 0, 10, 0);
-	//TLine *line = new TLine(-6048,0,6048,0);
-	//	TLine *line = new TLine(0,0,6048,0);
+	//TLine *line = new TLine(1, 0, 10, 0);
+	TLine *line = new TLine(-6048,0,6048,0);
+	//TLine *line = new TLine(0,0,6048,0);
 	line->Draw("same");
       }
-      else{
-	h1->GetYaxis()->SetTitleOffset(1.1);
-      }
+      h1->GetYaxis()->SetTitleOffset(1.2);
     }
   }
-  c1->Print("1to10MeV0R_E.pdf");
-  c1->Print("1to10MeV0R_E.pdf]");
+  c1->Print("Comp2.5MeV_Z2.2.pdf");
+  c1->Print("Comp2.5MeV_Z2.2.pdf]");
 }

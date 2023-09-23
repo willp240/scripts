@@ -16,36 +16,65 @@
 #include <string>
 #include <math.h>
 
-void plot_hitangle(  )
+void plot_hitangleranges(  )
 {
  // TCanvas c1;
-  int col[10] = {2,6,5,3,8,7,9,4,12,1};
+  int col[14] = {2,46,49,48,45,44,3,8,29,4,9,38,39,1};//   6,5,41,32,8,3,29,7,9,4,14,1};
   gStyle->SetOptStat(0);
   gStyle->SetFrameLineWidth(2);
 
   RAT::DB::Get()->SetAirplaneModeStatus(true);
 
   std::vector<TH1D*> hist_vec;
-  TLegend *leg = new TLegend(0.57,0.27,0.87,0.87);
+  TLegend *leg = new TLegend(0.57,0.57,0.87,0.87);
   leg->SetLineWidth(2);
 
   // Make ten histograms
-  for(int hist_num = 9; hist_num >= 0; hist_num--){
+  for(int hist_num = 13; hist_num >=0; hist_num--){
 
-    int minr = 5000 + hist_num*100;
-    int maxr = 5000 + (hist_num+1)*100;
+    TString hname;
+    TString htitle;
+    TString fname;
 
-    TString hname = Form("Radius%dto%d", minr, maxr);
-    TString htitle = Form("%dmm - %dmm", minr, maxr);
-    TH1D* h = new TH1D(hname, htitle, 180, 0, 180);
+    int i = hist_num;
+
+    if(i<8) {
+      int minr = i;
+      int maxr = i+1;
+      hname = Form("Radius%dto%d", minr, maxr);
+      htitle = Form("%dmm - %dmm", minr, maxr);
+      fname = Form("/data/snoplus3/parkerw/ratSimulations/Apr11_3MeV_%dto%dm/*.root", minr, maxr);
+    }
+    else if (i<9){
+      int minr = i;
+      double maxr = i+0.5;
+      hname = Form("Radius%dto%.1f", minr, maxr);
+      htitle = Form("%dmm - %.1fmm", minr, maxr);
+      fname = Form("/data/snoplus3/parkerw/ratSimulations/Apr11_3MeV_%dto%.1fm/*.root", minr, maxr);
+    }
+    else if (i<10){
+      double minr = i-0.5;
+      int maxr = i;
+      hname = Form("Radius%.1fto%d", minr, maxr);
+      htitle = Form("%.1fmm - %dmm", minr, maxr);
+      fname = Form("/data/snoplus3/parkerw/ratSimulations/Apr11_3MeV_%.1fto%dm/*.root", minr, maxr);
+    }
+    else {
+      int minr = i-1;
+      int maxr = i;
+      hname = Form("Radius%dto%d", minr, maxr);
+      htitle = Form("%dmm - %dmm", minr, maxr);
+      fname = Form("/data/snoplus3/parkerw/ratSimulations/Apr11_3MeV_%dto%dm/*.root", minr, maxr);
+    }
+
+    TH1D* h = new TH1D(hname, htitle, 90, 0, 180);
     h->GetXaxis()->SetTitle("Angle (degrees)");
-    h->GetYaxis()->SetTitle("Number of PMT Hits");
+    h->GetYaxis()->SetTitle("Normalised PMT Hits");
     h->GetYaxis()->SetTitleOffset(1.3);
     h->SetLineColor(col[hist_num]);
     h->SetLineWidth(2);
     hist_vec.push_back(h);
 
-    TString fname = Form("/data/snoplus3/parkerw/ratSimulations/Mar30_nearAV_0.5MeVe/nearav_%d_%d.root", minr, maxr);
     std::cout << fname << std::endl;
     RAT::DU::DSReader dsReader( fname.Data() );
 
@@ -65,6 +94,7 @@ void plot_hitangle(  )
         for (size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++){
             const RAT::DS::PMTCal& pmtCal = calibratedPMTs.GetPMT( iPMT );
             pmtTimes[iPMT] = pmtCal.GetTime();
+            //std::cout << pmtCal.GetTime() << std::endl;
           }
 
         int pmtStart = static_cast<int>(0.1 * calibratedPMTs.GetCount());
@@ -96,7 +126,12 @@ void plot_hitangle(  )
           }
       }
     hist_vec.push_back(h);
-    h->Draw("same");
+    h->Scale(1/h->Integral() );
+    h->GetYaxis()->SetRangeUser(0,0.05);
+    if(i == 13)
+      h->Draw("hist");
+    else
+      h->Draw("hist same");
     leg->AddEntry(h, htitle, "l");
   }
   leg->Draw("same");

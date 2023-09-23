@@ -1,5 +1,0 @@
-c#!/usr/bin/sh
-source /home/parkerw/Software/env-dev.sh
-cd ${run_directory_sub}
-${other_commands_sub}
-/home/parkerw/Software/bb-likelihood-analysis/fit/bin/fit_dataset /home/parkerw/Software/bb-likelihood-analysis/results/fit_config_3y.ini /home/parkerw/Software/bb-likelihood-analysis/pdfs/pdf_config.ini /home/parkerw/Software/bb-likelihood-analysis/cuts/cut_config.ini ${asimovfile} ${dims} ${outdir}

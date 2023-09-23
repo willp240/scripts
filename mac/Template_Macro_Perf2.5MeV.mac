@@ -3,12 +3,9 @@
 /rat/physics_list/OmitHadronicProcesses true
 
 /rat/db/set MC thin_factor 1.0
-/rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
-/rat/db/set GEO[inner_av] material "labppo_2p2_scintillator"
-
-/rat/db/set EFFECTIVE_VELOCITY inner_av_velocity 185.25569251
-
-/rat/db/set NOISE_MC noise_flag 1
+/rat/db/set DETECTOR geo_file "geo/snoplusnative_te.geo"
+/rat/db/set GEO[inner_av] material "labppo_6p0_TeDiol_2p5_bismsb_dda_scintillator_directors_review"
+/rat/db/set GEO[av] position [0.,0.,186.5]
 
 /run/initialize
 
@@ -18,6 +15,14 @@
 /rat/proc calibratePMT
 /rat/proc count
 /rat/procset update 10
+
+/rat/proc fitter
+/rat/procset method "quad"
+/rat/proc fitter
+/rat/procset method "multipdf-scint"
+/rat/procset seed "quad"
+/rat/procset selector "null"
+/rat/procset name "positionTimeFit"
 /rat/proc prune
 /rat/procset prune "mc.hits,mc.pmts.photons"
 
@@ -26,9 +31,8 @@
 
 /generator/add combo gun:fillshell
 /generator/vtx/set e- 0 0 0 2.5
-/generator/pos/set 0 0 0 0 0 0 0 4000
+/generator/pos/set 0 0 0 0 0 0 0 5500
 /generator/rate/set 1
-
 
 /rat/run/start 1000
 exit

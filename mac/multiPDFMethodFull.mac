@@ -1,0 +1,47 @@
+# File: multiPDFMethodFull.mac
+# Brief: Short macro showing how to run the multiPDF position
+#        fitting method in full fill
+#
+# Date: 18-03-2020
+# Contact: W. Parker, <william.parker@physics.ox.ac.uk>
+# Revisions:
+#
+# This is a macro which shows how to run the multiPDF position fitting
+# method.
+
+
+#Set number of position dependent and non-position dependent pdfs
+/rat/db/set ET1D_MultiPDF[labppo_scintillator]  num_posdep_pdfs 1
+/rat/db/set ET1D_MultiPDF[labppo_scintillator]  num_nonposdep_pdfs 0
+
+/run/initialize
+
+# BEGIN EVENT LOOP
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc count
+/rat/procset update 1
+/rat/proc calibratePMT
+
+# Requires a position seed
+/rat/proc fitter
+/rat/procset method "quad"
+
+/rat/proc fitter
+/rat/procset method "multipdf-scint"
+/rat/procset seed "quad"
+/rat/procset name "multiPDFFit"
+
+/rat/proc outroot
+/rat/procset file "multiPDFFull.root"
+# END EVENTLOOP
+
+/generator/add combo gun:point
+
+/generator/vtx/set e- 0 0 0 2.5
+/generator/pos/set 0 0 4000
+/generator/rate/set 1
+
+/rat/run/start 10
+exit

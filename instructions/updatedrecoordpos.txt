@@ -1,0 +1,62 @@
+First run some simulation:
+
+2.5 MeV something like:
+
+python submitJobs.py Template_Macro.mac /data/snoplus3/parkerw/ratSimulations/Sep22_sim2.5MeV -e /home/parkerw/Software/env-dev_5.34.38.sh -s /home/parkerw/Software/rat_submission -d /home/parkerw/Software/rat_master/ -n 100
+
+and get some going for 10 MeV (edit the macro E first). something like:
+
+python submitJobs.py Template_Macro.mac	/data/snoplus3/parkerw/ratSimulations/Sep22_sim10MeV -e /home/parkerw/Software/env-dev_5.34.38.sh -s /home/parkerw/Software/rat_submission -d /home/parkerw/Software/rat_master/ -n 100
+
+
+Now do Quad:
+
+cd rat-tools_fork/FitCoordination/QuadSpeed 
+and do something like:
+
+python AnalyseData.py -s labbppo_2p2_scintillator -i /data/snoplus3/parkerw/ratSimulations/Sep22_sim2.5MeV -p /data/snoplus3/parkerw/ratSimulations/Sep22_recoord_plots -w
+
+
+Now going to recoord ScintEffVel, then MultiPDF, and repeat
+
+For ScintEffVel:
+cd rat-tools_fork/FitCoordination/ScintEffectiveSpeed
+
+and do something like:
+
+python AnalyseData.py -s labbppo_2p2_scintillator -e single_energy -i /data/snoplus3/parkerw/ratSimulations/Sep22_sim2.5MeV -p /data/snoplus3/parkerw/ratSimulations/Sep22_recoord_plots -w
+
+
+For MultiPDF:
+cd rat-tools_master/FitCoordination/MultiPDFFull
+
+python AnalyseData.py -s labbppo_2p2_scintillator -i /data/snoplus3/parkerw/ratSimulations/Sep22_sim2.5MeV -n Template_Macro -p /data/snoplus3/parkerw/ratSimulations/Sep22_recoord_plots -w
+
+
+When SEV converged with MultiPDF, now recoordinate sev at higher energy.
+cd rat-tools_fork/FitCoordination/ScintEffectiveSpeed
+
+and do something like:
+
+python AnalyseData.py -s labbppo_2p2_scintillator -e interpolate -i /data/snoplus3/parkerw/ratSimulations/Sep22_sim2.5MeV -q /data/snoplus3/parkerw/ratSimulations/Sep22_sim10MeV -p /data/snoplus3/parkerw/ratSimulations/Sep22_recoord_plots -w
+
+
+For FitPerformance:
+
+Use Template_Macro_Perf1to10MeV.mac and Template_Macro_Perf2.5MeV.mac (update material, and run 1-10MeV up to 5.5m and 4m)
+with something like:
+
+python submitJobs.py /home/parkerw/Software/rat_master/Template_Macro_Perf1to10MeV.mac /data/snoplus3/parkerw/ratSimulations/Jun28_FitPerf_1to10MeV_2.5Terecoord -e /home/parkerw/Software/env-dev.sh -s /home/parkerw/Software/rat_submission/ -d /home/parkerw/Software/rat_master/ -n 100
+
+Remove e from plotting_1D.cfg prolly
+
+And do something like:
+python fit_performance_tool.py "/data/snoplus3/parkerw/ratSimulations/Sep22_FitPerf_2.5MeV/*.root" r -f positionTimeFit -o ./Sep22_FitPerf_2.5MeV_R.root -c plotting_1D.cfg --autoview  --debug
+
+And repeat for r and x,y,z for 2.5MeV, e, r, and x,y,z for 1-10MeV
+
+And to make plots update file paths in CompareFittersLoop.cc, also update y axis ranges and TLine range.
+
+root -l
+.L CompareFitPerformance.cc+
+CompareFitPerformance( "./Sep21_FitPerf_2.5MeV", "./Sep22_FitPerf_2.5MeV", "./Sep21_FitPerf_1to10MeV", "Sep22_FitPerf_1to10MeV", "Original", "Recoordinated", "Sep22_recoord"  )
