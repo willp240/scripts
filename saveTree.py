@@ -30,8 +30,8 @@ def saveTree(fname, outfile):
 
     '''
     #fname = "/home/parkerw/Software/rat_master/test.root"
-    #fname = "/data/snoplus/parkerw/ratSimulations/batch/Mar2_StraightPath_Powell/*.root"
-    fname = "/data/snoplus3/parkerw/ratSimulations/May19_Beta14_3MeV/*.root"
+    #fname = "/data/snoplus3/parkerw/ratSimulations/Oct6_ASRecoodVals_2p5/*.root"
+    fname = "/data/snoplus3/parkerw/ratSimulations/Nov27_0to1mShell_refact/*.root"
 
     #    fname = "/home/parkerw/Software/rat_b/testpartialmpdf.root"
     outFile = ROOT.TFile(outfile, "RECREATE")
@@ -47,6 +47,10 @@ def saveTree(fname, outfile):
     yFit=[]
     zFit=[]
     tiFit=[]
+    xSeed=[]
+    ySeed=[]
+    zSeed=[]
+    tiSeed=[]
     xBias=[]
     yBias=[]
     zBias=[]
@@ -79,6 +83,15 @@ def saveTree(fname, outfile):
     posTree.Branch("tiFit", tiFit, "tiFit/F")
     EFit = np.empty((1), dtype="float32")
     posTree.Branch("EFit", EFit, "EFit/F")
+
+    xSeed = np.empty((1), dtype="float32")
+    posTree.Branch("xSeed", xFit, "xSeed/F")
+    ySeed = np.empty((1), dtype="float32")
+    posTree.Branch("ySeed", ySeed, "ySeed/F")
+    zSeed = np.empty((1), dtype="float32")
+    posTree.Branch("zSeed", zSeed, "zSeed/F")
+    tiSeed = np.empty((1), dtype="float32")
+    posTree.Branch("tiSeed", tiSeed, "tiSeed/F")
 
     nearAV = np.empty((1), dtype="float32")
     posTree.Branch("nearAV", nearAV, "nearAV/F")
@@ -190,12 +203,23 @@ def saveTree(fname, outfile):
 
             eveNum[0] = simCounter
 
+            
+            try:
+                seedResult = ev.GetFitResult("quad")
+                seedVertex = seedResult.GetVertex(0)
+            except Exception as e:
+                msg = "No {0} for event {1:d}, GTID {2:d} : {3}"
+                msg = msg.format("Seed", evCounter, ev.GetGTID(), e)
+                print(msg)
+                continue
+
+
             # Get fitter vertex
             try:
                 #fitResult = ev.GetFitResult("diPoFit")
                 fitResult = ev.GetFitResult("scintFitter")
                 #fitResult = ev.GetFitResult("multiPDFFit")
-                #fitResult = ev.GetFitResult("multiPathScint")
+                #fitResult = ev.GetFitResult("positionTimeFit")
                 fitVertex = fitResult.GetVertex(0)
                                     
             except Exception as e:
@@ -204,6 +228,11 @@ def saveTree(fname, outfile):
                 print(msg)
                 continue
                 
+            xSeed[0] = seedVertex.GetPosition().X()
+            ySeed[0] = seedVertex.GetPosition().Y()
+            zSeed[0] = seedVertex.GetPosition().Z()
+            tiSeed[0] = seedVertex.GetTime()
+
             if not fitVertex.ValidPosition():
                 #print ("not valid pos ",fitVertex.GetPosition().X(), " ", fitVertex.GetPosition().Y(), " ", fitVertex.GetPosition().Z())
                 continue
@@ -224,18 +253,6 @@ def saveTree(fname, outfile):
             tiFit[0] = fitVertex.GetTime()
             #EFit[0] = fitVertex.GetEnergy()
             #print( ev.GetClassifierResult("nearAVAngular").GetClassification("ratio") )
-            nOwlhighcount = 0
-            pmts = ev.GetUncalPMTs()
-            pmtInfo = rat.utility().GetPMTInfo()
-            for i in range(pmts.GetOWLCount()) :
-                owl = pmts.GetOWLPMT(i);
-                z = pmtInfo.GetPosition(owl.GetID()).Z()
-                if ( z > 8000 ) :
-                    nOwlhighcount+=1
-
-            highOwl[0] = nOwlhighcount
-            neckHit[0] = pmts.GetNeckCount()
-            nhits[0] = ev.GetNhitsCleaned()
 
             try :
                 nearAV[0] = ev.GetClassifierResult("nearAVAngular").GetClassification("ratio")
@@ -245,13 +262,11 @@ def saveTree(fname, outfile):
             try : 
                 itr[0] = ev.GetClassifierResult("ITR:scintFitter").GetClassification("ITR")
             except Exception as e:
-                #print("no ITR")
                 itr[0] = -999
 
             try : 
                 beta14[0] = ev.GetClassifierResult("beta14").GetClassification("beta14")
             except Exception as e:
-                print("no beta14")
                 beta14[0] = -999
 
             if use_dir:
@@ -275,8 +290,8 @@ def saveTree(fname, outfile):
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionPositionSelectedNHit")
 
             #scintfitter
-            LLH[0] = fitResult.GetFOM("PositionLogL")
-            scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionSelectedNHit")
+            #LLH[0] = fitResult.GetFOM("PositionLogL")
+            #scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionSelectedNHit")
         
             #LLH[0] = fitResult.GetFOM("multipath_scint")
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("multipath_SelectedNHit_scint")

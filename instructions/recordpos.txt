@@ -33,7 +33,7 @@ python AnalyseData.py -i "labppo_2p2_scintillator"
 to get the printed out table to put in the db file. (may need root 5.34.38 for this)
 
 In Utilities, reverse meanBias[0] and speed in oneDimTGraph.SetPoint, also add: oneDimTGraph.SetPointError(count, 0, meanBias[1]). 
-In AnalyseData.py change histograms = Utilities.ProducePlots(i_energy) to histograms = Utilities.DrawPlot(). Comment out the next 3 lines.
+In AnalyseData.py change histograms = Utilities.ProducePlots(i_energy) to histograms = Utilities.DrawPlot(). Comment out the next 3 lines. Also may need to set ROOT.gROOT.SetBatch(False) in Utilities and AnalyseData
 (May have to rename fitter in Utilities)
 
 Also reverse the axis titles and add these lines in DrawPlot

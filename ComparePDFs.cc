@@ -65,8 +65,8 @@ void Compare3PDFs(){
   gStyle->SetOptStat(0);
 
   TFile *_file1 = TFile::Open("/data/snoplus3/parkerw/rat_pdfs/May23_E_PDFs/MultiPDF_Plots_2.5MeV.root");
-  TFile *_file2 = TFile::Open("MultiPDF_Plots_1.5Te_Round1.root");
-  TFile *_file3 = TFile::Open("MultiPDF_Plots_1.5Te_Round2.root");
+  TFile *_file2 = TFile::Open("/data/snoplus3/parkerw/ratSimulations/Oct6_New2p2glOptics_sevr6m/plots/MultiPDF_Plots_Round1.root");
+  TFile *_file3 = TFile::Open("/data/snoplus3/parkerw/ratSimulations/Oct9_New2p2glOptics_finalcheck/plots/MultiPDF_Plots_Round1.root");
 
   TH1D* h1 = (TH1D*)_file1->Get("PDF_0")->Clone();
   TH1D* h2 = (TH1D*)_file2->Get("PDF_0")->Clone();
@@ -89,9 +89,9 @@ void Compare3PDFs(){
   h3->Scale(1/h3->Integral());
 
   TLegend* t1 = new TLegend( 0.5, 0.7, 0.88, 0.85 );
-  t1->AddEntry( h1, "LAB PPO 2.2 g/l", "l" );
-  t1->AddEntry( h2, "LAB PPO 6.0 g/l Te 1.5% Round 1", "l" );
-  t1->AddEntry( h3, "LAB PPO 6.0 g/l Te 1.5% Round 2", "l" );
+  t1->AddEntry( h1, "RAT 7.0.14", "l" );
+  t1->AddEntry( h2, "PR 3015", "l" );
+  t1->AddEntry( h3, "Automated Recoordination", "l" );
 
   h3->GetXaxis()->SetRangeUser(-5,100);
   h3->GetXaxis()->SetTitle("Hit time residuals [ns]");
@@ -115,9 +115,9 @@ void Compare4PDFs(){
   gStyle->SetOptStat(0);
 
   TFile *_file1 = TFile::Open("/data/snoplus3/parkerw/rat_pdfs/May23_E_PDFs/MultiPDF_Plots_2.5MeV.root");
-  TFile *_file2 = TFile::Open("MultiPDF_Plots_1.5Te_Round1.root");
-  TFile *_file3 = TFile::Open("MultiPDF_Plots_1.5Te_Round2.root");
-  TFile *_file4 = TFile::Open("MultiPDF_Plots_1.5Te_Round3.root");
+  TFile *_file2 = TFile::Open("/data/snoplus3/parkerw/ratSimulations/Oct6_New2p2glOptics_sevr6m/plots/MultiPDF_Plots_Round1.root");
+  TFile *_file3 = TFile::Open("/data/snoplus3/parkerw/ratSimulations/Oct6_New2p2glOptics_sevr6m/plots/MultiPDF_Plots_Round1.root");
+  TFile *_file4 = TFile::Open("/data/snoplus3/parkerw/ratSimulations/Oct9_New2p2glOptics_finalcheck/plots/MultiPDF_Plots_Round1.root");
 
   TH1D* h1 = (TH1D*)_file1->Get("PDF_0")->Clone("h1");
   TH1D* h2 = (TH1D*)_file2->Get("PDF_0")->Clone("h2");
@@ -145,10 +145,10 @@ void Compare4PDFs(){
   h4->Scale(1/h4->Integral());
 
   TLegend* t1 = new TLegend( 0.45, 0.65, 0.88, 0.85 );
-  t1->AddEntry( h1, "LAB PPO 2.2 g/l", "l" );
-  t1->AddEntry( h2, "LAB PPO 6.0 g/l Te 1.5% Round 1", "l" );
-  t1->AddEntry( h3, "LAB PPO 6.0 g/l Te 1.5% Round 2", "l" );
-  t1->AddEntry( h4, "LAB PPO 6.0 g/l Te 1.5% Round 3", "l" );
+  t1->AddEntry( h1, "RAT 7.0.14", "l" );
+  t1->AddEntry( h2, "PR 3015", "l" );
+  t1->AddEntry( h3, "Automated Recoordination", "l" );
+  t1->AddEntry( h4, "Automated Recoordination R<6m for SEV", "l" );
 
   h4->GetXaxis()->SetRangeUser(-5,100);
   h4->GetXaxis()->SetTitle("Hit time residuals [ns]");
