@@ -1,4 +1,4 @@
-void plotNhit( const std::string& fileName )
+void plotNearAV( const std::string& fileName )
 {
 
   TCanvas *c = new TCanvas("canv", "canv", 900, 600);
@@ -8,7 +8,7 @@ void plotNhit( const std::string& fileName )
   gPad->SetFrameLineWidth(2);
   gPad->SetGrid(1);
 
-  TH1D* hNhit = new TH1D( "hNhit", "Nhit", 10, -0.5, 9.5 );
+  TH1D* hNearAV = new TH1D( "hNearAV", "NearAV", 10, -0.5, 9.5 );
 
   // If this is being done on data that does not require remote database connection
   // eg.: a simple simulation with default run number (0)
@@ -28,17 +28,17 @@ void plotNhit( const std::string& fileName )
       // Ignoring retriggers here
       const RAT::DS::EV& rEV = rDS.GetEV( 0 );
 
-      int nhits = rEV.GetNhits();
-      hNhit->SetBinContent( iEntry+1, nhits );
+      double nearAV = rEV.GetClassifierResult( "nearAVAngular:scintFitter" ).GetClassification( "ratio" );
+      hNearAV->SetBinContent( iEntry+1, nearAV );
     }
   
-  hNhit->GetXaxis()->SetTitle( "Event Number" );
-  hNhit->GetYaxis()->SetTitle( "Nhits" );
-  hNhit->SetMarkerStyle(50);
-  hNhit->GetYaxis()->SetTitleOffset(1.3);
-  hNhit->SetLineWidth(2);
-  hNhit->SetMarkerColor(kBlue+2);
-  hNhit->SetMarkerSize(4);
-  hNhit->GetYaxis()->SetRangeUser(0,2000);
-  hNhit->Draw("P");
+  hNearAV->GetXaxis()->SetTitle( "Event Number" );
+  hNearAV->GetYaxis()->SetTitle( "NearAV Ratio" );
+  hNearAV->SetMarkerStyle(50);
+  hNearAV->GetYaxis()->SetTitleOffset(1.3);
+  hNearAV->SetLineWidth(2);
+  hNearAV->SetMarkerColor(kBlue+2);
+  hNearAV->SetMarkerSize(4);
+  hNearAV->GetYaxis()->SetRangeUser(0,0.5);
+  hNearAV->Draw("P");
 }

@@ -24,10 +24,10 @@ void plotFittedR( const std::string& fileName, std::string fitName = "")
     {
       std::cout << iEntry << std::endl;
       const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
-      std::cout << "got entry" << std::endl;
+
       // Ignoring retriggers here
       const RAT::DS::EV& rEV = rDS.GetEV( 0 );
-      std::cout << "got event" << std::endl;
+
       // Grab the fit information
       if(fitName == "")
 	fitName = rEV.GetDefaultFitName();
@@ -39,7 +39,7 @@ void plotFittedR( const std::string& fileName, std::string fitName = "")
 
       TVector3 eventPosition = rVertex.GetPosition();
       hFittedRadius->SetBinContent( iEntry+1, eventPosition.Mag() );
-      std::cout << "done eve" << std::endl;
+
     }
   
   hFittedRadius->GetXaxis()->SetTitle( "Event Number" );
@@ -51,4 +51,5 @@ void plotFittedR( const std::string& fileName, std::string fitName = "")
   hFittedRadius->SetMarkerColor(kBlue+2);
   hFittedRadius->SetMarkerSize(4);
   hFittedRadius->GetYaxis()->SetRangeUser(0,6000);
+  hFittedRadius->Draw("P");
 }
