@@ -1,0 +1,38 @@
+To install RAT 7.0.16 on Alma 9:
+
+module load nixpkgs/16.09
+module load gcc/4.8.5
+export SNOPLUS_CVMFS_DIR=/cvmfs/snoplus.egi.eu/sl7/
+source /cvmfs/snoplus.egi.eu/sl7/sw/7.0.15/env_rat-7.0.15.sh
+source /cvmfs/snoplus.egi.eu/sl7/sw/7.0.15/rat-7.0.15/env.sh
+export LD_LIBRARY_PATH=/home/parkerw/rat7015/lib:/cvmfs/snoplus.egi.eu/sl7//sw/7.0.15/rat-7.0.15/lib:/cvmfs/snoplus.egi.eu/sl7//sw/7.0.15/rat-7.0.15/lib:/cvmfs/snoplus.egi.eu/sl7//sw/dependencies/root-5.34.38/lib:/cvmfs/snoplus.egi.eu/sl7//sw/dependencies/curl-7.26.0/lib:/cvmfs/snoplus.egi.eu/sl7//sw/dependencies/bzip2-1.0.6/lib:/cvmfs/snoplus.egi.eu/sl7/sw/dependencies/geant4.10.0.p02/lib64
+./configure
+. env.sh
+scons
+
+
+For pushing to CVMFS:
+cd ~/temp_Will
+git clone git@github.com:majek/openssl.git
+cd openssl
+./config --prefix=/home/snoprod/temp_Will/openssl/openssl --openssldir=/home/snoprod/temp_Will/openssl/ssl fips-enabled
+make install
+make depend
+
+cd ../
+git clone git@github.com:LairdCP/fipscheck.git
+cd fipscheck
+./autogen.sh
+export PATH=~/temp_Will/openssl/apps/:$PATH
+./configure
+make
+export LD_LIBRARY_PATH=/home/snoprod/temp_Will/fipscheck/src/.libs:$LD_LIBRARY_PATH
+
+
+export LD_LIBRARY_PATH=/cvmfs/grid.cern.ch/centos7-umd4-ui-151021/usr/lib64/:/home/snoprod/temp_Will/fipscheck/src/.libs:/cvmfs/grid.cern.ch/centos7-umd4-wn-4.0.5-1_191112/usr/lib64/:/cvmfs/grid.cern.ch/alma9-ui-test//usr/lib64/:/cvmfs/grid.cern.ch/alma9-ui-test//usr/lib/
+
+and rsync:
+/cvmfs/grid.cern.ch/./centos7-umd4-ui-151021/usr/bin/gsissh
+
+./run_script_no_container.sh ../rat 7.0.16
+
