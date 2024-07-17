@@ -22,8 +22,8 @@ void Compare2PDFs(){
 
   gStyle->SetOptStat(0);
 
-  TFile *_file1 = TFile::Open("/data/snoplus3/parkerw/rat_pdfs/May23_E_PDFs/MultiPDF_Plots_2.5MeV.root");
-  TFile *_file2 = TFile::Open("MultiPDF_Plots_2.5Te_Round1.root");
+  TFile *_file2 = TFile::Open("/data/snoplus3/parkerw/ratSimulations/Jul16_bisMSB_posrecoord/plots/MultiPDF_Plots_Round2.root");
+  TFile *_file1 = TFile::Open("/data/snoplus3/parkerw/ratSimulations/Dec24_coord_1mshells_fulllrecoord/plots/MultiPDF_Plots_Round1.root");
 
   TH1D* h1 = (TH1D*)_file1->Get("PDF_0")->Clone();
   TH1D* h2 = (TH1D*)_file2->Get("PDF_0")->Clone();
@@ -42,22 +42,24 @@ void Compare2PDFs(){
 
   TLegend* t1 = new TLegend( 0.5, 0.7, 0.88, 0.85 );
   t1->AddEntry( h1, "LAB PPO 2.2 g/l", "l" );
-  t1->AddEntry( h2, "LAB PPO 6 g/l Te 2.5% Round 1", "l" );
+  t1->AddEntry( h2, "LAB PPO 2.2 g/l BisMSB 2.2 mg/l", "l" );
 
-  h2->GetXaxis()->SetRangeUser(-5,100);
+  h2->GetXaxis()->SetRangeUser(-30,100);
   h2->GetXaxis()->SetTitle("Hit time residuals [ns]");
   h2->GetYaxis()->SetTitle("Normalised Counts");
   h2->GetYaxis()->SetTitleOffset(1.2);
 
-  h2->Draw();
-  h1->Draw("same");
+  TCanvas* c1 = new TCanvas("c1","c1");
+  
+  h2->Draw("hist");
+  h1->Draw("hist same");
   t1->Draw("same");
 
   gPad->SetFrameLineWidth(2);
   t1->SetLineWidth(2);
   gPad->SetGrid(1);
   gPad->Update();
-
+  c1->SaveAs("bismsbpdfcomp.pdf");
 }
 
 void Compare3PDFs(){

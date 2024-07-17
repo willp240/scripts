@@ -36,3 +36,72 @@ and rsync:
 
 ./run_script_no_container.sh ../rat 7.0.16
 
+
+Dependencies:
+
+FFTW:
+Get tar from https://www.fftw.org/download.html
+tar xvf fftw-3.3.10.tar
+cd fftw-3.3.10
+./configure --prefix=/home/snoprod/temp_Will/cvmfs/el9/fftw-3.3.10/ --with-pic
+make install
+make
+
+GSL:
+Get tar from https://www.gnu.org/software/gsl/ (current stable version)
+tar xvf gsl-latest.tar
+cd gsl-2.7.1/
+./configure --with-pic --prefix=/home/snoprod/temp_Will/cvmfs/el9/gsl-2.7.1/
+make
+make install
+
+ROOT:
+module load StdEnv/2023
+module load gcc/12.3
+Get tar from https://root.cern/releases/release-63008/
+tar xvf root_v6.30.06.source.tar
+cd root-6.30.06
+mkdir obj
+cd obj
+export GSL_ROOT_DIR=/home/snoprod/temp_Will/cvmfs/el9/sw/dependencies/gsl-2.7.1/
+export FFTW_DIR=/home/snoprod/temp_Will/cvmfs/el9/sw/dependencies/fftw-3.3.10/
+cmake -Dminuit2=ON -Droofit=ON -Dfortran=OFF -Dfftw3=ON -Dgsl=ON -Dgdml=ON -Dmathmore=ON -Dclad=OFF -Dbuiltin_tbb=OFF -Dimt=OFF  ..
+make -j 4
+
+Geant4:
+Get tar from https://cern.ch/geant4-data/releases/geant4.10.00.p04.tar.gz
+module load nixpkgs/16.09
+module load gcc/4.8.5
+tar xvf geant4.10.00.p04.tar
+mkdir geant4.10.00.p04-build
+cd geant4.10.00.p04-build
+cmake -DGEANT4_INSTALL_DATA=ON -DGEANT4_BUILD_CXXSTD=c++11 -DCMAKE_INSTALL_PREFIX=/home/snoprod/temp_Will/cvmfs/el9/geant4.10.00.p04/ /home/snoprod/temp_Will/cvmfs/el9/geant4.10.00.p04/
+make
+make install
+cd ..
+source geant4.10.00.p04/bin/geant4.sh
+source geant4.10.00.p04/share/Geant4-10.0.4/geant4make/geant4make.sh
+
+cURL:
+(use og compiler so can use the system openssl here i.e exit and ssh back in if you have to)
+Get tar from https://curl.se/download.html
+tar xvf curl-8.8.0.tar
+cd curl-8.8.0
+./configure --prefix=/home/snoprod/temp_Will/cvmfs/el9/curl-8.8.0/tree --with-openssl
+make
+make install
+
+bzip2:
+Get tar from https://sourceware.org/bzip2/index.html
+tar xvf bzip2-1.0.8.tar
+cd bzip2-1.0.8
+make
+make install PREFIX=/home/snoprod/temp_Will/cvmfs/el9/bzip2-1.0.8/tree
+
+SCons:
+Get tar from https://sourceforge.net/projects/scons/files/scons/3.1.2/scons-3.1.2.tar.gz/download
+tar xvf scons-3.1.2.tar.gz
+cd scons-3.1.2
+python setup.py build
+python setup.py install --prefix=/home/snoprod/temp_Will/cvmfs/el9/scons-3.1.2/tree
+
