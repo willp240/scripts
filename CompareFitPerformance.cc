@@ -43,7 +43,7 @@ void CompareFitPerformance( std::string fname_orig_2p5, std::string fname_new_2p
 
   std::string orig_r_1to10_filename = fname_orig_1to10 + "_r.root";
   std::string new_r_1to10_filename  = fname_new_1to10 + "_r.root";
-  std::string orig_x_1to10_filename = fname_orig_1to10 + "_z.root";
+  std::string orig_x_1to10_filename = fname_orig_1to10 + "_x.root";
   std::string new_x_1to10_filename  = fname_new_1to10 + "_x.root";
   std::string orig_y_1to10_filename = fname_orig_1to10 + "_y.root";
   std::string new_y_1to10_filename  = fname_new_1to10 + "_y.root";
