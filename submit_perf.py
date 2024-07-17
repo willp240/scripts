@@ -77,17 +77,20 @@ if __name__ == "__main__":
     true_sev_fv_1to10 = "Oct11_2p2glnewrecooord_1to10MeVallscint"
     reco_sev_fv_2p5 = "Oct11_2p2gl6mRecoord_2p5MeVallscint"
     reco_sev_fv_1to10 = "Oct11_2p2gl6mRecoord_1to10MeVallscint"
+    in_dir = "Oct6_ASRecoodVals_2p5"
 
-    out_dir = "Oct11_fitperftools_fv4_axistruth"
+    #out_dir = "Oct11_fitperftools_fv4_axistruth"
+    out_dir = "Oct6_ASRecoodVals_2p5_QuadFit"
 
+    setup_tools_jobs("perf_e2p5MeV_Quad", data_dir+out_dir, data_dir+in_dir, env_file, submission_dir, "r")
     #setup_tools_jobs("perf_e2p5MeV_SEVFVtrue", data_dir+out_dir, data_dir+true_sev_fv_2p5, env_file, submission_dir, "r")
     #setup_tools_jobs("perf_e2p5MeV_SEVFVtrue", data_dir+out_dir, data_dir+true_sev_fv_2p5, env_file, submission_dir, "z")
     #setup_tools_jobs("perf_e1to10MeV_SEVFVtrue", data_dir+out_dir, data_dir+true_sev_fv_1to10, env_file, submission_dir, "r")
     #setup_tools_jobs("perf_e1to10MeV_SEVFVtrue", data_dir+out_dir, data_dir+true_sev_fv_1to10, env_file, submission_dir, "z")
-    setup_tools_jobs("perf_e1to10MeV_SEVFVtrue", data_dir+out_dir, data_dir+true_sev_fv_1to10, env_file, submission_dir, "e")
+#    setup_tools_jobs("perf_e1to10MeV_SEVFVtrue", data_dir+out_dir, data_dir+true_sev_fv_1to10, env_file, submission_dir, "e")
 
     #setup_tools_jobs("perf_e2p5MeV_SEVFVreco", data_dir+out_dir, data_dir+reco_sev_fv_2p5, env_file, submission_dir, "r")
     #setup_tools_jobs("perf_e2p5MeV_SEVFVreco", data_dir+out_dir, data_dir+reco_sev_fv_2p5, env_file, submission_dir, "z")
     #setup_tools_jobs("perf_e1to10MeV_SEVFVreco", data_dir+out_dir, data_dir+reco_sev_fv_1to10, env_file, submission_dir, "r")
     #setup_tools_jobs("perf_e1to10MeV_SEVFVreco", data_dir+out_dir, data_dir+reco_sev_fv_1to10, env_file, submission_dir, "z")
-    setup_tools_jobs("perf_e1to10MeV_SEVFVreco", data_dir+out_dir, data_dir+reco_sev_fv_1to10, env_file, submission_dir, "e")
+    #setup_tools_jobs("perf_e1to10MeV_SEVFVreco", data_dir+out_dir, data_dir+reco_sev_fv_1to10, env_file, submission_dir, "e")
