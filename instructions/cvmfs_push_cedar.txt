@@ -28,11 +28,13 @@ export PATH=~/temp_Will/openssl/apps/:$PATH
 make
 export LD_LIBRARY_PATH=/home/snoprod/temp_Will/fipscheck/src/.libs:$LD_LIBRARY_PATH
 
-
 export LD_LIBRARY_PATH=/cvmfs/grid.cern.ch/centos7-umd4-ui-151021/usr/lib64/:/home/snoprod/temp_Will/fipscheck/src/.libs:/cvmfs/grid.cern.ch/centos7-umd4-wn-4.0.5-1_191112/usr/lib64/:/cvmfs/grid.cern.ch/alma9-ui-test//usr/lib64/:/cvmfs/grid.cern.ch/alma9-ui-test//usr/lib/
 
 and rsync:
 /cvmfs/grid.cern.ch/./centos7-umd4-ui-151021/usr/bin/gsissh
+
+and can check it:
+/cvmfs/grid.cern.ch/./centos7-umd4-ui-151021/usr/bin/gsissh -p 1975 cvmfs-upload01.gridpp.rl.ac.uk
 
 ./run_script_no_container.sh ../rat 7.0.16
 
@@ -69,13 +71,13 @@ cmake -Dminuit2=ON -Droofit=ON -Dfortran=OFF -Dfftw3=ON -Dgsl=ON -Dgdml=ON -Dmat
 make -j 4
 
 Geant4:
+module load StdEnv/2020
+module load gcc/11.3.0
 Get tar from https://cern.ch/geant4-data/releases/geant4.10.00.p04.tar.gz
-module load nixpkgs/16.09
-module load gcc/4.8.5
 tar xvf geant4.10.00.p04.tar
 mkdir geant4.10.00.p04-build
 cd geant4.10.00.p04-build
-cmake -DGEANT4_INSTALL_DATA=ON -DGEANT4_BUILD_CXXSTD=c++11 -DCMAKE_INSTALL_PREFIX=/home/snoprod/temp_Will/cvmfs/el9/geant4.10.00.p04/ /home/snoprod/temp_Will/cvmfs/el9/geant4.10.00.p04/
+cmake -DGEANT4_INSTALL_DATA=ON -DGEANT4_BUILD_CXXSTD=c++11 -DCMAKE_INSTALL_PREFIX=/home/snoprod/temp_Will/cvmfs/el9/sw/dependencies/geant4.10.00.p04/ /home/snoprod/temp_Will/cvmfs/el9/sw/dependencies/geant4.10.00.p04/
 make
 make install
 cd ..
@@ -105,3 +107,11 @@ cd scons-3.1.2
 python setup.py build
 python setup.py install --prefix=/home/snoprod/temp_Will/cvmfs/el9/scons-3.1.2/tree
 
+RAT 8:
+module load StdEnv/2023
+module load gcc/12.3
+git clone git@github.com:snoplus/rat
+cd rat
+./configure
+source env.sh
+scons
