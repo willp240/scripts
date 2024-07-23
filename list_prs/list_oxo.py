@@ -8,8 +8,8 @@ import json
 buffer = StringIO()
 # Aproach with search api
 
-#headers = { 'Authorization' : 'Basic %s' % base64.b64encode("willp240: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"), 'Accept' : 'application/vnd.github.mercy-preview+json'}
-headers = { 'Authorization' : 'Basic %s' % base64.b64encode("willp240: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"), 'Accept' : 'application/vnd.github.mercy-preview+json'}
+#headers = { 'Authorization' : 'Basic %s' % base64.b64encode("willp240:"), 'Accept' : 'application/vnd.github.mercy-preview+json'}
+headers = { 'Authorization' : 'Basic %s' % base64.b64encode("willp240:"), 'Accept' : 'application/vnd.github.mercy-preview+json'}
 base_url="https://api.github.com/search/issues"
 repo = "snoplus/oxsx"
 date = "2021-03-04"
