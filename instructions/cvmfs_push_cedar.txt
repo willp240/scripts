@@ -43,7 +43,7 @@ Updated Pushing to CVMFS:
 
 For RAT 7:
 cd temp_Will/cvmfs_pusher
-git clone https://github.com/snoplus/rat.git --branch 7.0.14
+git clone --depth 1 https://github.com/snoplus/rat.git --branch 7.0.14
 cd rat
 module load nixpkgs/16.09
 module load gcc/4.8.5
@@ -54,13 +54,14 @@ export LD_LIBRARY_PATH=/home/parkerw/rat7015/lib:/cvmfs/snoplus.egi.eu/sl7//sw/7
 . env.sh
 scons
 cd ../cvmfs_pusher
+#edit ./run_script_no_container.sh to use rat 7.0.9 scripts
 ./run_script_no_container.sh ../rat 7.0.14
 
 For RAT 8:
 export SNOPLUS_CVMFS_DIR=/cvmfs/snoplus.egi.eu/el9
 cd temp_Will/cvmfs_pusher
 rm -rf rat
-git clone https://github.com/snoplus/rat.git --branch $TAG
+git clone --depth 1 https://github.com/snoplus/rat.git --branch $TAG
 cd cvmfs_pusher
 ./run_script.sh ../rat $TAG ../rat-container.sif
 
