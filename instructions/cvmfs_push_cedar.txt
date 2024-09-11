@@ -1,4 +1,4 @@
-To install RAT 7.0.16 on Alma 9:
+To install RAT 7.0.16 on Cedar Alma 9:
 
 module load nixpkgs/16.09
 module load gcc/4.8.5
@@ -28,7 +28,7 @@ export PATH=~/temp_Will/openssl/apps/:$PATH
 make
 export LD_LIBRARY_PATH=/home/snoprod/temp_Will/fipscheck/src/.libs:$LD_LIBRARY_PATH
 
-export LD_LIBRARY_PATH=/cvmfs/grid.cern.ch/centos7-umd4-ui-151021/usr/lib64/:/home/snoprod/temp_Will/fipscheck/src/.libs:/cvmfs/grid.cern.ch/centos7-umd4-wn-4.0.5-1_191112/usr/lib64/:/cvmfs/grid.cern.ch/alma9-ui-test//usr/lib64/:/cvmfs/grid.cern.ch/alma9-ui-test//usr/lib/
+export LD_LIBRARY_PATH=/home/snoprod/temp_Will/fipscheck/src/.libs:/cvmfs/grid.cern.ch/alma9-ui-test//usr/lib64/:/cvmfs/grid.cern.ch/alma9-ui-test//usr/lib/:/cvmfs/grid.cern.ch/centos7-umd4-ui-151021/usr/lib64/:/cvmfs/grid.cern.ch/centos7-umd4-wn-4.0.5-1_191112/usr/lib64/
 
 and rsync:
 /cvmfs/grid.cern.ch/./centos7-umd4-ui-151021/usr/bin/gsissh
@@ -37,6 +37,32 @@ and can check it:
 /cvmfs/grid.cern.ch/./centos7-umd4-ui-151021/usr/bin/gsissh -p 1975 cvmfs-upload01.gridpp.rl.ac.uk
 
 ./run_script_no_container.sh ../rat 7.0.16
+
+
+Updated Pushing to CVMFS:
+
+For RAT 7:
+cd temp_Will/cvmfs_pusher
+git clone https://github.com/snoplus/rat.git --branch 7.0.14
+cd rat
+module load nixpkgs/16.09
+module load gcc/4.8.5
+export SNOPLUS_CVMFS_DIR=/cvmfs/snoplus.egi.eu/el9
+source /cvmfs/snoplus.egi.eu/el9/sw/7.0.15/env_rat-7.0.15.sh
+export LD_LIBRARY_PATH=/home/parkerw/rat7015/lib:/cvmfs/snoplus.egi.eu/sl7//sw/7.0.15/rat-7.0.15/lib:/cvmfs/snoplus.egi.eu/sl7//sw/7.0.15/rat-7.0.15/lib:/cvmfs/snoplus.egi.eu/sl7//sw/dependencies/root-5.34.38/lib:/cvmfs/snoplus.egi.eu/sl7//sw/dependencies/curl-7.26.0/lib:/cvmfs/snoplus.egi.eu/sl7//sw/dependencies/bzip2-1.0.6/lib:/cvmfs/snoplus.egi.eu/sl7/sw/dependencies/geant4.10.0.p02/lib64
+./configure
+. env.sh
+scons
+cd ../cvmfs_pusher
+./run_script_no_container.sh ../rat 7.0.14
+
+For RAT 8:
+export SNOPLUS_CVMFS_DIR=/cvmfs/snoplus.egi.eu/el9
+cd temp_Will/cvmfs_pusher
+rm -rf rat
+git clone https://github.com/snoplus/rat.git --branch $TAG
+cd cvmfs_pusher
+./run_script.sh ../rat $TAG ../rat-container.sif
 
 
 Dependencies:
@@ -115,3 +141,28 @@ cd rat
 ./configure
 source env.sh
 scons
+
+
+RAT Container:
+
+git clone git@github.com:snoplus/rat.git rat_test/
+apptainer pull --name rat-container.sif docker://snoplus/rat-container:main
+apptainer shell -B /home/parkerw/rat_test/:/rat rat-container.sif
+source /home/scripts/setup-env.sh (gives error first time)
+source /home/scripts/build-rat.sh
+rat
+
+After each: Make a selection (1-7, q aborts) [1]: 7
+
+Making new Container:
+
+Edit recipe file
+docker build -t main -f MAIN/Dockerfile .
+(obviously change main)
+check it:
+docker run -ti --init --rm -v /Users/wparker/snoplus/rat:/rat snoplus/rat-container:main
+source /home/scripts/build-rat.sh
+
+Push to Docker
+docker tag <local_tag_name> snoplus/rat-container:<remote_tag_name>
+docker push snoplus/rat-container:<remote_tag_name>
