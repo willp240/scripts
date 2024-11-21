@@ -20,10 +20,10 @@ void compOscGrids(){
   gStyle->SetFrameLineWidth(2);
   gStyle->SetPalette(51);
   
-  TFile *file1 = TFile::Open("/data/snoplus3/parkerw/antinu/Oct20_oscgridsBruce1_1000x1000x140/compare500x500x500_500x500x250.root");
+  TFile *file1 = TFile::Open("/data/snoplus3/parkerw/antinu/Nov5_oscgridsvecBruce1_1000x1000x140/comp1000x1000x140_500x500x140.root");
   TTree* tree1 = (TTree*)file1->Get("T")->Clone("tree");
 
-  std::string outdir = "/data/snoplus3/parkerw/antinu/Oct22_oscgridsBruce1_500x500x500/comp500_250_";
+  std::string outdir = "/data/snoplus3/parkerw/antinu/Nov5_oscgridsvecBruce1_1000x1000x140/comp1000_500_";
   std::string canv_name;
   
   ////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ void compOscGrids(){
 
   tree1->Draw("p1-p2:energy >> hP_E","","colz");
   hP_E->GetXaxis()->SetTitle("Prompt Energy, MeV");
-  hP_E->GetYaxis()->SetTitle("P_{500} - P_{250}");
+  hP_E->GetYaxis()->SetTitle("P_{1000} - P_{500}");
   canv_name = outdir + "probdiff_E.pdf";
   cpe->SaveAs(canv_name.c_str());
 
@@ -48,7 +48,7 @@ void compOscGrids(){
 
   tree1->Draw("p1-p2:dm21sq >> hP_dm","","colz");
   hP_dm->GetXaxis()->SetTitle("#Delta m_{21}^{2}, MeV^2");
-  hP_dm->GetYaxis()->SetTitle("P_{500} - P_{250}");
+  hP_dm->GetYaxis()->SetTitle("P_{1000} - P_{500}");
   canv_name = outdir + "probdiff_dm21sq.pdf";
   cdm->SaveAs(canv_name.c_str());
   
@@ -60,7 +60,7 @@ void compOscGrids(){
 
   tree1->Draw("p1-p2:ssqth21 >> hP_ss","","colz");
   hP_ss->GetXaxis()->SetTitle("sin^2 #theta_{12}");
-  hP_ss->GetYaxis()->SetTitle("P_{500} - P_{250}");
+  hP_ss->GetYaxis()->SetTitle("P_{1000} - P_{500}");
   canv_name = outdir + "probdiff_ssqth12.pdf";
   css->SaveAs(canv_name.c_str());
 
@@ -72,7 +72,7 @@ void compOscGrids(){
   cp->SetLogy();
   
   tree1->Draw("p1-p2 >> hP","","colz");
-  hP->GetXaxis()->SetTitle("P_{500} - P_{250}");
+  hP->GetXaxis()->SetTitle("P_{1000} - P_{500}");
   hP->GetYaxis()->SetTitle("Counts");
   canv_name = outdir + "probdiff.pdf";
   cp->SaveAs(canv_name.c_str());
@@ -85,7 +85,7 @@ void compOscGrids(){
   cp_frac->SetLogy();
 
   tree1->Draw("(p1-p2)/p1 >> hP_frac","","colz");
-  hP_frac->GetXaxis()->SetTitle("(P_{500} - P_{250}) / P_{500}");
+  hP_frac->GetXaxis()->SetTitle("(P_{1000} - P_{500}) / P_{1000}");
   hP_frac->GetYaxis()->SetTitle("Counts");
   canv_name = outdir + "probdifffrac.pdf";
   cp_frac->SaveAs(canv_name.c_str());
@@ -97,8 +97,8 @@ void compOscGrids(){
   cp_comp->SetGrid();
 
   tree1->Draw("p1:p2 >> hP_comp","","colz");
-  hP_comp->GetXaxis()->SetTitle("P_{250}");
-  hP_comp->GetYaxis()->SetTitle("P_{500}");
+  hP_comp->GetXaxis()->SetTitle("P_{500}");
+  hP_comp->GetYaxis()->SetTitle("P_{1000}");
   canv_name = outdir + "probcomp_E.pdf";
   cp_comp->SaveAs(canv_name.c_str());
   
@@ -109,8 +109,8 @@ void compOscGrids(){
   cp_frac2d->SetGrid();
 
   tree1->Draw("(p1-p2)/p1:p1 >> hP_frac2d","","colz");
-  hP_frac2d->GetYaxis()->SetTitle("(P_{500} - P_{250}) / P_{500}");
-  hP_frac2d->GetXaxis()->SetTitle("P_{500}");
+  hP_frac2d->GetYaxis()->SetTitle("(P_{1000} - P_{500}) / P_{1000}");
+  hP_frac2d->GetXaxis()->SetTitle("P_{1000}");
   canv_name = outdir + "probdifffrac_prob.pdf";
   cp_frac2d->SaveAs(canv_name.c_str());
   
