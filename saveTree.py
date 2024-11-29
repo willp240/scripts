@@ -109,7 +109,7 @@ def saveTree(fname, outfile):
     posTree.Branch("neckHit", neckHit, "neckHit/I")
 
     nhits = np.empty((1), dtype="int32")
-    posTree.Branch("neckHit", nhits, "nhits/I")
+    posTree.Branch("nhits", nhits, "nhits/I")
 
     xBias = np.empty((1), dtype="float32")
     posTree.Branch("xBias", xBias, "xBias/F")
@@ -143,7 +143,6 @@ def saveTree(fname, outfile):
         posTree.Branch("tFit", tFit, "tFit/F")
         phiFit = np.empty((1), dtype="float32")
         posTree.Branch("phiFit", phiFit, "phiFit/F")
-
 
     scaledLLH = np.empty((1), dtype="float32")
     posTree.Branch("scaledLLH", scaledLLH, "scaledLLH/F")
@@ -203,6 +202,10 @@ def saveTree(fname, outfile):
 
             eveNum[0] = simCounter
 
+            #highOwl[0] = nOwlhighcount
+            pmts = ev.GetUncalPMTs()
+            neckHit[0] = pmts.GetNeckCount()
+            nhits[0] = ev.GetNhitsCleaned()
             
             try:
                 seedResult = ev.GetFitResult("quad")
