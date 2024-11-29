@@ -25,6 +25,11 @@ void plot_hitangle(  )
 
   RAT::DB::Get()->SetAirplaneModeStatus(true);
 
+  TCanvas* c1 = new TCanvas("c1", "c1", 1500,800);
+  c1->SetRightMargin(0.13);
+  gPad->SetFrameLineWidth(2);
+  gPad->SetGrid(1);
+  
   std::vector<TH1D*> hist_vec;
   TLegend *leg = new TLegend(0.57,0.27,0.87,0.87);
   leg->SetLineWidth(2);
@@ -37,7 +42,7 @@ void plot_hitangle(  )
 
     TString hname = Form("Radius%dto%d", minr, maxr);
     TString htitle = Form("%dmm - %dmm", minr, maxr);
-    TH1D* h = new TH1D(hname, htitle, 180, 0, 180);
+    TH1D* h = new TH1D(hname, "", 180, 0, 180);
     h->GetXaxis()->SetTitle("Angle (degrees)");
     h->GetYaxis()->SetTitle("Number of PMT Hits");
     h->GetYaxis()->SetTitleOffset(1.3);
@@ -45,7 +50,7 @@ void plot_hitangle(  )
     h->SetLineWidth(2);
     hist_vec.push_back(h);
 
-    TString fname = Form("/data/snoplus3/parkerw/ratSimulations/Mar30_nearAV_0.5MeVe/nearav_%d_%d.root", minr, maxr);
+    TString fname = Form("/data/snoplus3/parkerw/ratSimulations/Nov29_NearAVShells/nearav_%d_%d.root", minr, maxr);
     std::cout << fname << std::endl;
     RAT::DU::DSReader dsReader( fname.Data() );
 
@@ -98,7 +103,11 @@ void plot_hitangle(  )
     hist_vec.push_back(h);
     h->Draw("same");
     leg->AddEntry(h, htitle, "l");
+    h->GetYaxis()->SetTitleOffset(1.3);
   }
   leg->Draw("same");
+
+  c1->SaveAs("nearAVangles.pdf");
+  
 }
 

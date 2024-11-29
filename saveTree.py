@@ -31,7 +31,7 @@ def saveTree(fname, outfile):
     '''
     #fname = "/home/parkerw/Software/rat_master/test.root"
     #fname = "/data/snoplus3/parkerw/ratSimulations/Oct6_ASRecoodVals_2p5/*.root"
-    fname = "/data/snoplus3/parkerw/ratSimulations/Nov27_0to1mShell_refact/*.root"
+    #fname = "/data/snoplus3/parkerw/ratSimulations/Nov27_0to1mShell_refact/*.root"
 
     #    fname = "/home/parkerw/Software/rat_b/testpartialmpdf.root"
     outFile = ROOT.TFile(outfile, "RECREATE")
@@ -210,8 +210,8 @@ def saveTree(fname, outfile):
             except Exception as e:
                 msg = "No {0} for event {1:d}, GTID {2:d} : {3}"
                 msg = msg.format("Seed", evCounter, ev.GetGTID(), e)
-                print(msg)
-                continue
+                #print(msg)
+                #continue
 
 
             # Get fitter vertex
@@ -228,10 +228,10 @@ def saveTree(fname, outfile):
                 print(msg)
                 continue
                 
-            xSeed[0] = seedVertex.GetPosition().X()
-            ySeed[0] = seedVertex.GetPosition().Y()
-            zSeed[0] = seedVertex.GetPosition().Z()
-            tiSeed[0] = seedVertex.GetTime()
+            #xSeed[0] = seedVertex.GetPosition().X()
+            # ySeed[0] = seedVertex.GetPosition().Y()
+            #zSeed[0] = seedVertex.GetPosition().Z()
+            #tiSeed[0] = seedVertex.GetTime()
 
             if not fitVertex.ValidPosition():
                 #print ("not valid pos ",fitVertex.GetPosition().X(), " ", fitVertex.GetPosition().Y(), " ", fitVertex.GetPosition().Z())
@@ -255,7 +255,7 @@ def saveTree(fname, outfile):
             #print( ev.GetClassifierResult("nearAVAngular").GetClassification("ratio") )
 
             try :
-                nearAV[0] = ev.GetClassifierResult("nearAVAngular").GetClassification("ratio")
+                nearAV[0] = ev.GetClassifierResult("nearAVAngular:scintFitter").GetClassification("ratio")
             except Exception as e:
                 nearAV[0] = -999;
 
@@ -290,8 +290,8 @@ def saveTree(fname, outfile):
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionPositionSelectedNHit")
 
             #scintfitter
-            #LLH[0] = fitResult.GetFOM("PositionLogL")
-            #scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionSelectedNHit")
+            LLH[0] = fitResult.GetFOM("PositionLogL")
+            scaledLLH[0] = LLH[0]/fitResult.GetFOM("PositionSelectedNHit")
         
             #LLH[0] = fitResult.GetFOM("multipath_scint")
             #scaledLLH[0] = LLH[0]/fitResult.GetFOM("multipath_SelectedNHit_scint")
@@ -305,8 +305,8 @@ def saveTree(fname, outfile):
             #    print("found a funny event ", ev.GetGTID())
             #    return
 
-            numScint[0] = mc.GetNScintPhotons()
-            numCerenk[0] = mc.GetNCherPhotons()
+            #numScint[0] = mc.GetNScintPhotons()
+            #numCerenk[0] = mc.GetNCherPhotons()
 
             posTree.Fill()
 

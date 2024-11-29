@@ -23,7 +23,7 @@ void Plot2D(){
 
   std::string coord[4] = {"X", "Y", "Z", "R"};
 
-  TFile *fFile = TFile::Open("/home/parkerw/Software/rat-tools_fork/FitPerformance/May19_Beta14_3MeV_Tree.root");
+  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Nov22_2p5MeVe_NearAV_Tree.root");
   TTree* fTree = (TTree*)fFile->Get("eveTree")->Clone("fTree");
 
   TCanvas* c1 = new TCanvas("c1", "c1", 1500,800);
@@ -35,7 +35,7 @@ void Plot2D(){
   //std::string cut = "sqrt(xTrue*xTrue + yTrue*yTrue + zTrue*zTrue) < 6000 && nearAV > 0.28";//"zFit<7000 && zFit>0 && xFit<7000 && xFit>-7000 && yFit<7000 && yFit>-7000";
   //std::string cut = "neckHit<2 && scaledLLH  > 14.2 && nearAV > 0.28";
 
-  std::string cut ="beta14 > -0.05 && scaledLLH  > 13.5 && zFit < 40000";// "itr > 0.18 && scaledLLH  > 14.2 && nearAV > 0.28";
+  std::string cut = "";//"beta14 > -0.05 && scaledLLH  > 13.5 && zFit < 40000";// "itr > 0.18 && scaledLLH  > 14.2 && nearAV > 0.28";
 
   for(int i=0; i<4; i++){
     c1->cd(i+1);
@@ -53,6 +53,6 @@ void Plot2D(){
     gPad->Update();
     
   }
-
+  c1->SaveAs("noCutRes.pdf");
 }
 
