@@ -2,10 +2,11 @@ import sys
 import os
 import string
 import argparse
+import numpy as np
     
-def write_macro(mac, macname, outfile):
+def write_macro(mac, macname, outfile, minr, maxr):
     with open(macname, "w") as f:
-        f.write(mac.format(os.path.abspath(outfile)))
+        f.write(mac.format(os.path.abspath(outfile), minr, maxr))
 
 def check_dir(dname):
     """Check if directory exists, create it if it doesn't"""
@@ -16,7 +17,7 @@ def check_dir(dname):
         os.stat(direc)
     except:
         os.makedirs(direc)
-        print "Made directory %s...." % dname
+        print ("Made directory %s...." % dname)
     return dname
 
 def pycondor_submit(job_batch, job_id, macro_path, run_path, rat_env, sub_path, out_dir, sleep_time = 1, priority = 5):
@@ -25,7 +26,7 @@ def pycondor_submit(job_batch, job_id, macro_path, run_path, rat_env, sub_path, 
     then write a submit file to be run by condor_submit
     '''
 
-    print job_id
+    print (job_id)
 
     ### set a condor path to be called later
     
@@ -80,7 +81,7 @@ def pycondor_submit(job_batch, job_id, macro_path, run_path, rat_env, sub_path, 
     out_submit_file.close()
     
     command = 'condor_submit -batch-name \"'+job_batch+'\" '+submit_filepath
-    print "executing job: "+command
+    print ("executing job: "+command)
     os.system(command)
 
 
@@ -107,7 +108,7 @@ if __name__ == "__main__":
     try:
         mac = open(args.macro, "r").read()
     except:
-        print "template macro could not be read"
+        print ("template macro could not be read")
         sys.exit(1)
 
     ## check if output and condor directories exist, create if they don't
@@ -124,12 +125,16 @@ if __name__ == "__main__":
     output_dir = check_dir("{0}/output/".format(out_dir))
     base_name = args.macro.split("/")[-1].replace(".mac","")
 
-    for i in range(args.no_sims):
+    for k in np.arange(0,10,1):
+
+        minr = 5000 + (100*k)
+        maxr = 5000 + (100*(k+1))
         write_macro(mac,
-                    "{0}{1}_{2}.mac".format(mac_dir, base_name, i),
-                    "{0}{1}_{2}.root".format(out_dir, base_name, i)
-        )
-        
-        job_id = "{0}_{1}".format(base_name,i)
+                    "{0}{1}_{2}_{3}.mac".format(mac_dir, base_name, minr, maxr),
+                    "{0}{1}_{2}_{3}.root".format(out_dir, base_name, minr, maxr),
+                minr,
+                maxr
+                )
+        job_id = "{0}_{1}_{2}".format(base_name,minr,maxr)
         batch_id = "rat_{0}".format(base_name)
-        pycondor_submit(batch_id,job_id,"{0}{1}_{2}.mac".format(mac_dir,base_name,i),args.run_directory,args.env_file,args.submission_directory,out_dir, sleep_time = 1, priority = 5)
+        pycondor_submit(batch_id,job_id,"{0}{1}_{2}_{3}.mac".format(mac_dir,base_name,minr,maxr),args.run_directory,args.env_file,args.submission_directory,out_dir, sleep_time = 1, priority = 5)
