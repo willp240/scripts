@@ -13,12 +13,47 @@
 #include <string>
 
 
-void Plot2D(){
+void PlotNearAVRad(){
 
   gStyle->SetPalette(51);
   gStyle->SetLineWidth(2);
   gStyle->SetOptStat(0);
 
+  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Dec30_4to6m_Tree.root");
+  TTree* fTree = (TTree*)fFile->Get("eveTree")->Clone("fTree");
+
+  std::string cut1 = "nearAV>0 && xSeed > -999999";
+
+  TH1F *htemp1 = new TH1F("htemp1","htemp1", 25, 5000, 6000);
+  fTree->Draw("sqrt(xTrue*xTrue+yTrue*yTrue+zTrue*zTrue) >> htemp1", "", "");
+  // TH1F *htemp2 = new TH1F("htemp2","htemp2", 25, 5000, 6000);
+  fTree->Draw("sqrt(xTrue*xTrue+yTrue*yTrue+zTrue*zTrue) >> htemp2", cut1.c_str(), "");
+
+  htemp1->SetTitle("");
+  htemp1->GetXaxis()->SetTitle("MC Radius, mm");
+  htemp1->GetYaxis()->SetTitle("Events");
+  
+  htemp1->SetLineWidth(2);
+  htemp1->SetLineColor(kBlack);
+  htemp2->SetLineWidth(2);
+  htemp2->SetLineColor(kBlue);
+
+  TCanvas* c1 = new TCanvas("c1", "c1", 1500,800);
+  c1->SetRightMargin(0.13);
+  gPad->SetFrameLineWidth(2);
+  gPad->SetGrid(1);
+
+  htemp1->Draw();
+  htemp2->Draw("same");
+
+  TLegend* t1 = new TLegend( 0.15, 0.65, 0.35, 0.85 );
+  t1->AddEntry( htemp1, "All Events", "l");
+  t1->AddEntry( htemp2, "NearAV Fitter Applied", "l" );
+  t1->Draw();
+
+  c1->SaveAs("radialdist.pdf");
+
+  /*
   std::string plotprefix = "e_test1m_";
 
   std::string axs[4] = {"xFit:xTrue", "yFit:yTrue", "zFit-184.4:zTrue-184.4", "sqrt(xFit*xFit+yFit*yFit+(zFit-184.4)*(zFit-184.4)):sqrt(xTrue*xTrue+yTrue*yTrue+(zTrue-184.4)*(zTrue-184.4))"};
@@ -180,6 +215,7 @@ void Plot2D(){
   gPad->Update();
   c4->SetLogz();
   c4->SaveAs((plotprefix+"FitDist.pdf").c_str());
-  
+  */
+
 }
 

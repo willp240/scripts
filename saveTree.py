@@ -62,6 +62,8 @@ def saveTree(fname, outfile):
     nearAV=[]
     itr=[]
     nhits=[]
+    dcapplied=[]
+    dcflagged=[]
     
     posTree=ROOT.TTree("eveTree","eveTree")
     xTrue = np.empty((1), dtype="float32")
@@ -85,7 +87,7 @@ def saveTree(fname, outfile):
     posTree.Branch("EFit", EFit, "EFit/F")
 
     xSeed = np.empty((1), dtype="float32")
-    posTree.Branch("xSeed", xFit, "xSeed/F")
+    posTree.Branch("xSeed", xSeed, "xSeed/F")
     ySeed = np.empty((1), dtype="float32")
     posTree.Branch("ySeed", ySeed, "ySeed/F")
     zSeed = np.empty((1), dtype="float32")
@@ -157,6 +159,11 @@ def saveTree(fname, outfile):
     numCerenk = np.empty((1), dtype="int32")
     posTree.Branch("numCerenk", numCerenk, "numCerenk/I")
 
+    dcapplied = np.empty((1), dtype="uint64")
+    posTree.Branch("dcapplied",dcapplied, "dcapplied/I")
+    dcflagged =	np.empty((1), dtype="uint64")
+    posTree.Branch("dcflagged", dcflagged, "dcflagged/I")
+    
     simCounter, evCounter = 0, 0
     for ds, run in rat.dsreader(fname):
         if simCounter == 0:
@@ -169,9 +176,9 @@ def saveTree(fname, outfile):
             #     if simCounter > 100:
             #         print "simCounter >100"
             #         break
-                    
+
         for iev in range(0,ds.GetEVCount()):
-                        
+                       
             # Use retriggers?
             if use_retriggers == 0 and iev > 0:
                 continue
@@ -202,17 +209,32 @@ def saveTree(fname, outfile):
 
             eveNum[0] = simCounter
 
-            #highOwl[0] = nOwlhighcount
             pmts = ev.GetUncalPMTs()
+            highOwl[0] = pmts.GetOWLCount()
             neckHit[0] = pmts.GetNeckCount()
             nhits[0] = ev.GetNhitsCleaned()
-            
+
             try:
-                seedResult = ev.GetFitResult("quad")
+                seedResult = ev.GetFitResult("nearAVAngular")
                 seedVertex = seedResult.GetVertex(0)
+                xSeed[0] = seedVertex.GetPosition().X()
+                ySeed[0] = seedVertex.GetPosition().Y()
+                zSeed[0] = seedVertex.GetPosition().Z()
+                tiSeed[0] = seedVertex.GetTime()
+                if xSeed[0] != xSeed[0]:
+                    xSeed[0] = -999999
+                    ySeed[0] = -999999
+                    zSeed[0] = -999999
+                #print("a", xSeed[0], ySeed[0], zSeed[0])
+
             except Exception as e:
                 msg = "No {0} for event {1:d}, GTID {2:d} : {3}"
                 msg = msg.format("Seed", evCounter, ev.GetGTID(), e)
+                xSeed[0] = -999999
+                ySeed[0] = -999999
+                zSeed[0] = -999999
+                tiSeed[0] = -999999
+                #print("b", xSeed[0], ySeed[0], zSeed[0])
                 #print(msg)
                 #continue
 
@@ -232,7 +254,7 @@ def saveTree(fname, outfile):
                 continue
                 
             #xSeed[0] = seedVertex.GetPosition().X()
-            # ySeed[0] = seedVertex.GetPosition().Y()
+            #ySeed[0] = seedVertex.GetPosition().Y()
             #zSeed[0] = seedVertex.GetPosition().Z()
             #tiSeed[0] = seedVertex.GetTime()
 
@@ -246,9 +268,9 @@ def saveTree(fname, outfile):
                 print("not valid")
                 continue
 
-            if(fitVertex.GetPosition().Z() > 7000):
-                print("valid z ", evCounter, " " , fitVertex.GetPosition().Z())
-                print("true ", mc.GetMCParticle(0).GetPosition().X(), mc.GetMCParticle(0).GetPosition().Y(), mc.GetMCParticle(0).GetPosition().Z())
+            #if(fitVertex.GetPosition().Z() > 7000):
+                #print("valid z ", evCounter, " " , fitVertex.GetPosition().Z())
+                #print("true ", mc.GetMCParticle(0).GetPosition().X(), mc.GetMCParticle(0).GetPosition().Y(), mc.GetMCParticle(0).GetPosition().Z())
 
             xFit[0] = fitVertex.GetPosition().X()
             yFit[0] = fitVertex.GetPosition().Y()
@@ -311,6 +333,9 @@ def saveTree(fname, outfile):
             #numScint[0] = mc.GetNScintPhotons()
             #numCerenk[0] = mc.GetNCherPhotons()
 
+            #dcapplied[0] = ev.GetDataCleaningFlags().GetApplied( ev.GetDataCleaningFlags().GetLatestPass() ).GetULong64_t(0)
+            #dcflagged[0] = ev.GetDataCleaningFlags().GetFlags( ev.GetDataCleaningFlags().GetLatestPass() ).GetULong64_t(0)
+            
             posTree.Fill()
 
     posTree.Write()

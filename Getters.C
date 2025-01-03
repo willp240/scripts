@@ -9,7 +9,7 @@
 int Getters() {
 
   // Read in file
-  RAT::DU::DSReader dsreader("/data/snoplus3/parkerw/ratSimulations/Sep5_testdag/perf_e2p5MeV_recon/*0.root");
+  RAT::DU::DSReader dsreader("/data/snoplus3/parkerw/ratSimulations/Dec29_4to6m_nearav/nearav_35.root");
   //RAT::DU::DSReader dsreader("/data/snoplus/parkerw/ratSimulations/batch/Jul21_recoordMPDF_2p2gl_perf_2p5MeV/recoord_MPDF_99.root");
 
   //Get pmtInfo
@@ -22,7 +22,7 @@ int Getters() {
     for(int iev=0;iev<nevC; iev++){
 
       const RAT::DS::EV& rev = rds.GetEV(iev);
-      std::cout << "event " << i << ", vertex " << iev << std::endl;
+      std::cout << "event " << i << ", vertex " << iev << " " << rev.GetNhits() <<  std::endl;
 
       std::vector<std::string> fittynames = rev.GetFitNames();
       for(int i_fit=0; i_fit<fittynames.size(); i_fit++){

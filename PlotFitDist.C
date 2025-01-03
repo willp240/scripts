@@ -13,12 +13,52 @@
 #include <string>
 
 
-void Plot2D(){
+void PlotFitDist(){
 
   gStyle->SetPalette(51);
   gStyle->SetLineWidth(2);
   gStyle->SetOptStat(0);
 
+  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Dec30_4to6m_Tree.root");
+  TTree* fTree = (TTree*)fFile->Get("eveTree")->Clone("fTree");
+
+  std::string cut1 = "nearAV>0 && xSeed > -999999";
+
+  TH2F *htemp1 = new TH2F("htemp1","htemp1", 100, 5000, 6000, 100, 0, 2000);
+  fTree->Draw("sqrt( (xFit-xTrue)*(xFit-xTrue)+(yFit-yTrue)*(yFit-yTrue)+(zFit-zTrue)*(zFit-zTrue) ):sqrt(xTrue*xTrue+yTrue*yTrue+zTrue*zTrue)  >> htemp1", cut1.c_str(), "colz");
+  TH2F *htemp2 = new TH2F("htemp2","htemp2", 100, 5000, 6000, 100, 0, 2000);
+  fTree->Draw("sqrt( (xSeed-xTrue)*(xSeed-xTrue)+(ySeed-yTrue)*(ySeed-yTrue)+(zSeed-zTrue)*(zSeed-zTrue) ):sqrt(xTrue*xTrue+yTrue*yTrue+zTrue*zTrue) >> htemp2", cut1.c_str(), "colz");
+  std::cout << htemp1->Integral() << " " << htemp2->Integral() << std::endl;
+  htemp1->SetTitle("MultiPDF");
+  htemp1->GetYaxis()->SetTitle("Fit - Truth Distance, mm");
+  htemp1->GetXaxis()->SetTitle("True Radius, mm");
+
+  htemp2->SetTitle("NearAV");
+  htemp2->GetYaxis()->SetTitle("Fit - Truth Distance, mm");
+  htemp2->GetXaxis()->SetTitle("True Radius, mm");
+  
+  htemp1->SetLineWidth(2);
+  htemp1->SetLineColor(kBlack);
+  htemp2->SetLineWidth(2);
+  htemp2->SetLineColor(kBlue);
+
+  TCanvas* c1 = new TCanvas("c1", "c1", 1500,800);
+  c1->SetRightMargin(0.13);
+  gPad->SetFrameLineWidth(2);
+  gPad->SetGrid(1);
+
+  htemp1->Draw("colz");
+  c1->SaveAs("fitdistSF.pdf");
+
+  TCanvas* c2 = new TCanvas("c2", "c2", 1500,800);
+  c2->SetRightMargin(0.13);
+  gPad->SetFrameLineWidth(2);
+  gPad->SetGrid(1);
+
+  htemp2->Draw("colz");
+  c2->SaveAs("fitdistNearAV.pdf");
+
+  /*
   std::string plotprefix = "e_test1m_";
 
   std::string axs[4] = {"xFit:xTrue", "yFit:yTrue", "zFit-184.4:zTrue-184.4", "sqrt(xFit*xFit+yFit*yFit+(zFit-184.4)*(zFit-184.4)):sqrt(xTrue*xTrue+yTrue*yTrue+(zTrue-184.4)*(zTrue-184.4))"};
@@ -180,6 +220,7 @@ void Plot2D(){
   gPad->Update();
   c4->SetLogz();
   c4->SaveAs((plotprefix+"FitDist.pdf").c_str());
-  
+  */
+
 }
 
