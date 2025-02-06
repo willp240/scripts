@@ -1,0 +1,9 @@
+executable              = /home/parkerw/Scripts/savetree.sh
+universe                = vanilla
+output                  = /home/parkerw/Scripts/savetree6to14.log
+error                   = /home/parkerw/Scripts/savetree6to14.err
+log                     = /home/parkerw/Scripts/savetree6to14.sh
+notification            = never
+priority                = 5
+getenv                  = False
+queue 1
