@@ -61,9 +61,11 @@ def saveTree(fname, outfile):
     numCerenk=[]
     nearAV=[]
     itr=[]
+    timingpeaks=[]
     nhits=[]
     dcapplied=[]
     dcflagged=[]
+    neckcut=[]
     
     posTree=ROOT.TTree("eveTree","eveTree")
     xTrue = np.empty((1), dtype="float32")
@@ -104,6 +106,9 @@ def saveTree(fname, outfile):
     beta14 = np.empty((1), dtype="float32")
     posTree.Branch("beta14", beta14, "beta14/F")
 
+    timingpeaks = np.empty((1), dtype="float32")
+    posTree.Branch("timingpeaks", timingpeaks, "timingpeaks/F")
+    
     highOwl = np.empty((1), dtype="int32")
     posTree.Branch("highOwl", highOwl, "highOwl/I")
 
@@ -163,6 +168,9 @@ def saveTree(fname, outfile):
     posTree.Branch("dcapplied",dcapplied, "dcapplied/I")
     dcflagged =	np.empty((1), dtype="uint64")
     posTree.Branch("dcflagged", dcflagged, "dcflagged/I")
+
+    neckcut = np.empty((1), dtype="bool")
+    posTree.Branch("neckcut", neckcut, "neckcut/O")
     
     simCounter, evCounter = 0, 0
     for ds, run in rat.dsreader(fname):
@@ -276,7 +284,7 @@ def saveTree(fname, outfile):
             yFit[0] = fitVertex.GetPosition().Y()
             zFit[0] = fitVertex.GetPosition().Z()
             tiFit[0] = fitVertex.GetTime()
-            #EFit[0] = fitVertex.GetEnergy()
+            EFit[0] = fitVertex.GetEnergy()
             #print( ev.GetClassifierResult("nearAVAngular").GetClassification("ratio") )
 
             try :
@@ -293,6 +301,11 @@ def saveTree(fname, outfile):
                 beta14[0] = ev.GetClassifierResult("beta14").GetClassification("beta14")
             except Exception as e:
                 beta14[0] = -999
+
+            try :
+                timingpeaks[0] = ev.GetClassifierResult("timingPeaks:scintFitter").GetClassification("timingPeaks")
+            except Exception as e:
+                timingpeaks[0] = -999
 
             if use_dir:
                 xdirFit[0] = fitVertex.GetDirection().X()
@@ -333,8 +346,10 @@ def saveTree(fname, outfile):
             #numScint[0] = mc.GetNScintPhotons()
             #numCerenk[0] = mc.GetNCherPhotons()
 
-            #dcapplied[0] = ev.GetDataCleaningFlags().GetApplied( ev.GetDataCleaningFlags().GetLatestPass() ).GetULong64_t(0)
-            #dcflagged[0] = ev.GetDataCleaningFlags().GetFlags( ev.GetDataCleaningFlags().GetLatestPass() ).GetULong64_t(0)
+            dcapplied[0] = ev.GetDataCleaningFlags().GetApplied( ev.GetDataCleaningFlags().GetLatestPass() ).GetULong64_t(0)
+            dcflagged[0] = ev.GetDataCleaningFlags().GetFlags( ev.GetDataCleaningFlags().GetLatestPass() ).GetULong64_t(0)
+
+            neckcut[0] = (dcflagged[0] & np.uint64(256)) == np.uint64(256)
             
             posTree.Fill()
 

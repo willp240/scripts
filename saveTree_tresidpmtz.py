@@ -66,6 +66,7 @@ def saveTree(fname, outfile):
     timingpeaks=[]
     dcapplied=[]
     dcflagged=[]
+    neckcut=[]
     pmtzlt4m=[]
     pmtz0tom4m=[]
     tresid50to100=[]
@@ -176,6 +177,9 @@ def saveTree(fname, outfile):
     dcflagged =	np.empty((1), dtype="uint64")
     posTree.Branch("dcflagged", dcflagged, "dcflagged/I")
 
+    neckcut = np.empty((1), dtype="bool")
+    posTree.Branch("neckcut", neckcut, "neckcut/O")
+    
     pmtzlt4m = np.empty((1), dtype="float32")
     posTree.Branch("pmtzlt4m", pmtzlt4m, "pmtzlt4m/F")
     pmtz0tom4m = np.empty((1), dtype="float32")
@@ -194,6 +198,8 @@ def saveTree(fname, outfile):
     posTree.Branch("tresidm5tom50", tresidm5tom50, "tresidm5tom50/F")
     pmtzltm5m = np.empty((1), dtype="float32")
     posTree.Branch("pmtzltm5m", pmtzltm5m, "pmtzltm5m/F")
+    tresid0to20pmtzltm5m = np.empty((1), dtype="float32")
+    posTree.Branch("tresid0to20pmtzltm5m", tresid0to20pmtzltm5m, "tresid0to20pmtzltm5m/F")
 
     effective_velocity = rat.utility().GetEffectiveVelocity()
     light_path = rat.utility().GetLightPathCalculator()
@@ -379,6 +385,8 @@ def saveTree(fname, outfile):
             dcapplied[0] = ev.GetDataCleaningFlags().GetApplied( ev.GetDataCleaningFlags().GetLatestPass() ).GetULong64_t(0)
             dcflagged[0] = ev.GetDataCleaningFlags().GetFlags( ev.GetDataCleaningFlags().GetLatestPass() ).GetULong64_t(0)
 
+            neckcut[0] = (dcflagged[0] & np.uint64(256)) == np.uint64(256)
+            
             light_path = rat.utility().GetLightPathCalculator()
             calibratedPMTs = ev.GetCalPMTs()
 
@@ -390,6 +398,7 @@ def saveTree(fname, outfile):
             pmtz0tom4 = 0
             tresm5tom50 = 0
             pmtzltm5 = 0
+            tresto20pmtzltm5 = 0
             
             psup_system_id = RAT.DU.Point3D.GetSystemId("innerPMT")
             event_point = RAT.DU.Point3D(psup_system_id, fitVertex.GetPosition())
@@ -424,6 +433,8 @@ def saveTree(fname, outfile):
                     tresm5tom50 += 1
                 if(pmtPosition.Z() < -5000):
                     pmtzltm5 += 1
+                if(pmtPosition.Z() < -5000 and tresid < 20 and tresid > 0):
+                    tresto20pmtzltm5 += 1
 
                     
             pmtzlt4m[0] = pmtzlt4
@@ -434,6 +445,7 @@ def saveTree(fname, outfile):
             tresid40to80pmtz0to4m[0] = tres40to80pmtz0to4
             tresidm5tom50[0] = tresm5tom50
             pmtzltm5m[0] = pmtzltm5
+            tresid0to20pmtzltm5m[0] = tresto20pmtzltm5
                     
             posTree.Fill()
 
