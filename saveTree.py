@@ -103,6 +103,9 @@ def saveTree(fname, outfile):
     itr = np.empty((1), dtype="float32")
     posTree.Branch("itr", itr, "itr/F")
 
+    bab = np.empty((1), dtype="float32")
+    posTree.Branch("bab", bab, "bab/F")
+    
     beta14 = np.empty((1), dtype="float32")
     posTree.Branch("beta14", beta14, "beta14/F")
 
@@ -302,6 +305,11 @@ def saveTree(fname, outfile):
             except Exception as e:
                 beta14[0] = -999
 
+            try :
+                bab[0] = ev.GetClassifierResult("BerkeleyAlphaBeta:scintFitter").GetClassification("likelihood")
+            except Exception as e:
+                bab[0] = -999
+                
             try :
                 timingpeaks[0] = ev.GetClassifierResult("timingPeaks:scintFitter").GetClassification("timingPeaks")
             except Exception as e:
