@@ -18,7 +18,7 @@ void Plot2D(){
   gStyle->SetLineWidth(2);
   gStyle->SetOptStat(0);
 
-  std::string plotprefix = "alpha_reconE_";
+  std::string plotprefix = "elownhit_neckhits_";
 
   std::string axs[4] = {"xFit:xTrue", "yFit:yTrue", "zFit-184.4:zTrue-184.4", "sqrt(xFit*xFit+yFit*yFit+(zFit-184.4)*(zFit-184.4)):sqrt(xTrue*xTrue+yTrue*yTrue+(zTrue-184.4)*(zTrue-184.4))"};
   std::string title = "Reconstructed";
@@ -26,13 +26,14 @@ void Plot2D(){
   std::string coord[4] = {"X", "Y", "Z", "R"};
 
   std::string cut1 = "sqrt(xFit*xFit+yFit*yFit+(zFit-184.4)*(zFit-184.4)) < 6000 && neckcut == 1";
-  std::string cut2 = "";
+  std::string cut2 = " && ((scaledLLH > 12.0 && neckHit/nhits < 0.01) || nhits > 500)";
   // std::string cut2 = "&& scaledLLH > 12.0 && neckHit/nhits < 0.01 && itr > 0.2 && highOwl / nhits < 0.01";
 
   // TFile *fFile = TFile::Open("/home/parkerw/Scripts/Jan8_NearAV_pmtzratio.root");
   //  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Feb5_alpha_pmtzratio.root");
   //  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Jan8_NearAV_ETree.root");
-  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Feb5_alpha_ETree.root"); 
+  //  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Feb9_e_Tree.root");
+  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Feb9_e_Tree.root");
   //  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Jan8_NearAV_timepeakstree.root");
   //TFile *fFile = TFile::Open("/home/parkerw/Software/rat-tools_master/FitPerformance/Dec21_alpha_owlTree.root");
   TTree* fTree = (TTree*)fFile->Get("eveTree")->Clone("fTree");
@@ -134,13 +135,13 @@ void Plot2D(){
   gPad->SetFrameLineWidth(2);
   gPad->SetGrid(1);
 
-  TH2F *htemp2 = new TH2F("htemp2","htemp2", 140, 0, 14000, 100, 0, 10);
-  fTree->Draw("EFit:sqrt(xTrue*xTrue + yTrue*yTrue + (zTrue-184.4)*(zTrue-184.4)) >> htemp2", (cut1+cut2).c_str(), "colz");
+  TH2F *htemp2 = new TH2F("htemp2","htemp2", 140, 0, 14000, 100, 0, 0.4);
+  fTree->Draw("neckHit/nhits:sqrt(xTrue*xTrue + yTrue*yTrue + (zTrue-184.4)*(zTrue-184.4)) >> htemp2", (cut1+cut2).c_str(), "colz");
   //fTree->Draw("scaledLLH:sqrt( (xFit-xTrue)*(xFit-xTrue) + (yFit-yTrue)*(yFit-yTrue) + (zFit-zTrue)*(zFit-zTrue) )", (cut1+cut2).c_str(), "colz");
   //TH2F *htemp2 = (TH2F*)gPad->GetPrimitive("htemp");
   std::string xtitle = "True Radius, mm";
   //std::string xtitle = "Fit - True Position, mm";
-  std::string ytitle = "Reconstructed Energy, MeV";
+  std::string ytitle = "Neck Hits / NHits";
   htemp2->GetXaxis()->SetTitle(xtitle.c_str());
   htemp2->GetYaxis()->SetTitle(ytitle.c_str());
   htemp2->SetTitle("");
