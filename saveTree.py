@@ -88,6 +88,24 @@ def saveTree(fname, outfile):
     EFit = np.empty((1), dtype="float32")
     posTree.Branch("EFit", EFit, "EFit/F")
 
+    xFitPosErr = np.empty((1), dtype="float32")
+    posTree.Branch("xFitPosErr", xFitPosErr, "xFitPosErr/F")
+    yFitPosErr = np.empty((1), dtype="float32")
+    posTree.Branch("yFitPosErr", yFitPosErr, "yFitPosErr/F")
+    zFitPosErr = np.empty((1), dtype="float32")
+    posTree.Branch("zFitPosErr", zFitPosErr, "zFitPosErr/F")
+    tiFitPosErr = np.empty((1), dtype="float32")
+    posTree.Branch("tiFitPosErr", tiFitPosErr, "tiFitPosErr/F")
+
+    xFitNegErr = np.empty((1), dtype="float32")
+    posTree.Branch("xFitNegErr", xFitNegErr, "xFitNegErr/F")
+    yFitNegErr = np.empty((1), dtype="float32")
+    posTree.Branch("yFitNegErr", yFitNegErr, "yFitNegErr/F")
+    zFitNegErr = np.empty((1), dtype="float32")
+    posTree.Branch("zFitNegErr", zFitNegErr, "zFitNegErr/F")
+    tiFitNegErr = np.empty((1), dtype="float32")
+    posTree.Branch("tiFitNegErr", tiFitNegErr, "tiFitNegErr/F")
+    
     xSeed = np.empty((1), dtype="float32")
     posTree.Branch("xSeed", xSeed, "xSeed/F")
     ySeed = np.empty((1), dtype="float32")
@@ -97,6 +115,33 @@ def saveTree(fname, outfile):
     tiSeed = np.empty((1), dtype="float32")
     posTree.Branch("tiSeed", tiSeed, "tiSeed/F")
 
+    xSeedPosErr = np.empty((1), dtype="float32")
+    posTree.Branch("xSeedPosErr", xSeedPosErr, "xSeedPosErr/F")
+    ySeedPosErr = np.empty((1), dtype="float32")
+    posTree.Branch("ySeedPosErr", ySeedPosErr, "ySeedPosErr/F")
+    zSeedPosErr = np.empty((1), dtype="float32")
+    posTree.Branch("zSeedPosErr", zSeedPosErr, "zSeedPosErr/F")
+    tiSeedPosErr = np.empty((1), dtype="float32")
+    posTree.Branch("tiSeedPosErr", tiSeedPosErr, "tiSeedPosErr/F")
+
+    xSeedNegErr = np.empty((1), dtype="float32")
+    posTree.Branch("xSeedNegErr", xSeedNegErr, "xSeedNegErr/F")
+    ySeedNegErr = np.empty((1), dtype="float32")
+    posTree.Branch("ySeedNegErr", ySeedNegErr, "ySeedNegErr/F")
+    zSeedNegErr = np.empty((1), dtype="float32")
+    posTree.Branch("zSeedNegErr", zSeedNegErr, "zSeedNegErr/F")
+    tiSeedNegErr = np.empty((1), dtype="float32")
+    posTree.Branch("tiSeedNegErr", tiSeedNegErr, "tiSeedNegErr/F")
+    
+    xNearAV = np.empty((1), dtype="float32")
+    posTree.Branch("xNearAV", xNearAV, "xNearAV/F")
+    yNearAV = np.empty((1), dtype="float32")
+    posTree.Branch("yNearAV", yNearAV, "yNearAV/F")
+    zNearAV = np.empty((1), dtype="float32")
+    posTree.Branch("zNearAV", zNearAV, "zNearAV/F")
+    tiNearAV = np.empty((1), dtype="float32")
+    posTree.Branch("tiNearAV", tiNearAV, "tiNearAV/F")
+    
     nearAV = np.empty((1), dtype="float32")
     posTree.Branch("nearAV", nearAV, "nearAV/F")
 
@@ -105,6 +150,12 @@ def saveTree(fname, outfile):
 
     bab = np.empty((1), dtype="float32")
     posTree.Branch("bab", bab, "bab/F")
+
+    babnhits = np.empty((1), dtype="float32")
+    posTree.Branch("babnhits", babnhits, "babnhits/F")
+
+    babretrigger = np.empty((1), dtype="float32")
+    posTree.Branch("babretrigger", babretrigger, "babretrigger/F")
     
     beta14 = np.empty((1), dtype="float32")
     posTree.Branch("beta14", beta14, "beta14/F")
@@ -226,29 +277,71 @@ def saveTree(fname, outfile):
             nhits[0] = ev.GetNhitsCleaned()
 
             try:
-                seedResult = ev.GetFitResult("nearAVAngular")
+                seedResult = ev.GetFitResult("quad")
                 seedVertex = seedResult.GetVertex(0)
                 xSeed[0] = seedVertex.GetPosition().X()
                 ySeed[0] = seedVertex.GetPosition().Y()
                 zSeed[0] = seedVertex.GetPosition().Z()
                 tiSeed[0] = seedVertex.GetTime()
+                xSeedPosErr[0] = seedVertex.GetPositivePositionError().X()
+                ySeedPosErr[0] = seedVertex.GetPositivePositionError().Y()
+                zSeedPosErr[0] = seedVertex.GetPositivePositionError().Z()
+                tiSeedPosErr[0] = seedVertex.GetPositiveTimeError()
+                xSeedNegErr[0] = seedVertex.GetNegativePositionError().X()
+                ySeedNegErr[0] = seedVertex.GetNegativePositionError().Y()
+                zSeedNegErr[0] = seedVertex.GetNegativePositionError().Z()
+                tiSeedNegErr[0] = seedVertex.GetNegativeTimeError()
                 if xSeed[0] != xSeed[0]:
                     xSeed[0] = -999999
                     ySeed[0] = -999999
                     zSeed[0] = -999999
-                #print("a", xSeed[0], ySeed[0], zSeed[0])
-
+                    xSeedPosErr[0] = -999999
+                    ySeedPosErr[0] = -999999
+                    zSeedPosErr[0] = -999999
+                    tiSeedPosErr[0] = -999999
+                    xSeedNegErr[0] = -999999
+                    ySeedNegErr[0] = -999999
+                    zSeedNegErr[0] = -999999
+                    tiSeedNegErr[0] = -999999
+                
             except Exception as e:
                 msg = "No {0} for event {1:d}, GTID {2:d} : {3}"
                 msg = msg.format("Seed", evCounter, ev.GetGTID(), e)
+                #print(msg)
                 xSeed[0] = -999999
                 ySeed[0] = -999999
                 zSeed[0] = -999999
                 tiSeed[0] = -999999
-                #print("b", xSeed[0], ySeed[0], zSeed[0])
-                #print(msg)
-                #continue
+                xSeedPosErr[0] = -999999
+                ySeedPosErr[0] = -999999
+                zSeedPosErr[0] = -999999
+                tiSeedPosErr[0] = -999999
+                xSeedNegErr[0] = -999999
+                ySeedNegErr[0] = -999999
+                zSeedNegErr[0] = -999999
+                tiSeedNegErr[0] = -999999
+                
+            try:
+                nearAVResult = ev.GetFitResult("nearAVAngular")
+                nearAVVertex = nearAVResult.GetVertex(0)
+                xNearAV[0] = nearAVVertex.GetPosition().X()
+                yNearAV[0] = nearAVVertex.GetPosition().Y()
+                zNearAV[0] = nearAVVertex.GetPosition().Z()
+                tiNearAV[0] = nearAVVertex.GetTime()
+                if xnearAV[0] != xnearAV[0]:
+                    xNearAV[0] = -999999
+                    yNearAV[0] = -999999
+                    zNearAV[0] = -999999
+                    tiNearAV[0] = -999999
 
+            except Exception as e:
+                msg = "No {0} for event {1:d}, GTID {2:d} : {3}"
+                msg = msg.format("nearAV", evCounter, ev.GetGTID(), e)
+                #print(msg)
+                xNearAV[0] = -999999
+                yNearAV[0] = -999999
+                zNearAV[0] = -999999
+                #tiNearAV[0] = -999999
 
             # Get fitter vertex
             try:
@@ -288,6 +381,14 @@ def saveTree(fname, outfile):
             zFit[0] = fitVertex.GetPosition().Z()
             tiFit[0] = fitVertex.GetTime()
             EFit[0] = fitVertex.GetEnergy()
+            xFitPosErr[0] = fitVertex.GetPositivePositionError().X()
+            yFitPosErr[0] = fitVertex.GetPositivePositionError().Y()
+            zFitPosErr[0] = fitVertex.GetPositivePositionError().Z()
+            tiFitPosErr[0] = fitVertex.GetPositiveTimeError()
+            xFitNegErr[0] = fitVertex.GetNegativePositionError().X()
+            yFitNegErr[0] = fitVertex.GetNegativePositionError().Y()
+            zFitNegErr[0] = fitVertex.GetNegativePositionError().Z()
+            tiFitNegErr[0] = fitVertex.GetNegativeTimeError()
             #print( ev.GetClassifierResult("nearAVAngular").GetClassification("ratio") )
 
             try :
@@ -309,6 +410,16 @@ def saveTree(fname, outfile):
                 bab[0] = ev.GetClassifierResult("BerkeleyAlphaBeta:scintFitter").GetClassification("likelihood")
             except Exception as e:
                 bab[0] = -999
+
+            try :
+                babnhits[0] = ev.GetClassifierResult("BerkeleyAlphaBeta:scintFitter").GetClassification("nhit")
+            except Exception as e:
+                babnhits[0] = -999
+
+            try :
+                babretrigger[0] = ev.GetClassifierResult("BerkeleyAlphaBeta:scintFitter").GetClassification("retrigger")
+            except Exception as e:
+                babretrigger[0] = -999
                 
             try :
                 timingpeaks[0] = ev.GetClassifierResult("timingPeaks:scintFitter").GetClassification("timingPeaks")
