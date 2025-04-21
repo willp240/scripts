@@ -18,7 +18,7 @@ void Plot2D(){
   gStyle->SetLineWidth(2);
   gStyle->SetOptStat(0);
 
-  std::string plotprefix = "alpha_tmin_";
+  std::string plotprefix = "alpha_mpdfcheck_";
 
   std::string axs[4] = {"xFit:xTrue", "yFit:yTrue", "zFit-184.4:zTrue-184.4", "sqrt(xFit*xFit+yFit*yFit+(zFit-184.4)*(zFit-184.4)):sqrt(xTrue*xTrue+yTrue*yTrue+(zTrue-184.4)*(zTrue-184.4))"};
   std::string title = "Reconstructed";
@@ -202,10 +202,10 @@ void Plot2D(){
   c5->SetRightMargin(0.13);
   gPad->SetFrameLineWidth(2);
   gPad->SetGrid(1);
-  TH2F *htemp5 = new TH2F("htemp5","htemp5", 140, 8, 14, 100, 0, 10000);
-  fTree->Draw("sqrt( (xFitPosErr-xFitNegErr)*(xFitPosErr-xFitNegErr) + (yFitPosErr-yFitNegErr)*(yFitPosErr-yFitNegErr) + (zFitPosErr-zFitNegErr)*(zFitPosErr-zFitNegErr)  ):scaledLLH >> htemp5", (cut1+cut2).c_str(), "colz");
-  std::string ytitle5 = "MPDF Fit Uncertainty";
-  std::string xtitle5 = "MPDF FOM / NHits";
+  TH2F *htemp5 = new TH2F("htemp5","htemp5", 140, 0, 14000, 100, 0, 1);
+  fTree->Draw(" (1-(neckHit / nhits)) * (sqrt( (xSeedPosErr-xSeedNegErr)*(xSeedPosErr-xSeedNegErr) + (ySeedPosErr-ySeedNegErr)*(ySeedPosErr-ySeedNegErr) + (zSeedPosErr-zSeedNegErr)*(zSeedPosErr-zSeedNegErr)) / 1000) * (sqrt( (xFitPosErr-xFitNegErr)*(xFitPosErr-xFitNegErr) + (yFitPosErr-yFitNegErr)*(yFitPosErr-yFitNegErr) + (zFitPosErr-zFitNegErr)*(zFitPosErr-zFitNegErr)) / 1000) * (sqrt((xFit-xSeed)*(xFit-xSeed)+(yFit-ySeed)*(yFit-ySeed)+(zFit-zSeed)*(zFit-zSeed) )/1000) * (1-(scaledLLH / 20)) * itr   : sqrt( (xFit-xTrue)*(xFit-xTrue) + (yFit-yTrue)*(yFit-yTrue) + (zFit-zTrue)*(zFit-zTrue) ) >> htemp5", (cut1).c_str(), "colz");
+  std::string ytitle5 = "Combination";
+  std::string xtitle5 = "Fit Distance, mm";
   htemp5->GetXaxis()->SetTitle(xtitle5.c_str());
   htemp5->GetYaxis()->SetTitle(ytitle5.c_str());
   htemp5->SetTitle("");
@@ -214,6 +214,7 @@ void Plot2D(){
   htemp5->GetYaxis()->SetTitleSize(0.05);
   c5->SetLogz();
   c5->SaveAs((plotprefix+"vsScaledLLH.pdf").c_str());
+
   
 }
 
