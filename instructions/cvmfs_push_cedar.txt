@@ -134,6 +134,37 @@ cd scons-3.1.2
 python setup.py build
 python setup.py install --prefix=/home/snoprod/temp_Will/cvmfs/el9/scons-3.1.2/tree
 
+Geant4 on Graham (SL7):
+module load StdEnv/2020
+module load gcc/11.3.0
+Get tar from https://cern.ch/geant4-data/releases/geant4.10.00.p04.tar.gz
+tar xvf geant4-v10.0.4.tar
+mkdir geant4-v10.0.4-build
+cd geant4-v10.0.4-build
+cmake -DGEANT4_INSTALL_DATA=ON -DGEANT4_BUILD_CXXSTD=c++11 -DCMAKE_INSTALL_PREFIX=/home/parkerw/geant4-v10.0.4 -DG4_BUILD_ABI=1 -DGEANT4_USE_VISUALIZATION=OFF -DGEANT4_USE_HEPREP=OFF /home/parkerw/geant4-v10.0.4
+make -j4
+make install
+cd ..
+source geant4-v10.0.4/bin/geant4.sh
+source geant4-v10.0.4/share/Geant4-10.0.4/geant4make/geant4make.sh
+
+RAT 8.0.1 on Graham (SL7):
+module load StdEnv/2023
+module load gcc/12.3
+module load root/6.28.06
+cd /home/parkerw/rat
+export SNOPLUS_CVMFS_DIR=/cvmfs/snoplus.egi.eu/sl7/
+export RAT_SCONS=$SNOPLUS_CVMFS_DIR/sw/dependencies/scons-3.1.2
+export BZIPROOT=$SNOPLUS_CVMFS_DIR/sw/dependencies/bzip2-1.0.6
+export PATH=$SNOPLUS_CVMFS_DIR/sw/dependencies/curl-7.26.0/bin:$PATH
+export LD_LIBRARY_PATH=$SNOPLUS_CVMFS_DIR/sw/dependencies/curl-7.26.0/lib:$SNOPLUS_CVMFS_DIR/sw/dependencies/bzip2-1.0.6/lib:$LD_LIBRARY_PATH
+export DYLD_LIBRARY_PATH=$SNOPLUS_CVMFS_DIR/sw/dependencies/curl-7.26.0/lib:$SNOPLUS_CVMFS_DIR/sw/dependencies/bzip2-1.0.6/lib:$DYLD_LIBRARY_PATH
+source geant4-v10.0.4/bin/geant4.sh
+source env.sh
+scons
+rat
+
+
 RAT 8:
 module load StdEnv/2023
 module load gcc/12.3
@@ -167,3 +198,5 @@ source /home/scripts/build-rat.sh
 Push to Docker
 docker tag <local_tag_name> snoplus/rat-container:<remote_tag_name>
 docker push snoplus/rat-container:<remote_tag_name>
+
+
