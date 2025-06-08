@@ -1,0 +1,5 @@
+#!/usr/bin/sh
+source /home/parkerw/Software/env-dev.sh
+cd /data/snoplus3/griddata/Prod_7_0_8_9_Preliminary_Scintillator_Gold/ntuples
+
+${command}

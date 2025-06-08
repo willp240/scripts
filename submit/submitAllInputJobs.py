@@ -16,7 +16,7 @@ def check_dir(dname):
         os.stat(direc)
     except:
         os.makedirs(direc)
-        print "Made directory %s...." % dname
+        print ("Made directory %s...." % dname)
     return dname
 
 def pycondor_submit(job_batch, job_id, macro_path, run_path, rat_env, sub_path, out_dir, sleep_time = 1, priority = 5):
@@ -25,7 +25,7 @@ def pycondor_submit(job_batch, job_id, macro_path, run_path, rat_env, sub_path, 
     then write a submit file to be run by condor_submit
     '''
 
-    print job_id
+    print (job_id)
 
     ### set a condor path to be called later
     
@@ -80,8 +80,7 @@ def pycondor_submit(job_batch, job_id, macro_path, run_path, rat_env, sub_path, 
     out_submit_file.close()
     
     command = 'condor_submit -batch-name \"'+job_batch+'\" '+submit_filepath
-#    command = sh_filepath
-    print "executing job: "+command
+    print ("executing job: ", command)
     os.system(command)
 
 
@@ -114,7 +113,7 @@ if __name__ == "__main__":
     try:
         mac = open(args.macro, "r").read()
     except:
-        print "template macro could not be read"
+        print ("template macro could not be read")
         sys.exit(1)
 
     ## check if output and condor directories exist, create if they don't

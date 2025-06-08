@@ -1,0 +1,7 @@
+#!/usr/bin/sh
+export HOME=/home/parkerw/
+source ${sh_sub}
+cd ${run_directory_sub}
+source ${run_directory_sub}/env.sh
+${other_commands_sub}
+rat ${mac_sub}

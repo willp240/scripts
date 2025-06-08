@@ -1,0 +1,7 @@
+#!/usr/bin/sh
+source /home/parkerw/Software/env-dev_5.34.38.sh
+cd /home/parkerw/Software/rat_master
+source /home/parkerw/Software/rat_fresh/env.sh
+
+${other_commands_sub}
+${command}

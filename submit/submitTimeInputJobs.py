@@ -3,9 +3,9 @@ import os
 import string
 import argparse
     
-def write_macro(mac, macname, outfile):
+def write_macro(mac, macname, outfile, infile):
     with open(macname, "w") as f:
-        f.write(mac.format(os.path.abspath(outfile)))
+        f.write(mac.format(os.path.abspath(outfile), os.path.abspath(infile)))
 
 def check_dir(dname):
     """Check if directory exists, create it if it doesn't"""
@@ -19,7 +19,7 @@ def check_dir(dname):
         print ("Made directory %s...." % dname)
     return dname
 
-def pycondor_submit(job_batch, job_id, macro_path, run_path, rat_env, sub_path, out_dir, walltime, mem, sleep_time = 1, priority = 5):
+def pycondor_submit(job_batch, job_id, in_name, macro_path, run_path, rat_env, sub_path, out_dir, sleep_time = 1, priority = 5):
     '''
     submit a job to condor, write a sh file to source environment and execute command
     then write a submit file to be run by condor_submit
@@ -70,9 +70,11 @@ def pycondor_submit(job_batch, job_id, macro_path, run_path, rat_env, sub_path, 
                      "notification            = "+str(notification)+"\n"+\
                      "priority                = "+str(priority)+"\n"+\
                      "getenv                  = "+str(getenv)+"\n"+\
-                     "allowed_execute_duration = " + str(walltime) + " \n" + \
+                     "transfer_input_files    = "+str(in_name)+"\n"+\
+                     "should_transfer_files   = YES\n"+\
+                     "when_to_transfer_output = ON_EXIT\n"+\
                      "queue "+str(n_rep)+"\n"
-                      #"request_memory           = " + str(mem) + " \n" + \
+
     ## check and create output path
     if not os.path.exists(os.path.dirname(submit_filepath)):
         os.makedirs(os.path.dirname(submit_filepath))
@@ -81,6 +83,7 @@ def pycondor_submit(job_batch, job_id, macro_path, run_path, rat_env, sub_path, 
     out_submit_file.close()
     
     command = 'condor_submit -batch-name \"'+job_batch+'\" '+submit_filepath
+#    command = sh_filepath
     print ("executing job: "+command)
     os.system(command)
 
@@ -99,11 +102,12 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--run_directory", type=str,
                        default="/path/to/rat/",
                        help="base directory from which the scripts will be run")
-    parser.add_argument("-w", "--wall_time", type=int, default=86400, help="what's the maximum runtime (in seconds, default 1 day)?")
-    parser.add_argument("-m", "--mem", type=float, default=2000, help="what's the maximum memory (in MB, default 300 MB)?")
-    parser.add_argument("-n", "--no_sims", type=int,
+    parser.add_argument("-n", "--no_files", type=int,
                        default=100,
-                       help="how many identical sims would you like to launch?")
+                       help="how many files do you want to look at")
+    parser.add_argument("-i", "--input_files_directory", type=str,
+                        default="/path/to/input/file",
+                        help="path to input files")
     args = parser.parse_args()
 
     ## check that macros is readable
@@ -113,14 +117,13 @@ if __name__ == "__main__":
         print ("template macro could not be read")
         sys.exit(1)
 
-    walltime = args.wall_time
-    mem = args.mem
-        
     ## check if output and condor directories exist, create if they don't
     out_dir = check_dir(args.out_dir)
+    in_dir = check_dir(args.input_files_directory)
+
     condor_directory = "{0}/condor".format(args.submission_directory)
 
-    # condor_dir = check_dir(condor_directory)
+#    condor_dir = check_dir(condor_directory)
     log_dir = check_dir("{0}/log/".format(out_dir))
     error_dir = check_dir("{0}/error/".format(out_dir))
     mac_dir = check_dir("{0}/macros/".format(out_dir))
@@ -129,12 +132,23 @@ if __name__ == "__main__":
     output_dir = check_dir("{0}/output/".format(out_dir))
     base_name = args.macro.split("/")[-1].replace(".mac","")
 
-    for i in range(args.no_sims):
-        write_macro(mac,
-                    "{0}{1}_{2}.mac".format(mac_dir, base_name, i),
-                    "{0}{1}_{2}.root".format(out_dir, base_name, i)
-        )
+    i=0
+    for in_name in os.listdir(in_dir): # range(args.no_sims):
+
+        if not in_name.endswith('.root'):
+            continue;
         
-        job_id = "{0}_{1}".format(base_name,i)
+        write_macro(mac,
+                    "{0}{1}_reproc.mac".format(mac_dir, in_name),
+                    "{0}{1}_reproc.root".format(out_dir, in_name),
+                    "{0}{1}".format(in_dir, in_name)
+        )
+
+        job_id = in_name #"{0}_{1}".format(base_name,i)
         batch_id = "rat_{0}".format(base_name)
-        pycondor_submit(batch_id,job_id,"{0}{1}_{2}.mac".format(mac_dir,base_name,i),args.run_directory,args.env_file,args.submission_directory,out_dir, walltime, mem, sleep_time = 1, priority = 5)
+        infile = in_dir + "/" + in_name
+        pycondor_submit(batch_id,job_id,infile,"{0}{1}_reproc.mac".format(mac_dir,in_name),args.run_directory,args.env_file,args.submission_directory,out_dir, sleep_time = 1, priority = 5)
+        i = i+1
+
+        if i > args.no_files:
+            break
