@@ -1,0 +1,10 @@
+executable              = /home/parkerw/Scripts/timeJobsUpdatedHist.sh
+universe                = vanilla
+output                  = /home/parkerw/Scripts/timeJobsUpdatedHist.out
+error                   = /home/parkerw/Scripts/timeJobsUpdatedHist.err
+log                     = /home/parkerw/Scripts/timeJobsUpdatedHist.log
+request_memory          = 16000
+notification            = never
+priority                = 5
+getenv                  = False
+queue 1

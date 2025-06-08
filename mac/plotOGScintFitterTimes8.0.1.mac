@@ -1,0 +1,10 @@
+executable              = /home/parkerw/Scripts/timeJobsOG.sh
+universe                = vanilla
+output                  = /home/parkerw/Scripts/timeJobsOG.out
+error                   = /home/parkerw/Scripts/timeJobsOG.err
+log                     = /home/parkerw/Scripts/timeJobsOG.log
+request_memory          = 16000
+notification            = never
+priority                = 5
+getenv                  = False
+queue 1
