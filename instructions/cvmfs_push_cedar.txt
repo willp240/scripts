@@ -65,6 +65,19 @@ git clone --depth 1 https://github.com/snoplus/rat.git --branch $TAG
 cd cvmfs_pusher
 ./run_script.sh ../rat $TAG ../rat-container.sif
 
+For RAT 8 without Container:
+module load StdEnv/2023
+module load gcc/12.3
+export SNOPLUS_CVMFS_DIR=/cvmfs/snoplus.egi.eu/el9
+cd cvmfs_pusher
+rm -rf rat
+git clone --depth 1 https://github.com/snoplus/rat.git --branch $TAG
+cd rat
+./configure
+. env.sh
+scons
+cd ../
+./run_script_no_container.sh ../rat $TAG
 
 Dependencies:
 
@@ -87,7 +100,7 @@ make install
 ROOT:
 module load StdEnv/2023
 module load gcc/12.3
-Get tar from https://root.cern/releases/release-63008/
+Get tar from https://root.cern/releases/release-63006/
 tar xvf root_v6.30.06.source.tar
 cd root-6.30.06
 mkdir obj
@@ -96,6 +109,27 @@ export GSL_ROOT_DIR=/home/snoprod/temp_Will/cvmfs/el9/sw/dependencies/gsl-2.7.1/
 export FFTW_DIR=/home/snoprod/temp_Will/cvmfs/el9/sw/dependencies/fftw-3.3.10/
 cmake -Dminuit2=ON -Droofit=ON -Dfortran=OFF -Dfftw3=ON -Dgsl=ON -Dgdml=ON -Dmathmore=ON -Dclad=OFF -Dbuiltin_tbb=OFF -Dimt=OFF  ..
 make -j 4
+
+ROOT (with no hardcoded filepaths):
+module load StdEnv/2023
+module load gcc/12.3
+Get tar from https://root.cern/releases/release-63408/
+tar xvf root_v6.34.08.source.tar
+export GSL_ROOT_DIR=/cvmfs/snoplus.egi.eu/el9/sw/dependencies/gsl-2.7.1/
+export FFTW_DIR=/cvmfs/snoplus.egi.eu/el9/sw/dependencies/fftw-3.3.10/
+mkdir -p /home/parkerw/temp_rootbuild
+cd /home/parkerw/temp_rootbuild
+cmake -Droofit=ON -Dfortran=OFF -Dfftw3=ON -Dgsl=ON -Dgdml=ON -Dmathmore=ON -Dclad=OFF -Dbuiltin_tbb=OFF -Dimt=OFF -Dthread=ON -DCMAKE_BUILD_TYPE=Release -Dgnuinstall=ON -DCMAKE_INSTALL_PREFIX=/cvmfs/snoplus.egi.eu/el9/sw/dependencies/root-6.34.08 /home/parkerw/root-6.34.08
+make -j4
+make install DESTDIR=/home/parkerw/root_6.34.08
+cd ../root_6.34.08
+chmod -R a+r .
+find . -perm /u+x -print0 | xargs -L1 -0 chmod a+x
+scp -rpC ./cvmfs/snoplus.egi.eu/el9/ snoplussgm@cvmfs-upload01.gridpp.rl.ac.uk:~/cvmfs_repo
+cd ..
+rm root_v6.34.08.source.tar.gz
+rm -r temp_rootbuild
+rm -r root-6.34.08
 
 Geant4:
 module load StdEnv/2020
@@ -127,6 +161,18 @@ cd bzip2-1.0.8
 make
 make install PREFIX=/home/snoprod/temp_Will/cvmfs/el9/bzip2-1.0.8/tree
 
+bzip2 (with shared library):
+Get tar from https://sourceware.org/bzip2/index.html
+tar xvf bzip2-1.0.8.tar
+cd bzip2-1.0.8
+make CFLAGS="-fPIC"
+make -f Makefile-libbz2_so
+make install PREFIX=/home/parkerw/cvmfs_pusher/bzip2/install
+cp libbz2.so* install/lib/
+chmod -R a+r .
+find . -perm /u+x -print0 | xargs -L1 -0 chmod a+x
+scp -rpC ./install/* snoplussgm@cvmfs-upload01.gridpp.rl.ac.uk:~/cvmfs_repo/el9/sw/dependencies/bzip2-1.0.8
+
 SCons:
 Get tar from https://sourceforge.net/projects/scons/files/scons/3.1.2/scons-3.1.2.tar.gz/download
 tar xvf scons-3.1.2.tar.gz
@@ -147,6 +193,15 @@ make install
 cd ..
 source geant4-v10.0.4/bin/geant4.sh
 source geant4-v10.0.4/share/Geant4-10.0.4/geant4make/geant4make.sh
+
+xxHash (prolly not needed):
+git clone https://github.com/Cyan4973/xxHash.git
+cd xxHash/
+make
+make PREFIX=/home/parkerw/cvmfs_pusher/xxHash/install install
+chmod -R a+r .
+find . -perm /u+x -print0 | xargs -L1 -0 chmod a+x
+scp -rpC ./install/* snoplussgm@cvmfs-upload01.gridpp.rl.ac.uk:~/cvmfs_repo/el9/sw/dependencies/xxhash-0.8.3/
 
 RAT 8.0.1 on Graham (SL7):
 module load StdEnv/2023
