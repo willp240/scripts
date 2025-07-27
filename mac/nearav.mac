@@ -4,7 +4,7 @@
 
 /rat/db/set MC thin_factor 1.0
 /rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
-/rat/db/set GEO[inner_av] material "labppo_2p2_scintillator"
+/rat/db/set GEO[inner_av] material "labppo_2p2_bismsb_2p2_scintillator"
 
 /rat/db/set NOISE_MC noise_flag 1
 
@@ -21,9 +21,9 @@
 /rat/proc outroot
 /rat/procset file "{0}"
 
-/generator/add combo gun:fill
-/generator/vtx/set e- 0 0 0 10.0
-/generator/pos/set 0 0 0
+/generator/add combo gun:fillshell
+/generator/vtx/set e- 0 0 0 2.5
+/generator/pos/set 0 0 0 0 0 0 {1} {2}
 /generator/rate/set 1
 
 /rat/run/start 1000
