@@ -1,0 +1,26 @@
+/rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
+/rat/db/set GEO[inner_av] material "labppo_2p2_scintillator"
+/rat/db/set MC thin_factor 1.0
+/run/initialize
+
+# BEGIN EVENT LOOP
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc datacleaning
+/rat/proc calibratePMT
+/rat/proc scintFitter
+/rat/proc count
+/rat/procset update 1
+/rat/proclast outroot
+/rat/procset file "reacibd.root"
+
+# END EVENTLOOP
+
+
+/generator/add reactor ALL:ibd:fill:poisson
+/generator/pos/set 0 0 0
+/generator/set flux_scale 30000
+
+/rat/run/start 1
+exit

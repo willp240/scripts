@@ -1,0 +1,38 @@
+# File: inroot.mac
+# Brief: Macro showing how to load a root file and run processoers on the data
+#
+# Date: 2014-07-24
+# Contact: P G Jones, <p.g.jones@qmul.ac.uk>
+# Revisions:
+#
+# This macro demonstrates how to load a root file called input.root and run
+# processors on it including output to a root file called output.root.
+
+/rat/inroot/load SNOP_0000304371_007_2ndpass.root
+
+# Extra files can also be loaded by including extra lines, such as:
+#/rat/inroot/load input2.root
+
+# To load files from the command line using the '-i' option
+# /rat/inroot/load_default
+# can be used instead
+
+/run/initialize
+
+# BEGIN EVENT LOOP
+/rat/proc count # An example processor
+/rat/procset update 5
+
+/rat/proc/if runeventlist
+
+    /rat/procset file "list.txt"
+
+    /rat/proc outroot
+    /rat/procset file "SNOP_0000304371_007_2ndpass_10evs.root"
+
+/rat/proc/endif
+# END EVENT LOOP
+
+/rat/inroot/read
+
+exit

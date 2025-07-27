@@ -1,0 +1,53 @@
+# File: scintFitter.mac
+# Brief: Short macro showing how to run the scintFitter
+#
+# Date: 19-05-2014
+# Contact: Dr M Mottram, <m.mottram@qmul.ac.uk>
+# Revisions:
+#       19-05-2014 I. Coulter <icoulter@hep.upenn.edu> Initial commit.
+#
+# This is a macro which shows how to run the scintFitter, which gives
+# the "best" fit for the scintillator phase, as defined by the
+# reconstruction group.
+# Currently, this will use different PDFs depending on the scintillator
+# material in use and so should work for both loaded and unloaded
+# scintillators. Details of what this contains can be found in the user
+# manual or within the code itself.
+#
+
+#/rat/physics_list/OmitMuonicProcesses true
+#/rat/physics_list/OmitHadronicProcesses true
+
+/rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
+
+/rat/db/set GEO[inner_av] material "labppo_2p2_bismsb_2p2_scintillator"
+
+#/rat/db/set GEO[inner_av] material "labppo_2p2_scintillator"
+
+/run/initialize
+
+# BEGIN EVENT LOOP
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc count
+/rat/procset update 1
+/rat/proc calibratePMT
+
+/rat/proc datacleaning
+/rat/procset index "scintillator"
+/rat/procset mask "default_apply"
+
+/rat/proc scintFitter
+
+/rat/proclast outroot
+/rat/procset file "test.root"
+# END EVENTLOOP
+
+/generator/add combo gun2:fillshell
+/generator/vtx/set e- 0 0 0 0 0 10
+/generator/pos/set 0 0 0 0 6000  inner_av
+/generator/rate/set 1
+
+/rat/run/start 10
+exit

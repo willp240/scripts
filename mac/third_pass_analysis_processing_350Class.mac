@@ -1,0 +1,82 @@
+#  File:       third_pass_analysis_processing.mac
+#
+#  Date:       2024-06-12
+#  Contact:    Valentina Lozza <vlozza@lip.pt>
+#
+#       3rd step of official processing (1st pass = first_pass_data_cleaning.mac
+#       to run the 1st pass of tpmuonfollowercut to identify muons,
+#       2nd pass = second_pass_processing.mac to run full DC, PMTCalibrations and
+#       HitCleaning). This pass then runs over the rootfiles output by the
+#       second_pass that contain all events, and applies conditional logic so that
+#       only open event are further analysed.
+#       All the open events are then output to both ntuple and root file.
+#
+#  Prerequesites: second_pass_processing.mac: creates a rootfile that contains all
+#       events, including blinded ones that is used as input to this macro.
+#
+
+/rat/physics_list/OmitAll true
+
+/rat/inroot/load /home/parkerw/Software/rat_master/SNOP_0000357647_005_2ndpass.root # a file parameter needs to be passed here
+
+# Load geo and set the scintillator optics
+/rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
+/rat/db/set GEO[inner_av] material "labppo_2p2_bismsb_2p2_scintillator" # 2.2 g/L PPO+bisMSB
+
+/run/initialize
+
+##########EVENT LOOP############
+
+# Conditional logic for analysis:
+# 1. Reconstruct all data that passes the reconstruction cuts
+/rat/proc/if trigTypeSelector
+  # We do not want to process events with the PED trigger - ie the Nhit monitor
+  /rat/procset trigType "Pedestal"
+  /rat/procset trigType "EXTASY"
+/rat/proc/else
+
+    # Conditional logic for reconstruction - only certain types of instrumental + physics events
+    # (does nothing currently - set to nothingcut)
+    /rat/proc/if dataCleaningCut
+    /rat/procset mask "reconstruction_filter"
+
+      # Conditional logic for reconstruction - choose Nhit>X (selected with -c) for speedier processing
+      /rat/proc/if nhitCut
+      /rat/procset userset 1
+      /rat/procset clean 1
+
+        /rat/proc scintFitter
+
+        # Run Millicharge classifier on events with >350 nhits
+        /rat/procset mCP.ITRmCPNhitCut 350
+
+      /rat/proc/else         # nHit < X
+
+        # For these low nhit <X, reconstruct only 1%
+        /rat/proc/if numberProcessed
+        /rat/procset number 100
+
+          # Even for these events - quad fitter needs at least 10 hits to converge
+          /rat/proc/if nhitCut
+          /rat/procset nhit 10
+          /rat/procset clean 1
+
+          /rat/proc scintFitter
+
+          /rat/proc/endif   # nhit selection (>10)
+        /rat/proc/endif     # 1% prescale
+      /rat/proc/endif       # nhit selection (>X)
+    /rat/proc/endif         # data cleaning (instrumentals)
+/rat/proc/endif             # not ped + EXTASY events
+
+# write the data to file (whether reconstructed or not, all triggers)
+/rat/proc prune
+/rat/procset prune "ev.uncalPMTs,ev.intermedCalPMTs"
+#/rat/proc outntuple         # a file parameter needs to be passed here
+/rat/proc outroot           # a file parameter needs to be passed here
+/rat/procset file "{0}"
+
+##########EVENT LOOP############
+/rat/inroot/read
+
+exit

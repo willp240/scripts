@@ -1,0 +1,16 @@
+
+/rat/inroot/load {1}
+
+/rat/db/set QUAD_FIT[labppo_2p2_bismsb_2p2_scintillator] num_points 500
+
+/run/initialize
+
+
+/rat/proc scintFitter
+
+/rat/proclast outroot
+/rat/procset file "{0}"
+# END EVENTLOOP
+
+/rat/inroot/read
+exit
