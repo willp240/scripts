@@ -1,0 +1,9 @@
+executable              = /home/parkerw/Scripts/testcontainer1.sh
+universe                = vanilla
+output                  = /data/snoplus3/parkerw/ratSimulations/Oct12_conttest/Oct12_conttest.output
+error                   = /data/snoplus3/parkerw/ratSimulations/Oct12_conttest/Oct12_conttest.error
+log                     = /data/snoplus3/parkerw/ratSimulations/Oct12_conttest/Oct12_conttest.log
+notification            = never
+priority                = 5
+getenv                  = False
+queue 1
