@@ -1,8 +1,8 @@
-executable              = /home/parkerw/Scripts/savetree_6to14alph.sh
+executable              = /home/parkerw/Scripts/condor_pair_open.sh
 universe                = vanilla
-output                  = /home/parkerw/Scripts/savetree6to14alph.log
-error                   = /home/parkerw/Scripts/savetree6to14alph.err
-log                     = /home/parkerw/Scripts/savetree6to14alph.out
+output                  = /home/parkerw/Scripts/condor_pair_open.log
+error                   = /home/parkerw/Scripts/condor_pair_open.err
+log                     = /home/parkerw/Scripts/condor_pair_open.out
 notification            = never
 priority                = 5
 getenv                  = False
