@@ -19,6 +19,7 @@ void PosFitDiffs( ) {
   //RAT::DU::DSReader dsreaderUpdated("/data/snoplus/parkerw/ratSimulations/May2_1to10_Quad500/scint*25.root");
 
   double mcx, mcy, mcz, mcr, mce, fitx1, fity1, fitz1, fitr1, fitx2, fity2, fitz2, fitr2;
+  int nhits;
   
   // Declare tree with branches: mcx mcy mcz mcr mce fitx1 fity1 fitz1 fitr1 fitx2 fity2 fitz2 fitr2
   TTree *tree = new TTree("T","events");
@@ -35,12 +36,13 @@ void PosFitDiffs( ) {
   tree->Branch("fity2", &fity2);
   tree->Branch("fitz2", &fitz2);
   tree->Branch("fitr2", &fitr2);
+  tree->Branch("nhits", &nhits);
 
   for(int iFile = 0; iFile < 100; iFile++)
     {
 
-      TString fname1 = Form("/data/snoplus/parkerw/ratSimulations/Apr20_1to10_e7/scintFitter_%d.root",iFile);
-      TString fname2 = Form("/data/snoplus/parkerw/ratSimulations/May2_1to10_Quad500/scintFitterInput_%d.root",iFile);
+      TString fname1 = Form("/data/snoplus3/parkerw/ratSimulations/Oct3_1to10_sim_SF/e1to10MeV_sim_%d.root",iFile);
+      TString fname2 = Form("/data/snoplus3/parkerw/ratSimulations/Oct3_1to10_sim_fastSF/inputPerf_%d.root",iFile);
 
       std::string f1 = std::string(fname1);
       std::string f2 = std::string(fname2);
@@ -75,6 +77,8 @@ void PosFitDiffs( ) {
 	    mcz = rDS1.GetMC().GetMCParticle(0).GetPosition().Z();
 	    mcr = rDS1.GetMC().GetMCParticle(0).GetPosition().Mag();
 	    mce = rDS1.GetMC().GetMCParticle(0).GetKineticEnergy();
+
+	    nhits = rev1.GetNhits();
 	    
 	    double mcx2 = rDS2.GetMC().GetMCParticle(0).GetPosition().X();
 	    double mcy2 = rDS2.GetMC().GetMCParticle(0).GetPosition().Y();
@@ -140,7 +144,7 @@ void PosFitDiffs( ) {
   hX->GetXaxis()->SetTitle("Original Fit X - Updated Fit X, mm");
   hX->GetYaxis()->SetTitle("Events");
   hX->Draw();
-  cX->SaveAs("May30X2.pdf");
+  cX->SaveAs("Oct3_Xfitdiffs.pdf");
   
   TCanvas* cY = new TCanvas("cY", "cY", 1500,800);
   cY->SetRightMargin(0.13);
@@ -155,7 +159,7 @@ void PosFitDiffs( ) {
   hY->GetXaxis()->SetTitle("Original Fit Y - Updated Fit Y, mm");
   hY->GetYaxis()->SetTitle("Events");
   hY->Draw();
-  cY->SaveAs("May30Y2.pdf");
+  cY->SaveAs("Oct3_Yfitdiffs.pdf");
   
   TCanvas* cZ = new TCanvas("cZ", "cZ", 1500,800);
   cZ->SetRightMargin(0.13);
@@ -170,7 +174,7 @@ void PosFitDiffs( ) {
   hZ->GetXaxis()->SetTitle("Original Fit Z - Updated Fit Z, mm");
   hZ->GetYaxis()->SetTitle("Events");
   hZ->Draw();
-  cZ->SaveAs("May30Z2.pdf");
+  cZ->SaveAs("Oct3_Zfitdiffs.pdf");
   
   TCanvas* cR = new TCanvas("cR", "cR", 1500,800);
   cR->SetRightMargin(0.13);
@@ -185,8 +189,8 @@ void PosFitDiffs( ) {
   hR->GetXaxis()->SetTitle("Original Fit R - Updated Fit R, mm");
   hR->GetYaxis()->SetTitle("Events");
   hR->Draw();
-  cR->SaveAs("May30R2.pdf");
-  
+  cR->SaveAs("Oct3_Rfitdiffs.pdf");
+    
   TCanvas* cD = new TCanvas("cD", "cD", 1500,800);
   cD->SetRightMargin(0.13);
   gPad->SetFrameLineWidth(2);
@@ -200,8 +204,7 @@ void PosFitDiffs( ) {
   hD->GetXaxis()->SetTitle("Original - Updated Fit Distance, mm");
   hD->GetYaxis()->SetTitle("Events");
   hD->Draw();
-  cD->SaveAs("May30D2.pdf");
-  
+  cD->SaveAs("Oct3_Dfitdiffs.pdf");
   
   // 2D plots distance:r distance:e distance:truedistance1
   
@@ -216,7 +219,7 @@ void PosFitDiffs( ) {
   hDR->GetYaxis()->SetTitle("Original - Updated Fit Distance, mm");
   hDR->GetXaxis()->SetTitle("True Radius, mm");
   hDR->Draw("colz");
-  cDR->SaveAs("May30DR2.pdf");
+  cDR->SaveAs("Oct3_2Drfitdiffs.pdf");
   
   TCanvas* cDE = new TCanvas("cDE", "cDE", 1500,800);
   cDE->SetRightMargin(0.13);
@@ -229,7 +232,7 @@ void PosFitDiffs( ) {
   hDE->GetYaxis()->SetTitle("Original - Updated Fit Distance, mm");
   hDE->GetXaxis()->SetTitle("True Energy, MeV");
   hDE->Draw("colz");
-  cDE->SaveAs("May30DE2.pdf");
+  cDE->SaveAs("Oct3_2dEfitdiffs.pdf");
   
   TCanvas* cDD = new TCanvas("cDD", "cDD", 1500,800);
   cDD->SetRightMargin(0.13);
@@ -244,7 +247,7 @@ void PosFitDiffs( ) {
   hDD->GetXaxis()->SetTitle("True - Original Fit Distance, mm");
   hDD->GetYaxis()->SetTitle("Original - Updated Fit Distance, mm");
   hDD->Draw("colz");
-  cDD->SaveAs("May30DD2.pdf");
+  cDD->SaveAs("Oct3_2dtrueDfitdiffs.pdf");
   
   TCanvas* cXX = new TCanvas("cXX", "cXX", 1500,800);
   cXX->SetRightMargin(0.13);
@@ -257,7 +260,7 @@ void PosFitDiffs( ) {
   hXX->GetXaxis()->SetTitle("Original Fit X, mm");
   hXX->GetYaxis()->SetTitle("Updated Fit X, mm");
   hXX->Draw("colz");
-  cXX->SaveAs("May30XX2.pdf");
+  cXX->SaveAs("Oct3_2dXfitdiffs.pdf");
   
   TCanvas* cYY = new TCanvas("cYY", "cYY", 1500,800);
   cXX->SetRightMargin(0.13);
@@ -270,7 +273,7 @@ void PosFitDiffs( ) {
   hYY->GetXaxis()->SetTitle("Original Fit Y, mm");
   hYY->GetYaxis()->SetTitle("Updated Fit Y, mm");
   hYY->Draw("colz");
-  cYY->SaveAs("May30YY2.pdf");
+  cYY->SaveAs("Oct3_2dYfitdiffs.pdf");
   
   TCanvas* cZZ = new TCanvas("cZZ", "cZZ", 1500, 800);
   cZZ->SetRightMargin(0.13);
@@ -283,7 +286,7 @@ void PosFitDiffs( ) {
   hZZ->GetXaxis()->SetTitle("Original Fit Z, mm");
   hZZ->GetYaxis()->SetTitle("Updated Fit Z, mm");
   hZZ->Draw("colz");
-  cZZ->SaveAs("May30ZZ2.pdf");
+  cZZ->SaveAs("Oct3_2dZfitdiffs.pdf");
   
   TCanvas* cRR = new TCanvas("cRR", "cRR", 1500, 800);
   cRR->SetRightMargin(0.13);
@@ -296,6 +299,46 @@ void PosFitDiffs( ) {
   hRR->GetXaxis()->SetTitle("Original Fit R, mm");
   hRR->GetYaxis()->SetTitle("Updated Fit R, mm");
   hRR->Draw("colz");
-  cRR->SaveAs("May30RR2.pdf");
+  cRR->SaveAs("Oct3_2dRfitdiffs.pdf");
+  
+  TCanvas* cTruth = new TCanvas("cTruth", "cTruth", 1500,800);
+  cTruth->SetRightMargin(0.13);
+  gPad->SetFrameLineWidth(2);
+  gPad->SetGrid(1);
+  TH2F *hTruth = new TH2F("hTruth","hTruth", 1000, 0, 12000, 1000, 0, 12000);
+  hTruth->SetTitle("");
+  tree->Draw("sqrt( (mcx-fitx2)*(mcx-fitx2) + (mcy-fity2)*(mcy-fity2) + (mcz-fitz2)*(mcz-fitz2)): sqrt( (mcx-fitx1)*(mcx-fitx1) + (mcy-fity1)*(mcy-fity1) + (mcz-fitz1)*(mcz-fitz1) ) >> hTruth", "", "");
+  hTruth->SetLineWidth(2);
+  hTruth->GetXaxis()->SetTitle("True - Original Fit Distance, mm");
+  hTruth->GetYaxis()->SetTitle("True - Updated Fit Distance, mm");
+  hTruth->Draw("colz");
+  cTruth->SaveAs("Oct3_2dtruefitdists.pdf");
+
+  TCanvas* cNhit = new TCanvas("cNhit", "cNhit", 1500, 800);
+  cNhit->SetRightMargin(0.13);
+  gPad->SetFrameLineWidth(2);
+  gPad->SetGrid(1);
+  TH2F *hNhit = new TH2F("hNhit","hNhit", 1000, 0, 12000, 1000, 0, 5000);
+  hNhit->SetTitle("");
+  tree->Draw("nhits:sqrt( (mcx-fitx2)*(mcx-fitx2) + (mcy-fity2)*(mcy-fity2) + (mcz-fitz2)*(mcz-fitz2) ) >> hNhit", "", "");
+  hNhit->SetLineWidth(2);
+  hNhit->GetXaxis()->SetTitle("True - Original Fit Distance, mm");
+  hNhit->GetYaxis()->SetTitle("Nhits");
+  hNhit->Draw("colz");
+  cNhit->SaveAs("Oct3_Nhitfitdiffs.pdf");
+
+  TCanvas* cRadius = new TCanvas("cRadius", "cRadius", 1500, 800);
+  cRadius->SetRightMargin(0.13);
+  gPad->SetFrameLineWidth(2);
+  gPad->SetGrid(1);
+  TH2F *hRadius = new TH2F("hRadius","hRadius", 1000, 0, 12000, 1000, 0, 6000);
+  hRadius->SetTitle("");
+  tree->Draw(" mcr:sqrt( (mcx-fitx2)*(mcx-fitx2) + (mcy-fity2)*(mcy-fity2) + (mcz-fitz2)*(mcz-fitz2) ) >> hRadius", "", "");
+  hRadius->SetLineWidth(2);
+  hRadius->GetYaxis()->SetTitle("True Radius, mm");
+  hRadius->GetXaxis()->SetTitle("True - Original Fit Distance, mm");
+  hRadius->Draw("colz");
+  cRadius->SaveAs("Oct3_TrueRfitdiff.pdf");
+
   
 }
