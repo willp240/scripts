@@ -1,0 +1,7 @@
+#!/usr/bin/sh
+export HOME=/home/parkerw/
+source ${sh_sub}
+cd /home/parkerw/Scripts
+
+${other_commands_sub}
+root -l -b -q 'one_pair_open.C("${reprocfile}", "${origfile}", "${outfile}")'
