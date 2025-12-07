@@ -1,0 +1,779 @@
+// ROOT Headers
+#include <TFile.h>
+#include <TTree.h>
+#include <TH2D.h>
+#include <TCanvas.h>
+#include <TStyle.h>
+
+// c++ Headers
+#include <sys/stat.h>
+
+/* ///////////////////////////////////////////////////////////////////
+///
+/// Hacked script to make prefit distributions. Fit dir and outputs
+/// are hard coded
+///
+/////////////////////////////////////////////////////////////////// */
+
+// Configurable parameter sets
+const std::vector<std::string> baseParams1{
+    "asimov", "data", "reactor_nubar", "geonu_U", "geonu_Th", "alphan_PRecoil", "alphan_CScatter",
+    "alphan_OExcited", "bipolike", "atmospheric"};
+
+const std::string datasetname1 = "2p2ppo";
+
+const std::vector<std::string> baseParams2{
+    "asimov", "data", "reactor_nubar2", "geonu_U2", "geonu_Th2", "alphan_PRecoil2", "alphan_CScatter2",
+    "alphan_OExcited2", "bipolike2", "atmospheric2"};
+
+const std::string datasetname2 = "bismsb";
+
+const std::vector<std::string> reactorGroup = {"reactor_nubar"};
+const std::vector<std::string> geoGroup = {"geonu_Th", "geonu_U"};
+const std::vector<std::string> alphaGroup = {"alphan_PRecoil", "alphan_CScatter", "alphan_OExcited"};
+const std::vector<std::string> bipolikeGroup = {"bipolike"};
+const std::vector<std::string> atmosphericGroup = {"atmospheric"};
+const std::vector<std::string> reactorGroup2 = {"reactor_nubar2"};
+const std::vector<std::string> geoGroup2 = {"geonu_Th2", "geonu_U2"};
+const std::vector<std::string> alphaGroup2 = {"alphan_PRecoil2", "alphan_CScatter2", "alphan_OExcited2"};
+const std::vector<std::string> bipolikeGroup2 = {"bipolike2"};
+const std::vector<std::string> atmosphericGroup2 = {"atmospheric2"};
+
+// Define colours for histograms
+std::vector<int> lineColours = {kBlue + 2, kBlack, kBlue, kMagenta + 2, kMagenta + 4, kRed + 1, kRed + 2, kRed + 3, kGreen + 3, kOrange + 2};
+std::vector<int> fillColours = {kBlue + 2, kBlack, kBlue - 9, kMagenta - 8, kMagenta - 5, kRed - 9, kRed - 2, kRed - 1, kGreen - 5, kOrange + 1};
+
+// Axis ranges
+double xmin = 0.9;
+double xmax = 8.0;
+
+// Depeding on your 'datasetChoice', the yrange is either the 0 (both datasets), 1 (dataset1/ppo), or 2 (dataset2/bismsb) choice of these ranges
+double ymin;
+double ymax;
+double ymin0 = 0.0;
+double ymax0 = 7.0;
+double ymin1 = 0.0;
+double ymax1 = 2.5;
+double ymin2 = 0.0;
+double ymax2 = 4.5;
+double ymin0dat = 0.0;
+double ymax0dat = 50.0;
+double ymin1dat = 0.0;
+double ymax1dat = 15;// 20.0;
+double ymin2dat = 0.0;
+double ymax2dat = 35.0;
+
+// If you are plotting real data, what bin width to use for data
+double databinwidth = 0.3;
+
+TH1D* rebinData(std::string dataDir, const int datasetChoice)
+{
+    std::cout << "Rebinning data from " << dataDir << std::endl;
+
+    // Open the file
+    std::string filename1 = dataDir + "/data_" + datasetname1 + ".root";
+    TFile *file1 = TFile::Open(filename1.c_str(), "READ");
+    if (!file1 || file1->IsZombie())
+    {
+        std::cerr << "Error opening file: " << filename1 << std::endl;
+        throw;
+    }
+
+    // Get the TNtuple (replace "ntuple" with your actual name if different)
+    TNtuple *nt1 = (TNtuple *)file1->Get("pruned");
+    if (!nt1)
+    {
+        std::cerr << "Could not find TNtuple 'pruned' in file " << filename1 << std::endl;
+        file1->Close();
+        throw;
+    }
+
+    // Open the second file
+    std::string filename2 = dataDir + "/data_" + datasetname2 + ".root";
+    TFile *file2 = TFile::Open(filename2.c_str(), "READ");
+    if (!file2 || file2->IsZombie())
+    {
+        std::cerr << "Error opening file: " << filename2 << std::endl;
+        throw;
+    }
+
+    // Get the TNtuple (replace "ntuple" with your actual name if different)
+    TNtuple *nt2 = (TNtuple *)file2->Get("pruned");
+    if (!nt2)
+    {
+        std::cerr << "Could not find TNtuple 'pruned' in file " << filename2 << std::endl;
+        file2->Close();
+        throw;
+    }
+
+    //    Int_t nBins = static_cast<Int_t>((xmax - xmin) / databinwidth);
+    double eps = 1e-12;
+    int nBins = static_cast<int>(std::ceil((xmax - xmin)/databinwidth - eps));
+    double xmax_new = xmin + nBins * databinwidth;
+    
+    TH1D *h1 = new TH1D("hEnergy", "Energy distribution;Energy (MeV);Events",
+                           nBins, xmin, xmax_new);
+    h1->SetLineWidth(2);
+    h1->SetLineColor(kBlack);
+
+    float energy = 0;
+
+    if (datasetChoice == 0 || datasetChoice == 1)
+    {
+
+        nt1->SetBranchAddress("energy", &energy);
+
+        // Loop over entries
+        Long64_t nEntries = nt1->GetEntries();
+        for (Long64_t i = 0; i < nEntries; ++i)
+        {
+            nt1->GetEntry(i);
+            h1->Fill(energy);
+        }
+    }
+    if (datasetChoice == 0 || datasetChoice == 2)
+    {
+
+        nt2->SetBranchAddress("energy", &energy);
+
+        // Loop over entries
+        Long64_t nEntries = nt2->GetEntries();
+        for (Long64_t i = 0; i < nEntries; ++i)
+        {
+            nt2->GetEntry(i);
+            h1->Fill(energy);
+        }
+    }
+    return h1;
+}
+
+std::string RemoveDSName(const std::string& input) {
+    std::string result = input;
+    // Remove "PPO" or "bisMSB" with optional leading/trailing spaces
+    result = std::regex_replace(result, std::regex("\\s*(PPO|bisMSB)\\s*"), " ");
+    // Trim any extra whitespace that might be left at the ends
+    result = std::regex_replace(result, std::regex("^\\s+|\\s+$"), "");
+    return result;
+}
+
+void plotFixedOscDist_Asmv(const char *filename = "fit_results.root", const int datasetChoice = 1, std::string dataDir = "")
+{
+
+    gROOT->SetStyle("snoplus");
+
+    // Open the ROOT file
+    TFile *file = TFile::Open(filename, "READ");
+    if (!file || file->IsZombie())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return;
+    }
+
+    // Get the TTree
+    TTree *tree = nullptr;
+    file->GetObject("fitResults", tree);
+    if (!tree)
+    {
+        std::cerr << "Error: Could not find TTree 'fitResults' in file " << filename << std::endl;
+        file->Close();
+        return;
+    }
+
+    // Get the list of branches
+    TObjArray *branches = tree->GetListOfBranches();
+    std::map<std::string, double> branchValues;
+
+    // Create a map of branch names to variables
+    std::map<std::string, double *> branchPointers;
+    for (int i = 0; i < branches->GetEntries(); ++i)
+    {
+        std::string branchName = branches->At(i)->GetName();
+        branchValues[branchName] = 0.0;
+        branchPointers[branchName] = &branchValues[branchName];
+        tree->SetBranchAddress(branchName.c_str(), branchPointers[branchName]);
+    }
+
+    // Check the form of theta 12
+    std::string theta12name;
+    if (tree->GetBranch("theta12"))
+        theta12name = "theta12";
+    else if (tree->GetBranch("sintheta12"))
+        theta12name = "sintheta12";
+    else if (tree->GetBranch("sinsqtheta12"))
+        theta12name = "sinsqtheta12";
+
+    double minLLH = 1e9;
+    double bestTheta = 0;
+    double bestDeltaM = 0;
+
+    // Loop over entries in the tree
+    Long64_t nEntries = tree->GetEntries();
+    for (Long64_t i = 0; i < nEntries; ++i)
+    {
+        tree->GetEntry(i);
+        if (branchValues["LLH"] < minLLH)
+        {
+            minLLH = branchValues["LLH"];
+            bestTheta = branchValues[theta12name];
+            bestDeltaM = branchValues["deltam21"];
+        }
+    }
+
+    // Build paramOrder based on datasetChoice
+    std::vector<std::vector<std::string>> paramOrders;
+    std::vector<std::string> dsname;
+    std::vector<std::string> reacGrp;
+    std::vector<std::string> geoGrp;
+    std::vector<std::string> alphaGrp;
+    std::vector<std::string> bipolikeGrp;
+    std::vector<std::string> atmosphericGrp;
+    std::string outsuffix = "";
+
+    if (datasetChoice == 0)
+    {
+        paramOrders.push_back(baseParams1);
+        paramOrders.push_back(baseParams2);
+        dsname.push_back(datasetname1);
+        dsname.push_back(datasetname2);
+        reacGrp = reactorGroup;
+        reacGrp.insert(reacGrp.end(), reactorGroup2.begin(), reactorGroup2.end());
+        geoGrp = geoGroup;
+        geoGrp.insert(geoGrp.end(), geoGroup2.begin(), geoGroup2.end());
+        alphaGrp = alphaGroup;
+        alphaGrp.insert(alphaGrp.end(), alphaGroup2.begin(), alphaGroup2.end());
+        bipolikeGrp = bipolikeGroup;
+        bipolikeGrp.insert(bipolikeGrp.end(), bipolikeGroup2.begin(), bipolikeGroup2.end());
+        atmosphericGrp = atmosphericGroup;
+        atmosphericGrp.insert(atmosphericGrp.end(), atmosphericGroup2.begin(), atmosphericGroup2.end());
+        outsuffix = "_all";
+        if(dataDir == "")
+        {
+            ymin = ymin0;
+            ymax = ymax0;
+        }
+        else{
+            ymin = ymin0dat;
+            ymax = ymax0dat;
+        }
+    }
+    else if (datasetChoice == 1)
+    {
+        paramOrders.push_back(baseParams1);
+        dsname.push_back(datasetname1);
+        reacGrp = reactorGroup;
+        geoGrp = geoGroup;
+        alphaGrp = alphaGroup;
+        bipolikeGrp = bipolikeGroup;
+        atmosphericGrp = atmosphericGroup;
+        outsuffix = "_" + datasetname1;
+        if(dataDir == "")
+        {
+            ymin = ymin1;
+            ymax = ymax1;
+        }
+        else{
+            ymin = ymin1dat;
+            ymax = ymax1dat;
+        }
+    }
+    else if (datasetChoice == 2)
+    {
+        paramOrders.push_back(baseParams2);
+        dsname.push_back(datasetname2);
+        reacGrp = reactorGroup2;
+        geoGrp = geoGroup2;
+        alphaGrp = alphaGroup2;
+        bipolikeGrp = bipolikeGroup2;
+        atmosphericGrp = atmosphericGroup2;
+        outsuffix = "_" + datasetname2;
+        if(dataDir == "")
+        {
+            ymin = ymin2;
+            ymax = ymax2;
+        }
+        else{
+            ymin = ymin2dat;
+            ymax = ymax2dat;
+        }
+    }
+
+    // Declare group histos and stacks
+    TH1D *hReactor;
+    TH1D *hGeo;
+    TH1D *hAlpha;
+    TH1D *hAtmospheric;
+    TH1D *hBiPoLike;
+    TH1D *hData;
+    TH1D *hMC;
+    THStack *hStack = new THStack("hStack", ";Reconstructed Energy, MeV;Events");
+    THStack *hGroupStack = new THStack("hGroupStack", ";Reconstructed Energy, MeV;Events");
+    std::map<std::string, TH1D *> histMap;
+
+    // Make map of param names to plot labels
+    std::map<std::string, std::string> labelMap;
+    std::vector<std::string> *paramNames = nullptr;
+    std::vector<std::string> *labelsVec = nullptr;
+    file->GetObject("all_param_names", paramNames);
+    file->GetObject("all_tex_labels", labelsVec);
+
+    for (int iParam = 0; iParam < labelsVec->size(); iParam++)
+    {
+        labelMap[paramNames->at(iParam)] = labelsVec->at(iParam);
+        if(datasetChoice == 0)
+            labelMap[paramNames->at(iParam)] = RemoveDSName(labelMap[paramNames->at(iParam)]);
+    }
+    labelMap["data"] = "Data";
+
+    // Directory of best LLH fit
+    std::filesystem::path dirPath(filename);
+    dirPath.replace_filename("");
+    std::ostringstream directory;
+    //directory << dirPath.string() << "/th" << std::fixed << std::setprecision(3) << bestTheta
+    //          << "/th" << std::fixed << std::setprecision(3) << bestTheta
+    //          << "_dm" << std::fixed << std::setprecision(8) << bestDeltaM
+    //          << "/postfit_dists/";
+    directory << "/data/snoplus/parkerw/antinu/Nov7_BestFit_alphan/asimov_dists/";
+
+    TLegend *t1 = new TLegend(0.5, 0.48, 0.85, 0.85);
+    t1->SetLineWidth(2);
+    TLegend *t2 = new TLegend(0.5, 0.5, 0.85, 0.85);
+    t2->SetLineWidth(2);
+
+    int colourIndex = 0;
+
+    std::vector<std::filesystem::path> postfit_files;
+
+    // Add files from the postfit_dists directory
+    for (int iFile = 0; iFile < paramOrders.size(); iFile++)
+    {
+        for (int iPar = 0; iPar < paramOrders.at(iFile).size(); iPar++)
+        {
+
+            std::string filePath = directory.str() + "/" + paramOrders.at(iFile).at(iPar) + "_" + dsname.at(iFile) + ".root";
+            if (paramOrders.at(iFile).at(iPar) == "data")
+            {
+                filePath = directory.str() + "/../" + paramOrders.at(iFile).at(iPar) + "_" + dsname.at(iFile) + ".root";
+            }
+            if (paramOrders.at(iFile).at(iPar) == "asimov")
+            {
+                filePath = directory.str() + "/../asimov_" + dsname.at(iFile) + ".root";
+            }
+            std::filesystem::path pathObj(filePath);
+            TFile *file = TFile::Open(filePath.c_str(), "READ");
+            if (!file || file->IsZombie())
+            {
+                std::cerr << "Error opening file: " << filePath << std::endl;
+                delete file;
+                continue;
+            }
+
+            // Get the filename only, without directories
+            std::string filename = pathObj.filename().string(); // "bipolike_2p2ppo.root"
+
+            // Remove the extension
+            std::string stem = pathObj.stem().string(); // "bipolike_2p2ppo"
+
+            // Remove everything after the last underscore
+            std::size_t pos = stem.rfind('_');
+            if (pos != std::string::npos)
+                stem = stem.substr(0, pos); // "bipolike"
+
+            std::cout << stem << std::endl;
+
+            // Get histogram
+            TH1D *h1 = nullptr;
+            file->GetObject(stem.c_str(), h1);
+
+            if (!h1)
+            {
+                TH1D *h2 = nullptr;
+                file->GetObject("oxsx_saved", h2);
+
+                if (!h2)
+                {
+                    std::cerr << "No histogram 'oxsx_saved' found in file: " << filePath << std::endl;
+                    file->Close();
+                    delete file;
+                    continue;
+                }
+                else
+                {
+                    h1 = h2;//->ProjectionX();
+                }
+            }
+            h1->SetDirectory(nullptr);
+
+            if (paramOrders.at(iFile).at(iPar) != "data" && dataDir != "")
+            {
+
+                for (int i = 1; i <= h1->GetNbinsX(); ++i)
+                {
+                    double binWidth = h1->GetBinWidth(i);
+                    double content = h1->GetBinContent(i);
+                    double error = h1->GetBinError(i);
+
+                    double scale = databinwidth / binWidth;
+                    h1->SetBinContent(i, content * scale);
+                    h1->SetBinError(i, error * scale);
+                }
+            }
+
+            if (iFile == 0)
+            {
+                histMap[paramOrders.at(iFile).at(iPar)] = h1;
+                histMap[paramOrders.at(0).at(iPar)]->SetLineColor(lineColours[iPar]);
+                histMap[paramOrders.at(0).at(iPar)]->SetFillColor(fillColours[iPar]);
+                histMap[paramOrders.at(0).at(iPar)]->SetLineWidth(2);
+            }
+            else
+            {
+                histMap[paramOrders.at(0).at(iPar)]->Add(h1);
+            }
+        }
+    }
+
+    // Intialise group histos
+    // Assumes we have a data and postfitdist (full fitted MC) but let's assume we always want to plot these
+    histMap["data"]->SetMarkerStyle(21);
+    hData = (TH1D *)histMap["data"]->Clone("hData");
+    hData->Reset();
+    hMC = (TH1D *)histMap["asimov"]->Clone("hMC");
+    double chi2 = histMap["data"]->Chi2Test(hMC, "CHI2/NDF W");
+    std::cout << "Chi Squared = " << chi2 << std::endl;
+    hReactor = (TH1D *)histMap["data"]->Clone("hReactor");
+    hReactor->Reset();
+    hGeo = (TH1D *)histMap["data"]->Clone("hGeo");
+    hGeo->Reset();
+    hAlpha = (TH1D *)histMap["data"]->Clone("hAlpha");
+    hAlpha->Reset();
+    hBiPoLike = (TH1D *)histMap["data"]->Clone("hBiPoLike");
+    hBiPoLike->Reset();
+    hAtmospheric = (TH1D *)histMap["data"]->Clone("hAtmospheric");
+    hAtmospheric->Reset();
+    hData->SetLineColor(kBlack);
+    hData->SetLineWidth(2);
+    hData->SetFillStyle(0);
+    hReactor->SetLineColor(kBlue);
+    hReactor->SetFillColor(kBlue - 9);
+    hReactor->SetLineWidth(2);
+    hGeo->SetLineColor(kMagenta + 2);
+    hGeo->SetFillColor(kMagenta - 8);
+    hGeo->SetLineWidth(2);
+    hAlpha->SetLineColor(kRed + 1);
+    hAlpha->SetFillColor(kRed - 9);
+    hAlpha->SetLineWidth(2);
+    hBiPoLike->SetLineColor(kGreen + 3);
+    hBiPoLike->SetFillColor(kGreen - 5);
+    hBiPoLike->SetLineWidth(2);
+    hAtmospheric->SetLineColor(kOrange + 2);
+    hAtmospheric->SetFillColor(kOrange + 1);
+    hAtmospheric->SetLineWidth(2);
+
+    colourIndex = 0;
+
+    // Now loop over files, getting histos, and adding to the appropriate groups
+    for (int iPar = 0; iPar < paramOrders.at(0).size(); iPar++)
+    {
+
+        if (paramOrders.at(0).at(iPar) == "asimov")
+            continue;
+
+        if (paramOrders.at(0).at(iPar) == "data")
+        {
+            hData->Add(histMap[paramOrders.at(0).at(iPar)]);
+            if (dataDir != "")
+            {
+                t1->AddEntry(histMap[paramOrders.at(0).at(iPar)], labelMap[paramOrders.at(0).at(iPar)].c_str(), "lep");
+                histMap["data"] = rebinData(dataDir, datasetChoice);
+            }
+            else
+                t1->AddEntry(histMap[paramOrders.at(0).at(iPar)], labelMap[paramOrders.at(0).at(iPar)].c_str(), "l");
+ 
+        }
+        else if (std::find(reacGrp.begin(), reacGrp.end(), paramOrders.at(0).at(iPar)) != reacGrp.end())
+        {
+            hReactor->Add(histMap[paramOrders.at(0).at(iPar)]);
+            hStack->Add(histMap[paramOrders.at(0).at(iPar)]);
+            t1->AddEntry(histMap[paramOrders.at(0).at(iPar)], labelMap[paramOrders.at(0).at(iPar)].c_str(), "f");
+            histMap.erase(paramOrders.at(0).at(iPar));
+        }
+        else if (std::find(geoGrp.begin(), geoGrp.end(), paramOrders.at(0).at(iPar)) != geoGrp.end())
+        {
+            hGeo->Add(histMap[paramOrders.at(0).at(iPar)]);
+            hStack->Add(histMap[paramOrders.at(0).at(iPar)]);
+            t1->AddEntry(histMap[paramOrders.at(0).at(iPar)], labelMap[paramOrders.at(0).at(iPar)].c_str(), "f");
+            histMap.erase(paramOrders.at(0).at(iPar));
+        }
+        else if (std::find(alphaGrp.begin(), alphaGrp.end(), paramOrders.at(0).at(iPar)) != alphaGrp.end())
+        {
+            hAlpha->Add(histMap[paramOrders.at(0).at(iPar)]);
+            hStack->Add(histMap[paramOrders.at(0).at(iPar)]);
+            t1->AddEntry(histMap[paramOrders.at(0).at(iPar)], labelMap[paramOrders.at(0).at(iPar)].c_str(), "f");
+            histMap.erase(paramOrders.at(0).at(iPar));
+        }
+        else if (std::find(bipolikeGrp.begin(), bipolikeGrp.end(), paramOrders.at(0).at(iPar)) != alphaGrp.end())
+        {
+            hBiPoLike->Add(histMap[paramOrders.at(0).at(iPar)]);
+            hStack->Add(histMap[paramOrders.at(0).at(iPar)]);
+            t1->AddEntry(histMap[paramOrders.at(0).at(iPar)], labelMap[paramOrders.at(0).at(iPar)].c_str(), "f");
+            histMap.erase(paramOrders.at(0).at(iPar));
+        }
+        else if (std::find(atmosphericGrp.begin(), atmosphericGrp.end(), paramOrders.at(0).at(iPar)) != atmosphericGrp.end())
+        {
+            hAtmospheric->Add(histMap[paramOrders.at(0).at(iPar)]);
+            hStack->Add(histMap[paramOrders.at(0).at(iPar)]);
+            t1->AddEntry(histMap[paramOrders.at(0).at(iPar)], labelMap[paramOrders.at(0).at(iPar)].c_str(), "f");
+            histMap.erase(paramOrders.at(0).at(iPar));
+        }
+
+
+        colourIndex++;
+    }
+
+    if (dataDir == "")
+    {
+        // Draw stack of all event types
+        TCanvas *c1 = new TCanvas("c1", "Stacked", 1000, 600);
+        gStyle->SetOptStat(0);
+        c1->SetFrameLineWidth(2);
+        double uppermin = 0.3;
+        TPad *lower = new TPad("lower", "pad", 0, 0, 1, uppermin);
+        TPad *upper = new TPad("upper", "pad", 0, uppermin, 1, 1);
+        upper->SetBottomMargin(0.04);
+        lower->SetTopMargin(0.06);
+        lower->SetBottomMargin(0.4);
+        upper->SetFrameLineWidth(2);
+        lower->SetFrameLineWidth(2);
+        upper->Draw();
+        lower->Draw();
+        c1->cd();
+
+        upper->cd();
+        TH1F *frame = upper->DrawFrame(xmin, ymin, xmax, ymax);
+        frame->SetTitle(";Reconstructed Energy, MeV;Events");
+        frame->GetXaxis()->SetLabelOffset(1.2);
+        frame->GetXaxis()->SetTitleFont(42);
+        frame->GetYaxis()->SetTitleFont(42);
+        frame->GetXaxis()->SetLabelFont(42);
+        frame->GetYaxis()->SetLabelFont(42);
+        frame->GetXaxis()->SetLabelSize(0.06);
+        frame->GetYaxis()->SetLabelSize(0.06);
+        frame->GetXaxis()->SetTitleSize(0.06);
+        frame->GetYaxis()->SetTitleSize(0.06);
+        frame->GetYaxis()->SetTitleOffset(0.8);
+        hStack->Draw("histsame");
+        histMap["data"]->SetFillStyle(0);
+        histMap["data"]->Draw("histsame");
+        hStack->GetXaxis()->SetLabelOffset(1.2);
+        hStack->GetXaxis()->SetTitleFont(42);
+        hStack->GetYaxis()->SetTitleFont(42);
+        hStack->GetXaxis()->SetLabelFont(42);
+        hStack->GetYaxis()->SetLabelFont(42);
+        hStack->GetXaxis()->SetLabelSize(0.06);
+        hStack->GetYaxis()->SetLabelSize(0.06);
+        hStack->GetXaxis()->SetTitleSize(0.06);
+        hStack->GetYaxis()->SetTitleSize(0.06);
+        hStack->GetYaxis()->SetTitleOffset(0.8);
+        t1->SetTextFont(42);
+        t1->Draw();
+        upper->Modified();
+        upper->Update();
+        c1->Update();
+
+        lower->cd();
+        hMC->Divide(hData);
+        hMC->SetFillStyle(0);
+        hMC->GetYaxis()->SetRangeUser(0.9, 1.1);
+        hMC->GetXaxis()->SetRangeUser(xmin, xmax);
+        hMC->GetXaxis()->SetTitleFont(42);
+        hMC->GetYaxis()->SetTitleFont(42);
+        hMC->GetXaxis()->SetLabelFont(42);
+        hMC->GetYaxis()->SetLabelFont(42);
+        hMC->GetXaxis()->SetLabelSize(0.14);
+        hMC->GetYaxis()->SetLabelSize(0.14);
+        hMC->GetXaxis()->SetTitleSize(0.14);
+        hMC->GetYaxis()->SetTitleSize(0.14);
+        hMC->GetYaxis()->SetTitle("MC/Data");
+        hMC->GetYaxis()->SetTitleOffset(0.33);
+        hMC->GetYaxis()->SetNdivisions(404);
+        hMC->GetYaxis()->SetTickLength(0.05);
+        hMC->GetXaxis()->SetTickLength(0.07);
+        hMC->GetYaxis()->ChangeLabel(2, -1, -1, -1, -1, -1, " ");
+        hMC->GetYaxis()->ChangeLabel(4, -1, -1, -1, -1, -1, " ");
+        hMC->SetLineWidth(2);
+        hMC->Draw("hist");
+        c1->Update();
+
+        struct stat st = {0};
+        std::filesystem::path pathObj("/data/snoplus/parkerw/antinu/Nov7_BestFit_alphan/fit_result_tree.root");
+        pathObj.replace_filename("plots/");
+        if (stat(pathObj.string().c_str(), &st) == -1)
+            mkdir(pathObj.string().c_str(), 0700);
+        pathObj.replace_filename(("dist" + outsuffix + ".pdf").c_str());
+        c1->SaveAs(pathObj.string().c_str());
+        pathObj.replace_filename(("dist" + outsuffix + ".root").c_str());
+        c1->SaveAs(pathObj.string().c_str());
+
+        // Draw stack of grouped event types
+        TCanvas *c2 = new TCanvas("c2", "Groups", 1000, 600);
+        gStyle->SetOptStat(0);
+        c2->SetFrameLineWidth(2);
+        TPad *lower2 = new TPad("lower2", "pad", 0, 0, 1, uppermin);
+        TPad *upper2 = new TPad("upper2", "pad", 0, uppermin, 1, 1);
+        upper2->SetBottomMargin(0.04);
+        lower2->SetTopMargin(0.06);
+        lower2->SetBottomMargin(0.4);
+        upper2->SetFrameLineWidth(2);
+        lower2->SetFrameLineWidth(2);
+        upper2->Draw();
+        lower2->Draw();
+        c2->cd();
+
+        t2->AddEntry(hData, "Data", "l");
+        hGroupStack->Add(hReactor);
+        t2->AddEntry(hReactor, "Reactor #bar{#nu}", "f");
+        hGroupStack->Add(hGeo);
+        t2->AddEntry(hGeo, "Geo #bar{#nu}", "f");
+        hGroupStack->Add(hAlpha);
+        t2->AddEntry(hAlpha, "(#alpha, n)", "f");
+        hGroupStack->Add(hBiPoLike);
+        t2->AddEntry(hBiPoLike, "(#alpha, p)", "f");
+        hGroupStack->Add(hAtmospheric);
+        t2->AddEntry(hAtmospheric, "Atmospheric", "f");
+
+        upper2->cd();
+        TH1F *frame2 = upper->DrawFrame(xmin, ymin, xmax, ymax);
+        frame2->SetTitle(";Reconstructed Energy, MeV;Events");
+        frame2->GetXaxis()->SetLabelOffset(1.2);
+        frame2->GetXaxis()->SetTitleFont(42);
+        frame2->GetYaxis()->SetTitleFont(42);
+        frame2->GetXaxis()->SetLabelFont(42);
+        frame2->GetYaxis()->SetLabelFont(42);
+        frame2->GetXaxis()->SetLabelSize(0.06);
+        frame2->GetYaxis()->SetLabelSize(0.06);
+        frame2->GetXaxis()->SetTitleSize(0.06);
+        frame2->GetYaxis()->SetTitleSize(0.06);
+        frame2->GetYaxis()->SetTitleOffset(0.8);
+        hGroupStack->Draw("histsame");
+        histMap["data"]->Draw("histsame");
+        hGroupStack->GetXaxis()->SetLabelOffset(1.2);
+        hGroupStack->GetXaxis()->SetTitleFont(42);
+        hGroupStack->GetYaxis()->SetTitleFont(42);
+        hGroupStack->GetXaxis()->SetLabelFont(42);
+        hGroupStack->GetYaxis()->SetLabelFont(42);
+        hGroupStack->GetXaxis()->SetLabelSize(0.06);
+        hGroupStack->GetYaxis()->SetLabelSize(0.06);
+        hGroupStack->GetXaxis()->SetTitleSize(0.06);
+        hGroupStack->GetYaxis()->SetTitleSize(0.06);
+        hGroupStack->GetYaxis()->SetTitleOffset(0.8);
+        t2->SetTextFont(42);
+        t2->Draw();
+        upper2->Modified();
+        upper2->Update();
+        c2->Update();
+
+        lower2->cd();
+        hMC->Draw("hist");
+
+        pathObj.replace_filename(("distgroup" + outsuffix + ".pdf").c_str());
+        c2->SaveAs(pathObj.string().c_str());
+        pathObj.replace_filename(("distgroup" + outsuffix + ".root").c_str());
+        c2->SaveAs(pathObj.string().c_str());
+    }
+    else
+    {
+        // Draw stack of all event types
+        TCanvas *c1 = new TCanvas("c1", "Stacked", 1000, 600);
+        gStyle->SetOptStat(0);
+        c1->SetFrameLineWidth(2);
+        c1->SetBottomMargin(0.15);
+
+        TH1F *frame = c1->DrawFrame(xmin, ymin, xmax, ymax);
+        TString titles = Form(";Reconstructed Energy, MeV;Events / %.1f MeV",databinwidth);
+        frame->SetTitle(titles);
+        frame->GetXaxis()->SetTitleFont(42);
+        frame->GetYaxis()->SetTitleFont(42);
+        frame->GetXaxis()->SetLabelFont(42);
+        frame->GetYaxis()->SetLabelFont(42);
+        frame->GetXaxis()->SetLabelSize(0.06);
+        frame->GetYaxis()->SetLabelSize(0.06);
+        frame->GetXaxis()->SetTitleSize(0.06);
+        frame->GetYaxis()->SetTitleSize(0.06);
+        frame->GetYaxis()->SetTitleOffset(0.8);
+        hStack->Draw("histsame");
+        histMap["data"]->SetFillStyle(0);
+        histMap["data"]->Draw("e1same");
+        hStack->GetXaxis()->SetTitleFont(42);
+        hStack->GetYaxis()->SetTitleFont(42);
+        hStack->GetXaxis()->SetLabelFont(42);
+        hStack->GetYaxis()->SetLabelFont(42);
+        hStack->GetXaxis()->SetLabelSize(0.06);
+        hStack->GetYaxis()->SetLabelSize(0.06);
+        hStack->GetXaxis()->SetTitleSize(0.06);
+        hStack->GetYaxis()->SetTitleSize(0.06);
+        hStack->GetYaxis()->SetTitleOffset(0.8);
+        t1->SetTextFont(42);
+        t1->Draw();
+        c1->Update();
+
+        struct stat st = {0};
+        std::filesystem::path pathObj("/data/snoplus/parkerw/antinu/Nov7_BestFit_alphan/fit_result_tree.root");
+        pathObj.replace_filename("plots/");
+        if (stat(pathObj.string().c_str(), &st) == -1)
+            mkdir(pathObj.string().c_str(), 0700);
+        pathObj.replace_filename(("dist" + outsuffix + ".pdf").c_str());
+        c1->SaveAs(pathObj.string().c_str());
+        pathObj.replace_filename(("dist" + outsuffix + ".root").c_str());
+        c1->SaveAs(pathObj.string().c_str());
+
+        // Draw stack of grouped event types
+        TCanvas *c2 = new TCanvas("c2", "Groups", 1000, 600);
+        gStyle->SetOptStat(0);
+        c2->SetFrameLineWidth(2);
+        c2->SetBottomMargin(0.15);
+        c2->cd();
+
+        t2->AddEntry(hData, "Data", "lep");
+        hGroupStack->Add(hReactor);
+        t2->AddEntry(hReactor, "Reactor #bar{#nu}", "f");
+        hGroupStack->Add(hGeo);
+        t2->AddEntry(hGeo, "Geo #bar{#nu}", "f");
+        hGroupStack->Add(hAlpha);
+        t2->AddEntry(hAlpha, "(#alpha, n)", "f");
+        hGroupStack->Add(hBiPoLike);
+        t2->AddEntry(hBiPoLike, "(#alpha, p)", "f");
+        hGroupStack->Add(hAtmospheric);
+        t2->AddEntry(hAtmospheric, "Atmospheric", "f");
+
+        TH1F *frame2 = c2->DrawFrame(xmin, ymin, xmax, ymax);
+        frame2->SetTitle(titles);
+        frame2->GetXaxis()->SetTitleFont(42);
+        frame2->GetYaxis()->SetTitleFont(42);
+        frame2->GetXaxis()->SetLabelFont(42);
+        frame2->GetYaxis()->SetLabelFont(42);
+        frame2->GetXaxis()->SetLabelSize(0.06);
+        frame2->GetYaxis()->SetLabelSize(0.06);
+        frame2->GetXaxis()->SetTitleSize(0.06);
+        frame2->GetYaxis()->SetTitleSize(0.06);
+        frame2->GetYaxis()->SetTitleOffset(0.8);
+        hGroupStack->Draw("histsame");
+        histMap["data"]->Draw("e1same");
+        hGroupStack->GetXaxis()->SetTitleFont(42);
+        hGroupStack->GetYaxis()->SetTitleFont(42);
+        hGroupStack->GetXaxis()->SetLabelFont(42);
+        hGroupStack->GetYaxis()->SetLabelFont(42);
+        hGroupStack->GetXaxis()->SetLabelSize(0.06);
+        hGroupStack->GetYaxis()->SetLabelSize(0.06);
+        hGroupStack->GetXaxis()->SetTitleSize(0.06);
+        hGroupStack->GetYaxis()->SetTitleSize(0.06);
+        hGroupStack->GetYaxis()->SetTitleOffset(0.8);
+        t2->SetTextFont(42);
+        t2->Draw();
+        c2->Update();
+
+        pathObj.replace_filename(("distgroup" + outsuffix + ".pdf").c_str());
+        c2->SaveAs(pathObj.string().c_str());
+        pathObj.replace_filename(("distgroup" + outsuffix + ".root").c_str());
+        c2->SaveAs(pathObj.string().c_str());
+    }
+}
