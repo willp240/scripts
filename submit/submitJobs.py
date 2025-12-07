@@ -71,8 +71,8 @@ def pycondor_submit(job_batch, job_id, macro_path, run_path, rat_env, sub_path, 
                      "priority                = "+str(priority)+"\n"+\
                      "getenv                  = "+str(getenv)+"\n"+\
                      "allowed_execute_duration = " + str(walltime) + " \n" + \
+                     "request_memory           = " + str(mem) + " \n" + \
                      "queue "+str(n_rep)+"\n"
-                      #"request_memory           = " + str(mem) + " \n" + \
     ## check and create output path
     if not os.path.exists(os.path.dirname(submit_filepath)):
         os.makedirs(os.path.dirname(submit_filepath))
@@ -99,6 +99,9 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--run_directory", type=str,
                        default="/path/to/rat/",
                        help="base directory from which the scripts will be run")
+    parser.add_argument("-b", "--batch_name", type=str,
+                        default="reproc_pair",
+                        help="Batch name")
     parser.add_argument("-w", "--wall_time", type=int, default=86400, help="what's the maximum runtime (in seconds, default 1 day)?")
     parser.add_argument("-m", "--mem", type=float, default=2000, help="what's the maximum memory (in MB, default 300 MB)?")
     parser.add_argument("-n", "--no_sims", type=int,
@@ -128,6 +131,7 @@ if __name__ == "__main__":
     submit_dir = check_dir("{0}/submit/".format(out_dir))
     output_dir = check_dir("{0}/output/".format(out_dir))
     base_name = args.macro.split("/")[-1].replace(".mac","")
+    batch_name = args.batch_name
 
     for i in range(args.no_sims):
         write_macro(mac,
@@ -136,5 +140,4 @@ if __name__ == "__main__":
         )
         
         job_id = "{0}_{1}".format(base_name,i)
-        batch_id = "rat_{0}".format(base_name)
-        pycondor_submit(batch_id,job_id,"{0}{1}_{2}.mac".format(mac_dir,base_name,i),args.run_directory,args.env_file,args.submission_directory,out_dir, walltime, mem, sleep_time = 1, priority = 5)
+        pycondor_submit(batch_name, job_id, "{0}{1}_{2}.mac".format(mac_dir,base_name,i), args.run_directory, args.env_file, args.submission_directory, out_dir, walltime, mem, sleep_time = 1, priority = 5)

@@ -1,0 +1,8 @@
+#!/usr/bin/sh
+export HOME=/home/parkerw/
+source ${sh_sub}
+cd /home/parkerw/Scripts
+
+${other_commands_sub}
+./process_subrun ${prompt1} ${prompt2} ${promptlist} ${delaylist} ${delay1} ${delay2} ${outfile}
+
