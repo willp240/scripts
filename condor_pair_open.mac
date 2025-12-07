@@ -1,0 +1,10 @@
+executable              = /home/parkerw/Scripts/condor_pair_open.sh
+universe                = vanilla
+output                  = /home/parkerw/Scripts/condor_pair_open.out
+error                   = /home/parkerw/Scripts/condor_pair_open.err
+log                     = /home/parkerw/Scripts/condor_pair_open.log
+notification            = never
+priority                = 5
+getenv                  = False
+request_memory          = 4 GB
+queue 1

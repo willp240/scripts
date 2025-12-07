@@ -1,0 +1,10 @@
+executable              = /home/parkerw/Scripts/condor_pair_open_bismsb.sh
+universe                = vanilla
+output                  = /home/parkerw/Scripts/condor_pair_open_bismsb.out
+error                   = /home/parkerw/Scripts/condor_pair_open_bismsb.err
+log                     = /home/parkerw/Scripts/condor_pair_open_bismsb.log
+notification            = never
+priority                = 5
+getenv                  = False
+request_memory          = 4 GB
+queue 1
