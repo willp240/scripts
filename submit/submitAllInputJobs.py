@@ -122,7 +122,7 @@ if __name__ == "__main__":
     ## check if output and condor directories exist, create if they don't
     out_dir = check_dir(args.out_dir)
     in_dir = check_dir(args.input_files_directory)
-
+    
     condor_directory = "{0}/condor".format(args.submission_directory)
 
 #    condor_dir = check_dir(condor_directory)
@@ -137,6 +137,8 @@ if __name__ == "__main__":
 
     i=0
     for in_name in os.listdir(in_dir): # range(args.no_sims):
+        if (not in_name.endswith(".root")):
+            continue
         write_macro(mac,
                     "{0}{1}_reproc.mac".format(mac_dir, in_name),
                     "{0}{1}_reproc.root".format(out_dir, in_name),
@@ -147,3 +149,4 @@ if __name__ == "__main__":
         batch_id = "rat_{0}".format(base_name)
         pycondor_submit(batch_id, job_id, "{0}{1}_reproc.mac".format(mac_dir,in_name), args.run_directory, args.env_file, args.submission_directory, out_dir, in_dir+"/"+in_name, sleep_time = 1, priority = 5, )
         i = i+1
+        
