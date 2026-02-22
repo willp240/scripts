@@ -13,9 +13,9 @@ void dataTree2FitDiffs( ) {
   gStyle->SetOptStat(0);
   gStyle->SetPalette(51);
   
-  TFile* fIn = new TFile("/data/snoplus3/parkerw/ratSimulations/Oct14_bMR_data_trees/Analysis20_bMR_.tree.root","READ");
+  TFile* fIn = new TFile("/data/snoplus3/parkerw/ratSimulations/Oct14_PPO_data_trees/Analysis20_PPOR_.tree.root","READ");
 
-  std::string outname = "Oct14_bMR";
+  std::string outname = "Oct14_PPO";
   
   TTree* tree = (TTree*) fIn->Get("T");
     
@@ -99,7 +99,7 @@ void dataTree2FitDiffs( ) {
   c2R->SetRightMargin(0.13);
   gPad->SetFrameLineWidth(2);
   gPad->SetGrid(1);
-  gPad->SetLogy();
+  //  gPad->SetLogy();
   TH1F *hR1 = new TH1F("hR1","hR1", 1000, 0, 6000);
   hR1->SetTitle("");
   tree->Draw("fitr1 >> hR1", "", "");

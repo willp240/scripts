@@ -18,7 +18,7 @@ void Plot2D(){
   gStyle->SetLineWidth(2);
   gStyle->SetOptStat(0);
 
-  std::string plotprefix = "alpha_mpdfcheck_";
+  std::string plotprefix = "alpha_avonly_";
 
   std::string axs[4] = {"xFit:xTrue", "yFit:yTrue", "zFit-184.4:zTrue-184.4", "sqrt(xFit*xFit+yFit*yFit+(zFit-184.4)*(zFit-184.4)):sqrt(xTrue*xTrue+yTrue*yTrue+(zTrue-184.4)*(zTrue-184.4))"};
   std::string title = "Reconstructed";
@@ -26,7 +26,7 @@ void Plot2D(){
   std::string coord[4] = {"X", "Y", "Z", "R"};
 
   std::string cut1 = "sqrt(xFit*xFit+yFit*yFit+(zFit-184.4)*(zFit-184.4)) < 6000 && neckcut == 1";
-  std::string cut2 = "&& neckHit / nhits < 0.01 && sqrt( (xSeedPosErr-xSeedNegErr)*(xSeedPosErr-xSeedNegErr) + (ySeedPosErr-ySeedNegErr)*(ySeedPosErr-ySeedNegErr) + (zSeedPosErr-zSeedNegErr)*(zSeedPosErr-zSeedNegErr)) < 250 &&  sqrt( (xFitPosErr-xFitNegErr)*(xFitPosErr-xFitNegErr) + (yFitPosErr-yFitNegErr)*(yFitPosErr-yFitNegErr) + (zFitPosErr-zFitNegErr)*(zFitPosErr-zFitNegErr)) < 1200 && sqrt( (xFit-xSeed)*(xFit-xSeed)+(yFit-ySeed)*(yFit-ySeed)+(zFit-zSeed)*(zFit-zSeed) ) < 1000 && scaledLLH > 12.0 && itr > 0.2";
+  std::string cut2 = "&& neckHit / nhits < 0.01 && sqrt( (xSeedPosErr-xSeedNegErr)*(xSeedPosErr-xSeedNegErr) + (ySeedPosErr-ySeedNegErr)*(ySeedPosErr-ySeedNegErr) + (zSeedPosErr-zSeedNegErr)*(zSeedPosErr-zSeedNegErr)) < 250 &&  sqrt( (xFitPosErr-xFitNegErr)*(xFitPosErr-xFitNegErr) + (yFitPosErr-yFitNegErr)*(yFitPosErr-yFitNegErr) + (zFitPosErr-zFitNegErr)*(zFitPosErr-zFitNegErr)) < 1200 && sqrt( (xFit-xSeed)*(xFit-xSeed)+(yFit-ySeed)*(yFit-ySeed)+(zFit-zSeed)*(zFit-zSeed) ) < 1000 && scaledLLH > 12.0 && itr > 0.2 && sqrt(xTrue*xTrue+yTrue*yTrue+(zTrue-184.4)*(zTrue-184.4)) < 5700";
   //std::string cut2 = "&&  neckHit / nhits < 0.01 && sqrt( (xSeedPosErr-xSeedNegErr)*(xSeedPosErr-xSeedNegErr) + (ySeedPosErr-ySeedNegErr)*(ySeedPosErr-ySeedNegErr) + (zSeedPosErr-zSeedNegErr)*(zSeedPosErr-zSeedNegErr)) < 250 && sqrt( (xFitPosErr-xFitNegErr)*(xFitPosErr-xFitNegErr) + (yFitPosErr-yFitNegErr)*(yFitPosErr-yFitNegErr) + (zFitPosErr-zFitNegErr)*(zFitPosErr-zFitNegErr)) < 900 && sqrt( (xFit-xSeed)*(xFit-xSeed)+(yFit-ySeed)*(yFit-ySeed)+(zFit-zSeed)*(zFit-zSeed) ) < 1000 ";//"&& scaledLLH > 12.0 && neckHit/nhits < 0.01 && itr > 0.2 && highOwl / nhits < 0.01";
   // std::string cut2 = "&& scaledLLH > 12.0 && neckHit/nhits < 0.01 && itr > 0.2 && highOwl / nhits < 0.01";
 
@@ -38,11 +38,11 @@ void Plot2D(){
   //  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Feb5_alpha_pmtzratio.root");
   //  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Jan8_NearAV_ETree.root");
   //  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Feb9_e_Tree.root");
-  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Mar26_quad_alpha_tspread_Tree.root");
+  TFile *fFile = TFile::Open("/data/snoplus/parkerw/ratSimulations/MarFeb25_Trees/Mar26_quad_alpha_tspread_Tree.root");
   //  TFile *fFile = TFile::Open("/home/parkerw/Scripts/Jan8_NearAV_timepeakstree.root");
   //TFile *fFile = TFile::Open("/home/parkerw/Software/rat-tools_master/FitPerformance/Dec21_alpha_owlTree.root");
   TTree* fTree = (TTree*)fFile->Get("eveTree")->Clone("fTree");
-
+  /*
   fTree->Draw("sqrt(xFit*xFit+yFit*yFit+(zFit-184.4)*(zFit-184.4)):sqrt(xTrue*xTrue+yTrue*yTrue+(zTrue-184.4)*(zTrue-184.4))",(cut1+"&& sqrt(xTrue*xTrue + yTrue*yTrue + zTrue*zTrue) < 6184.4").c_str(),"colz");
   TH2F *hAVBefore = (TH2F*)gPad->GetPrimitive("htemp");
   float numAVBefore = hAVBefore->Integral();
@@ -102,7 +102,7 @@ void Plot2D(){
   std::cout << "Num Events in Neck MisRecon into FV Before Cut " << numNeckMisRecoFVBefore << std::endl;
   std::cout << "Num Events in Neck MisRecon into FV After Cut " << numNeckMisRecoFVAfter << std::endl;
   std::cout << "% lost = " << 100*(numNeckMisRecoFVBefore-numNeckMisRecoFVAfter)/numNeckMisRecoFVBefore << "; % kept = " << 100 - (100*(numNeckMisRecoFVBefore-numNeckMisRecoFVAfter)/numNeckMisRecoFVBefore) << std::endl << std::endl;
-  
+  */
 
   TCanvas* c1 = new TCanvas("c1", "c1", 1500,800);
   c1->SetRightMargin(0.13);

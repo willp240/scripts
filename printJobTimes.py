@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 
 # Directory containing .log files
-log_dir = "/data/snoplus/parkerw/antinu/Sep1_2dsthetaprior/log"
+log_dir = "/data/snoplus3/parkerw/ratSimulations/Dec10_enotrack/log/"
 
 start_pattern = re.compile(r"001 .*?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
 end_pattern = re.compile(r"005 .*?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")

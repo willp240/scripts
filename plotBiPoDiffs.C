@@ -180,13 +180,12 @@ void plotBiPoDiffs( ) {
   hDDelay->GetYaxis()->SetTitle("Events");
   hDDelay->Draw();
   cDDelay->SaveAs( (outname+"_DDelay.pdf").c_str() );
-  std::cout << "d delay " << hDDelay->Integral() << " " <<  hDDelay->Integral(0, 10) << " " << hDDelay->Integral(0, 10) / hDDelay->Integral() << std::endl;
   
   TCanvas* cD = new TCanvas("cD", "cD", 1500,800);
   cD->SetRightMargin(0.13);
   gPad->SetFrameLineWidth(2);
   gPad->SetGrid(1);
-  gPad->SetLogy();
+  //gPad->SetLogy();
   TH1F *hD1 = new TH1F("hD1","hD1", 40, 0, 1200);
   hD1->SetTitle("");
   tree->Draw("sqrt( (fitxprompt1-fitxdelayed1)*(fitxprompt1-fitxdelayed1) + (fityprompt1-fitydelayed1)*(fityprompt1-fitydelayed1) + (fitzprompt1-fitzdelayed1)*(fitzprompt1-fitzdelayed1) ) >> hD1", "", "");
