@@ -5,11 +5,20 @@
 
 /run/initialize
 
+/rat/proc count
+/rat/procset update 10000
+
+#/rat/proc/if runeventlist
+
+#/rat/procset file "/data/snoplus3/parkerw/BiPo/dataPromptGTIDs.txt"
 
 /rat/proc scintFitter
 
 /rat/proclast outroot
 /rat/procset file "{0}"
+
+#/rat/proc/endif
+
 # END EVENTLOOP
 
 /rat/inroot/read
