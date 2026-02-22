@@ -1,0 +1,22 @@
+
+/rat/inzdab/load /data/snoplus/degraw/reprocessing/8.0.2_patch_test/SNOP_0000304371_007.zdab
+
+/run/initialize
+
+# BEGIN EVENT LOOP
+/rat/proc count 
+/rat/procset update 10000
+
+/rat/proc/if runeventlist
+
+    /rat/procset file "list.txt"
+
+    /rat/proc outroot
+    /rat/procset file "out.root"
+
+/rat/proc/endif
+# END EVENT LOOP
+
+/rat/inzdab/read
+
+exit

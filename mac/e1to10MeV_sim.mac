@@ -1,0 +1,34 @@
+#################################################################
+### Template macro for running e- simulation with a fixed energy
+### Options are written in by scripts in job_sub
+#################################################################
+
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
+
+/rat/db/set MC thin_factor 1.0
+/rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
+/rat/db/set GEO[inner_av] material "labppo_2p2_bismsb_2p2_scintillator"
+
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 10
+
+/rat/proc scintFitter
+
+/rat/proc outroot
+/rat/procset file "{0}"
+
+/generator/add combo gun2:fillshell
+/generator/vtx/set e- 0 0 0 0 0 10 
+/generator/pos/set 0 0 0 0 6000 inner_av
+/generator/rate/set 1
+
+/rat/run/start 1000
+exit
