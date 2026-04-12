@@ -6,7 +6,7 @@
 void hncSurvivingNeckEvs()
 {
 
-  const char* filename = "/home/parkerw/Software/rat-tools2/FitCoordination/HighNeck/Feb19_alpha_combined.root";
+  const char* filename = "/home/parkerw/Software/rat-tools2/FitCoordination/HighNeck/Feb19_e_combined.root";
   const char* treename = "output";
   TFile* f = TFile::Open(filename, "READ");
   if (!f || f->IsZombie()) {
@@ -55,16 +55,19 @@ void hncSurvivingNeckEvs()
 
 
   const char* cut = ""
-    "sqrt(posx*posx+posy*posy+(posz-184.4)*(posz-184.4)) < 6000 && "
-    "sqrt(mcPosx*mcPosx+mcPosy*mcPosy+(mcPosz-184.4)*(mcPosz-184.4)) > 7000 && "
-    "necknhits / nhitsCleaned < 0.004 && "
+    "(sqrt(posx*posx+posy*posy+(posz-184.4)*(posz-184.4)) < 6000 && "
+    "sqrt(mcPosx*mcPosx+mcPosy*mcPosy+(mcPosz-184.4)*(mcPosz-184.4)) > 7000) && "
+    "( (necknhits / nhitsCleaned < 0.004 && "
     "sqrt( (seedxPosError-seedxNegError)*(seedxPosError-seedxNegError) + (seedyPosError-seedyNegError)*(seedyPosError-seedyNegError) + (seedzPosError-seedzNegError)*(seedzPosError-seedzNegError)) < 600 && "
     "posFOM/posFOM2 > 12 && "
     "sqrt( (posx-seedx)*(posx-seedx)+(posy-seedy)*(posy-seedy)+(posz-seedz)*(posz-seedz) ) < 1000 && "
     "itr > 0.2 && "
-    "sqrt( (posxPosError-posxNegError)*(posxPosError-posxNegError) + (posyPosError-posyNegError)*(posyPosError-posyNegError) + (poszPosError-poszNegError)*(poszPosError-poszNegError)) < 800 ";
+    "sqrt( (posxPosError-posxNegError)*(posxPosError-posxNegError) + (posyPosError-posyNegError)*(posyPosError-posyNegError) + (poszPosError-poszNegError)*(poszPosError-poszNegError)) < 800 ) ||"
+    "(nhitsCleaned > 750) )";
 
   output->Scan("TrueR_mm:RecoR_mm:TrueE_MeV:RecoE_MeV:Nhits:NeckHitsFrac:QuadUnc_mm:PosFOM:QuadMPDFDist_mm:ITR:MPDFUnc_mm", cut);
 
+  output->Draw("sqrt(posx*posx+posy*posy+(posz)*(posz)):sqrt(mcPosx*mcPosx+mcPosy*mcPosy+(mcPosz)*(mcPosz))", cut, "colz");
+  
   f->Close();
 }

@@ -27,7 +27,7 @@ void hncCutAVEvs(){
 
   std::string cut1 = "(sqrt(posx*posx+posy*posy+(posz-184.4)*(posz-184.4)) < 6000 && (dcFlagged & 256) == 256 && fitValid == 1 && evIndex == 0 )";
 
-  std::string cut2 = "(necknhits / nhitsCleaned < 0.004 && sqrt( (seedxPosError-seedxNegError)*(seedxPosError-seedxNegError) + (seedyPosError-seedyNegError)*(seedyPosError-seedyNegError) + (seedzPosError-seedzNegError)*(seedzPosError-seedzNegError)) < 600 &&  sqrt( (posxPosError-posxNegError)*(posxPosError-posxNegError) + (posyPosError-posyNegError)*(posyPosError-posyNegError) + (poszPosError-poszNegError)*(poszPosError-poszNegError)) < 800 && sqrt( (posx-seedx)*(posx-seedx)+(posy-seedy)*(posy-seedy)+(posz-seedz)*(posz-seedz) ) < 1000 && posFOM/posFOM2 > 12.0 && itr > 0.2)";
+  std::string cut2 = "necknhits / nhitsCleaned < 0.004 && sqrt( (seedxPosError-seedxNegError)*(seedxPosError-seedxNegError) + (seedyPosError-seedyNegError)*(seedyPosError-seedyNegError) + (seedzPosError-seedzNegError)*(seedzPosError-seedzNegError)) < 600 &&  sqrt( (posxPosError-posxNegError)*(posxPosError-posxNegError) + (posyPosError-posyNegError)*(posyPosError-posyNegError) + (poszPosError-poszNegError)*(poszPosError-poszNegError)) < 800 && sqrt( (posx-seedx)*(posx-seedx)+(posy-seedy)*(posy-seedy)+(posz-seedz)*(posz-seedz) ) < 1000 && posFOM/posFOM2 > 12.0 && itr > 0.2";
 
   std::string cut3 = " (sqrt( mcPosx*mcPosx + mcPosy*mcPosy + mcPosz*mcPosz ) < 6000 )";
   
