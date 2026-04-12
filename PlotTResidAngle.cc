@@ -1,283 +1,385 @@
+#include <glob.h>
 
 #include <RAT/DU/DSReader.hh>
-#include <RAT/DU/Utility.hh>
 #include <RAT/DU/PMTInfo.hh>
-#include <RAT/DU/LightPathCalculator.hh>
-#include <RAT/DU/GroupVelocity.hh>
+#include <RAT/DU/Point3D.hh>
+#include <RAT/DU/TimeResidualCalculator.hh>
+#include <RAT/DU/Utility.hh>
+#include <RAT/DS/EV.hh>
 #include <RAT/DS/Entry.hh>
 #include <RAT/DS/MC.hh>
-#include <RAT/DS/EV.hh>
 #include <RAT/DS/PMT.hh>
-#include <RAT/DS/FitResult.hh>
-#include <RAT/LightPathStraightScint.hh>
-#include <RAT/DU/TimeResidualCalculator.hh>
 
-#include <TFile.h>
-#include <TH2D.h>
 #include <TCanvas.h>
+#include <TFile.h>
+#include <TH1D.h>
+#include <TH2D.h>
 #include <TLegend.h>
 #include <TStyle.h>
-#include <TMath.h>
+#include <TString.h>
 
+#include <algorithm>
+#include <iostream>
 #include <string>
+#include <vector>
 
-/// Plot the hit time residuals for the fit position
-///
-/// @param[in] fileName of the RAT::DS root file to analyse
-/// @return the histogram plot
-void* PlotTResid( const std::string& fileName)
+namespace
 {
+
+const int kNumTimeBins = 400;
+const double kTimeMin = -100.0;
+const double kTimeMax = 300.0;
+const int kNumCosBins = 20;
+const double kCosMin = -1.0;
+const double kCosMax = 1.0;
+
+std::vector<std::string> ExpandInputFiles(const std::string &input)
+{
+  glob_t globResult;
+  std::vector<std::string> files;
+
+  const int globStatus = glob(input.c_str(), 0, 0, &globResult);
+  if (globStatus == 0)
+  {
+    for (size_t i = 0; i < globResult.gl_pathc; ++i)
+      files.push_back(globResult.gl_pathv[i]);
+  }
+  else if (globStatus == GLOB_NOMATCH)
+  {
+    files.push_back(input);
+  }
+  else
+  {
+    std::cerr << "Failed to expand input pattern: " << input << std::endl;
+  }
+
+  globfree(&globResult);
+  std::sort(files.begin(), files.end());
+  return files;
+}
+
+std::string ToString(const char *text)
+{
+  return text ? std::string(text) : std::string("");
+}
+
+std::string BaseNameNoRoot(const std::string &path)
+{
+  std::string name = path;
+  const std::string::size_type slash = name.find_last_of('/');
+  if (slash != std::string::npos)
+    name = name.substr(slash + 1);
+  if (name.size() > 5 && name.substr(name.size() - 5) == ".root")
+    name = name.substr(0, name.size() - 5);
+  return name;
+}
+
+TH1D *MakeTimeResidualHist(const std::string &name, const std::string &title)
+{
+  return new TH1D(name.c_str(), title.c_str(), kNumTimeBins, kTimeMin, kTimeMax);
+}
+
+TH2D *MakeAngleHist(const std::string &name, const std::string &title)
+{
+  return new TH2D(name.c_str(), title.c_str(),
+                  kNumTimeBins, kTimeMin, kTimeMax,
+                  kNumCosBins, kCosMin, kCosMax);
+}
+
+void NormaliseHist(TH1D *hist)
+{
+  if (!hist)
+    return;
+  const double integral = hist->Integral();
+  if (integral > 0.0)
+    hist->Scale(1.0 / integral);
+}
+
+void FillHistogramsFromPattern(const std::string &inputPattern,
+                               TH1D *hTResid,
+                               TH2D *hAngle)
+{
+  RAT::DB::Get()->SetAirplaneModeStatus(true);
+
+  const std::vector<std::string> inputFiles = ExpandInputFiles(inputPattern);
+  for (size_t iFile = 0; iFile < inputFiles.size(); iFile++)
+  {
+    std::cout << "Processing " << inputFiles[iFile] << std::endl;
+    RAT::DU::DSReader dsReader(inputFiles[iFile]);
+    RAT::DU::TimeResidualCalculator timeResCalc = RAT::DU::Utility::Get()->GetTimeResidualCalculator();
+    const RAT::DU::PMTInfo &pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
+    const size_t pmtSystemId = RAT::DU::Point3D::GetSystemId("innerPMT");
+
+    for (size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++)
+    {
+      const RAT::DS::Entry &rDS = dsReader.GetEntry(iEntry);
+      if (!rDS.MCExists() || rDS.GetMCEVCount() == 0 || rDS.GetEVCount() == 0 ||
+          rDS.GetMC().GetMCParticleCount() == 0)
+      {
+        RAT::DB::Get()->Clear();
+        continue;
+      }
+
+      const TVector3 truePos = rDS.GetMC().GetMCParticle(0).GetPosition();
+      const TVector3 trueDirection = rDS.GetMC().GetMCParticle(0).GetMomentum().Unit();
+      const RAT::DU::Point3D truePoint(pmtSystemId, truePos);
+      const double trueTime = 390.0 - rDS.GetMCEV(0).GetGTTime();
+
+      for (size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++)
+      {
+        if (iEV > 0)
+          continue;
+
+        const RAT::DS::EV &rEV = rDS.GetEV(iEV);
+        const RAT::DS::CalPMTs &calibratedPMTs = rEV.GetCalPMTs();
+        for (size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++)
+        {
+          const RAT::DS::PMTCal &pmtCal = calibratedPMTs.GetPMT(iPMT);
+          const TVector3 pmtPos = pmtInfo.GetPosition(pmtCal.GetID());
+          const double timeResidual =
+              timeResCalc.CalcTimeResidual(pmtCal, truePoint, trueTime, true);
+          const double trueCosAngle = (pmtPos - truePos).Unit().Dot(trueDirection);
+
+          if (hTResid)
+            hTResid->Fill(timeResidual);
+          if (hAngle)
+            hAngle->Fill(timeResidual, trueCosAngle);
+        }
+      }
+
+      RAT::DB::Get()->Clear();
+    }
+  }
+}
+
+TH1D *LoadTimeResidualHist(TFile *file)
+{
+  if (!file)
+    return 0;
+  TH1D *hist = dynamic_cast<TH1D *>(file->Get("tResidNorm"));
+  if (!hist)
+    hist = dynamic_cast<TH1D *>(file->Get("tResid"));
+  return hist;
+}
+
+TH2D *LoadAngleHist(TFile *file)
+{
+  if (!file)
+    return 0;
+  TH2D *hist = dynamic_cast<TH2D *>(file->Get("tResidAngle"));
+  if (!hist)
+    hist = dynamic_cast<TH2D *>(file->Get("newPDF"));
+  return hist;
+}
+
+} // namespace
+
+void PlotTResidOverlay(const std::vector<std::string> &rootFiles,
+                       const std::vector<std::string> &labels,
+                       const char *outputPrefix = "tresid_overlay");
+
+void MakeTResidAngleFile(const char *inputPattern, const char *outputPrefix)
+{
+  const std::string pattern = ToString(inputPattern);
+  std::string prefix = ToString(outputPrefix);
+  if (prefix.empty())
+    prefix = "tresid_angle";
 
   gStyle->SetOptStat(0);
 
-  //  TH2D* hnewPDF = new TH2D( "newPDF", "True cos(#theta_{#gamma}) - Time Residual of PMT Hits", 400, -100, 300, 20, -1.0, 1.0 );
+  TH1D *hTResid = MakeTimeResidualHist("tResid", "Time Residual;Time Residual, ns;Counts");
+  TH2D *hAngle = MakeAngleHist("tResidAngle", "cos(#theta) vs Time Residual;Time Residual, ns;cos(#theta)");
 
-  TH1D* hTResid = new TH1D( "tResid", "Time Residual of PMT Hits", 400, -100, 300);
+  FillHistogramsFromPattern(pattern, hTResid, hAngle);
 
-  // If this is being done on data that does not require remote database connection
-  // eg.: a simple simulation with default run number (0)
-  // We can disable the remote connections:
-  //
-  // NOTE: Don't do this if you are using real data!!!
-  RAT::DB::Get()->SetAirplaneModeStatus(true);
+  TH1D *hTResidNorm = static_cast<TH1D *>(hTResid->Clone("tResidNorm"));
+  hTResidNorm->SetTitle("Normalised Time Residual;Time Residual, ns;Normalised counts");
+  NormaliseHist(hTResidNorm);
 
-  RAT::DU::DSReader dsReader( fileName );
+  TCanvas *c1 = new TCanvas((prefix + "_time_canvas").c_str(), "", 900, 700);
+  hTResidNorm->SetLineWidth(2);
+  hTResidNorm->Draw("hist");
 
-  RAT::DU::TimeResidualCalculator timeResCalc = RAT::DU::Utility::Get()->GetTimeResidualCalculator(); // To calculate the light's path
-  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo(); // The PMT positions etc..
-  for( size_t iEntry = 0; iEntry<dsReader.GetEntryCount(); iEntry++ )
-    {
-      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
-      for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
-        {
-	  if(iEV>0)// man don't want no retriggers
-	    continue;
-          const RAT::DS::EV& rEV = rDS.GetEV( iEV );
+  TCanvas *c2 = new TCanvas((prefix + "_angle_canvas").c_str(), "", 1000, 800);
+  hAngle->Draw("lego");
 
-	  const RAT::DS::CalPMTs& calibratedPMTs = rEV.GetCalPMTs();
-          for( size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++ )
-            {
-              const RAT::DS::PMTCal& pmtCal = calibratedPMTs.GetPMT( iPMT );
-
-	      TVector3 truePos = rDS.GetMC().GetMCParticle(0).GetPosition();
-	      double trueTime = 390 - rDS.GetMCEV(0).GetGTTime();
-	      //TVector3 trueDirection = rDS.GetMC().GetMCParticle(0).GetMomentum().Unit();
-
-	      double distInAV = 0.0;
-              double distInWater = 0.0;
-              double distInTarget = 0.0;
-
-	      TVector3 pmtpos = pmtInfo.GetPosition( pmtCal.GetID() );
-
-	      RAT::LP::LightPathStraightScint::GetPath(pmtpos, truePos, distInTarget, distInWater);
-
-              float trueTransitTime = RAT::DU::Utility::Get()->GetEffectiveVelocity().CalcByDistance( distInTarget, distInAV, distInWater );
-              float trueCorrectedTime = pmtCal.GetTime() - trueTransitTime - trueTime;
-
-              //TVector3 truePhotonDir = (pmtpos - truePos).Unit();
-              //double trueCosAngle = truePhotonDir.Dot(trueDirection);
-
-	      double TimeResidual = timeResCalc.CalcTimeResidual(pmtCal, truePos, 390 - rDS.GetMCEV(0).GetGTTime(), true);
-
-              hTResid->Fill(TimeResidual);
-            }
-        }
-
-    }
-
-  //  gStyle->SetPalette(55);
-  TCanvas* c1 = new TCanvas();
-  hTResid->GetXaxis()->SetTitle( "Time Residual, ns" );
-  hTResid->GetYaxis()->SetTitle( "Events" );
-  hTResid->Draw();
-
-  TFile* file = new TFile("timeResid2.root","RECREATE");
+  TFile *file = new TFile((prefix + ".root").c_str(), "RECREATE");
   hTResid->Write();
-
-  // return hHitTimeResiduals;
+  hTResidNorm->Write();
+  hAngle->Write();
+  c1->Write("timeResidualCanvas");
+  c2->Write("angleCanvas");
+  file->Close();
 }
 
-void* CompareTResid( const std::string& fileName1, const std::string& fileName2, const std::string& label1, const std::string& label2)
+void PlotTResid(const char *inputPattern)
 {
-
-  gStyle->SetOptStat(0);
-
-  TH1D* hTResid1 = new TH1D( "tResid1", "Time Residual of PMT Hits", 400, -100, 300);
-  TH1D* hTResid2 = new TH1D( "tResid2", "Time Residual of PMT Hits", 400, -100, 300);
-
-  // If this is being done on data that does not require remote database connection
-  // eg.: a simple simulation with default run number (0)
-  // We can disable the remote connections:
-  //
-  // NOTE: Don't do this if you are using real data!!!
-  RAT::DB::Get()->SetAirplaneModeStatus(true);
-
-  RAT::DU::DSReader dsReader1( fileName1 );
-
-  RAT::DU::TimeResidualCalculator timeResCalc1 = RAT::DU::Utility::Get()->GetTimeResidualCalculator(); // To calculate the light's path
-  const RAT::DU::PMTInfo& pmtInfo1 = RAT::DU::Utility::Get()->GetPMTInfo(); // The PMT positions etc..
-  for( size_t iEntry = 0; iEntry<dsReader1.GetEntryCount(); iEntry++ )
-    {
-      const RAT::DS::Entry& rDS1 = dsReader1.GetEntry( iEntry );
-      for( size_t iEV = 0; iEV < rDS1.GetEVCount(); iEV++ )
-        {
-	  if(iEV>0)// man don't want no retriggers
-	    continue;
-          const RAT::DS::EV& rEV1 = rDS1.GetEV( iEV );
-
-	  const RAT::DS::CalPMTs& calibratedPMTs1 = rEV1.GetCalPMTs();
-          for( size_t iPMT = 0; iPMT < calibratedPMTs1.GetCount(); iPMT++ )
-            {
-              const RAT::DS::PMTCal& pmtCal1 = calibratedPMTs1.GetPMT( iPMT );
-
-	      TVector3 truePos1 = rDS1.GetMC().GetMCParticle(0).GetPosition();
-	      double trueTime1 = 390 - rDS1.GetMCEV(0).GetGTTime();
-
-	      double distInAV1 = 0.0;
-              double distInWater1 = 0.0;
-              double distInTarget1 = 0.0;
-
-	      TVector3 pmtpos1 = pmtInfo1.GetPosition( pmtCal1.GetID() );
-
-	      RAT::LP::LightPathStraightScint::GetPath(pmtpos1, truePos1, distInTarget1, distInWater1);
-
-              float trueTransitTime1 = RAT::DU::Utility::Get()->GetEffectiveVelocity().CalcByDistance( distInTarget1, distInAV1, distInWater1 );
-              float trueCorrectedTime1 = pmtCal1.GetTime() - trueTransitTime1 - trueTime1;
-
-	      double TimeResidual1 = timeResCalc1.CalcTimeResidual(pmtCal1, truePos1, 390 - rDS1.GetMCEV(0).GetGTTime(), true);
-
-              hTResid1->Fill(TimeResidual1);
-            }
-        }
-    }
-
-  RAT::DU::DSReader dsReader2( fileName2 );
-
-  RAT::DU::TimeResidualCalculator timeResCalc2 = RAT::DU::Utility::Get()->GetTimeResidualCalculator(); // To calculate the light's path
-  const RAT::DU::PMTInfo& pmtInfo2 = RAT::DU::Utility::Get()->GetPMTInfo(); // The PMT positions etc..
-  for( size_t iEntry = 0; iEntry<dsReader2.GetEntryCount(); iEntry++ )
-    {
-      const RAT::DS::Entry& rDS2 = dsReader2.GetEntry( iEntry );
-      for( size_t iEV = 0; iEV < rDS2.GetEVCount(); iEV++ )
-        {
-	  if(iEV>0)// man don't want no retriggers
-	    continue;
-          const RAT::DS::EV& rEV2 = rDS2.GetEV( iEV );
-
-	  const RAT::DS::CalPMTs& calibratedPMTs2 = rEV2.GetCalPMTs();
-          for( size_t iPMT = 0; iPMT < calibratedPMTs2.GetCount(); iPMT++ )
-            {
-              const RAT::DS::PMTCal& pmtCal2 = calibratedPMTs2.GetPMT( iPMT );
-
-	      TVector3 truePos2 = rDS2.GetMC().GetMCParticle(0).GetPosition();
-	      double trueTime2 = 390 - rDS2.GetMCEV(0).GetGTTime();
-
-	      double distInAV2 = 0.0;
-              double distInWater2 = 0.0;
-              double distInTarget2 = 0.0;
-
-	      TVector3 pmtpos2 = pmtInfo2.GetPosition( pmtCal2.GetID() );
-
-	      RAT::LP::LightPathStraightScint::GetPath(pmtpos2, truePos2, distInTarget2, distInWater2);
-
-              float trueTransitTime2 = RAT::DU::Utility::Get()->GetEffectiveVelocity().CalcByDistance( distInTarget2, distInAV2, distInWater2 );
-              float trueCorrectedTime2 = pmtCal2.GetTime() - trueTransitTime2 - trueTime2;
-
-	      double TimeResidual2 = timeResCalc2.CalcTimeResidual(pmtCal2, truePos2, 390 - rDS2.GetMCEV(0).GetGTTime(), true);
-
-              hTResid2->Fill(TimeResidual2);
-            }
-        }
-
-    }
-  
-  TCanvas* c1 = new TCanvas();
-  hTResid1->GetXaxis()->SetTitle( "Time Residual, ns" );
-  hTResid1->GetYaxis()->SetTitle( "Events" );
-  hTResid1->SetLineColor(kRed);
-  hTResid1->Draw();
-
-  hTResid2->GetXaxis()->SetTitle( "Time Residual, ns" );
-  hTResid2->GetYaxis()->SetTitle( "Events" );
-  hTResid2->SetLineColor(kBlue);
-  hTResid2->Draw("same");
-
-  TLegend* t1 = new TLegend( 0.45, 0.75, 0.87, 0.9 );
-  t1->AddEntry( hTResid1, label1.c_str(), "l" );
-  t1->AddEntry( hTResid2, label2.c_str(), "l" );
-
-  TFile* file = new TFile("timeResidComp.root","RECREATE");
-  hTResid1->Write();
-  hTResid2->Write();
-
+  MakeTResidAngleFile(inputPattern, "timeResid2");
 }
 
-void* PlotAngles( const std::string& fileName)
+void PlotAngles(const char *inputPattern)
 {
+  MakeTResidAngleFile(inputPattern, "timeResidAngle");
+}
 
+void CompareTResid(const char *fileName1, const char *fileName2, const char *label1, const char *label2)
+{
+  std::vector<std::string> files;
+  files.push_back(ToString(fileName1));
+  files.push_back(ToString(fileName2));
+  std::vector<std::string> labels;
+  labels.push_back(ToString(label1));
+  labels.push_back(ToString(label2));
+
+  PlotTResidOverlay(files, labels, "timeResidComp");
+}
+
+void PlotTResidOverlay(const std::vector<std::string> &rootFiles,
+                       const std::vector<std::string> &labels,
+                       const char *outputPrefix)
+{
   gStyle->SetOptStat(0);
 
-  TH2D* hnewPDF = new TH2D( "newPDF", "True cos(#theta_{#gamma}) - Time Residual of PMT Hits", 400, -100, 300, 20, -1.0, 1.0 );
+  std::string prefix = ToString(outputPrefix);
+  if (prefix.empty())
+    prefix = "tresid_overlay";
 
-  // If this is being done on data that does not require remote database connection
-  // eg.: a simple simulation with default run number (0)
-  // We can disable the remote connections:
-  //
-  // NOTE: Don't do this if you are using real data!!!
-  RAT::DB::Get()->SetAirplaneModeStatus(true);
+  TCanvas *canvas = new TCanvas((prefix + "_canvas").c_str(), "", 900, 700);
+  //TLegend *legend = new TLegend(0.68, 0.68, 0.88, 0.88);
+  TLegend *legend = new TLegend(0.48, 0.38, 0.88, 0.58);
+  bool first = true;
 
-  RAT::DU::DSReader dsReader( fileName );
+  const int colors[] = {kBlack, kRed + 1, kBlue + 1, kGreen + 2, kOrange + 7, kMagenta + 2, kCyan + 2};
 
-  RAT::DU::TimeResidualCalculator timeResCalc = RAT::DU::Utility::Get()->GetTimeResidualCalculator(); // To calculate the light's path
-  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo(); // The PMT positions etc..
-  for( size_t iEntry = 0; iEntry<dsReader.GetEntryCount(); iEntry++ )
+  TFile *outFile = new TFile((prefix + ".root").c_str(), "RECREATE");
+
+  for (size_t i = 0; i < rootFiles.size(); i++)
+  {
+    TFile input(rootFiles[i].c_str(), "READ");
+    TH1D *source = LoadTimeResidualHist(&input);
+    if (!source)
     {
-      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
-      for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
-        {
-	  if(iEV>0)// man don't want no retriggers
-	    continue;
-          const RAT::DS::EV& rEV = rDS.GetEV( iEV );
-
-	  const RAT::DS::CalPMTs& calibratedPMTs = rEV.GetCalPMTs();
-          for( size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++ )
-            {
-              const RAT::DS::PMTCal& pmtCal = calibratedPMTs.GetPMT( iPMT );
-
-	      TVector3 truePos = rDS.GetMC().GetMCParticle(0).GetPosition();
-	      double trueTime = 390 - rDS.GetMCEV(0).GetGTTime();
-	      TVector3 trueDirection = rDS.GetMC().GetMCParticle(0).GetMomentum().Unit();
-
-	      double distInAV = 0.0;
-              double distInWater = 0.0;
-              double distInTarget = 0.0;
-
-	      TVector3 pmtpos = pmtInfo.GetPosition( pmtCal.GetID() );
-
-	      RAT::LP::LightPathStraightScint::GetPath(pmtpos, truePos, distInTarget, distInWater);
-
-              float trueTransitTime = RAT::DU::Utility::Get()->GetEffectiveVelocity().CalcByDistance( distInTarget, distInAV, distInWater );
-              float trueCorrectedTime = pmtCal.GetTime() - trueTransitTime - trueTime;
-
-              TVector3 truePhotonDir = (pmtpos - truePos).Unit();
-              double trueCosAngle = truePhotonDir.Dot(trueDirection);
-
-	      double TimeResidual = timeResCalc.CalcTimeResidual(pmtCal, truePos, 390 - rDS.GetMCEV(0).GetGTTime(), true);
-
-              hnewPDF->Fill(TimeResidual, trueCosAngle);
-            }
-        }
-
+      std::cerr << "Could not find time residual histogram in " << rootFiles[i] << std::endl;
+      continue;
     }
 
-  //  gStyle->SetPalette(55);
-  TCanvas* c1 = new TCanvas();
-  hnewPDF->GetXaxis()->SetTitle( "Time Residual, ns" );
-  hnewPDF->GetYaxis()->SetTitle( "Events" );
-  hnewPDF->Draw("lego");
+    TH1D *hist = static_cast<TH1D *>(source->Clone(TString::Format("tResidOverlay_%zu", i)));
+    hist->SetDirectory(0);
+    NormaliseHist(hist);
+    hist->SetLineWidth(2);
+    hist->SetLineStyle(1);
+    hist->SetLineColor(colors[i % (sizeof(colors) / sizeof(colors[0]))]);
+    hist->SetTitle("Normalised Time Residual Comparison;Time Residual, ns;Normalised Counts");
+    hist->GetXaxis()->SetRangeUser(-30,30);
+    hist->GetYaxis()->SetTitleOffset(1.2);
+    canvas->SetLogy();
 
-  TFile* file = new TFile("timeResidAngle.root","RECREATE");
-  hnewPDF->Write();
+    if (first)
+    {
+      hist->Draw("hist");
+      first = false;
+    }
+    else
+    {
+      hist->Draw("hist same");
+    }
 
-  // return hHitTimeResiduals;
+    const std::string label = i < labels.size() ? labels[i] : BaseNameNoRoot(rootFiles[i]);
+    legend->AddEntry(hist, label.c_str(), "l");
+    outFile->cd();
+    hist->Write();
+  }
+
+  outFile->cd();
+  legend->Draw();
+  canvas->Write("overlayCanvas");
+  outFile->Close();
+  canvas->SaveAs((prefix+".pdf").c_str());
+}
+
+void CombineTResidOutputs(const std::vector<std::string> &rootFiles,
+                          const char *outputPrefix)
+{
+  std::string prefix = ToString(outputPrefix);
+  if (prefix.empty())
+    prefix = "tresid_combined";
+
+  TH1D *combined1D = 0;
+  TH2D *combined2D = 0;
+
+  for (size_t i = 0; i < rootFiles.size(); i++)
+  {
+    TFile input(rootFiles[i].c_str(), "READ");
+    TH1D *source1D = LoadTimeResidualHist(&input);
+    TH2D *source2D = LoadAngleHist(&input);
+
+    if (!source1D || !source2D)
+    {
+      std::cerr << "Could not find expected histograms in " << rootFiles[i] << std::endl;
+      continue;
+    }
+
+    if (!combined1D)
+    {
+      combined1D = static_cast<TH1D *>(source1D->Clone("tResid"));
+      combined1D->SetDirectory(0);
+      combined2D = static_cast<TH2D *>(source2D->Clone("tResidAngle"));
+      combined2D->SetDirectory(0);
+    }
+    else
+    {
+      combined1D->Add(source1D);
+      combined2D->Add(source2D);
+    }
+  }
+
+  if (!combined1D || !combined2D)
+    return;
+
+  TH1D *combinedNorm = static_cast<TH1D *>(combined1D->Clone("tResidNorm"));
+  combinedNorm->SetDirectory(0);
+  combinedNorm->SetTitle("Normalised Time Residual;Time Residual, ns;Normalised counts");
+  NormaliseHist(combinedNorm);
+
+  TCanvas *c1 = new TCanvas((prefix + "_time_canvas").c_str(), "", 900, 700);
+  combinedNorm->SetLineWidth(2);
+  combinedNorm->Draw("hist");
+
+  TCanvas *c2 = new TCanvas((prefix + "_angle_canvas").c_str(), "", 1000, 800);
+  combined2D->SetTitle("cos(#theta) vs Time Residual;Time Residual, ns;cos(#theta)");
+  combined2D->Draw("lego");
+
+  TFile *outFile = new TFile((prefix + ".root").c_str(), "RECREATE");
+  combined1D->Write();
+  combinedNorm->Write();
+  combined2D->Write();
+  c1->Write("timeResidualCanvas");
+  c2->Write("angleCanvas");
+  outFile->Close();
+}
+
+void SaveAngleLegoPdf(const char *inputFileName, const char *outputName)
+{
+  const std::string inputFile = ToString(inputFileName);
+  std::string outputBase = ToString(outputName);
+  if (outputBase.empty())
+    outputBase = BaseNameNoRoot(inputFile);
+
+  TFile input(inputFile.c_str(), "READ");
+  TH2D *source = LoadAngleHist(&input);
+  if (!source)
+  {
+    std::cerr << "Could not find tResidAngle in " << inputFile << std::endl;
+    return;
+  }
+
+  TH2D *hist = static_cast<TH2D *>(source->Clone("tResidAngleLego"));
+  hist->SetDirectory(0);
+  hist->GetXaxis()->SetRangeUser(-25,-5);
+  hist->GetXaxis()->SetTitleOffset(1.4);
+  hist->GetYaxis()->SetTitleOffset(1.6);
+
+  TCanvas *canvas = new TCanvas((outputBase + "_lego_canvas").c_str(), "", 1500, 800);
+  hist->Draw("lego");
+  canvas->SaveAs((outputBase + ".pdf").c_str());
 }
