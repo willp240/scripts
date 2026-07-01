@@ -19,6 +19,7 @@
 #include <TString.h>
 
 #include <algorithm>
+#include <exception>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -106,7 +107,8 @@ void FillHistogramsFromPattern(const std::string &inputPattern,
   {
     std::cout << "Processing " << inputFiles[iFile] << std::endl;
     RAT::DU::DSReader dsReader(inputFiles[iFile]);
-    RAT::DU::TimeResidualCalculator timeResCalc = RAT::DU::Utility::Get()->GetTimeResidualCalculator();
+    RAT::DU::TimeResidualCalculator timeResCalc;
+    timeResCalc.BeginOfRun();
     const RAT::DU::PMTInfo &pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
     const size_t pmtSystemId = RAT::DU::Point3D::GetSystemId("innerPMT");
 
@@ -159,6 +161,24 @@ TH1D *LoadTimeResidualHist(TFile *file)
   TH1D *hist = dynamic_cast<TH1D *>(file->Get("tResidNorm"));
   if (!hist)
     hist = dynamic_cast<TH1D *>(file->Get("tResid"));
+  if (hist)
+    return hist;
+
+  TH2D *hist2D = dynamic_cast<TH2D *>(file->Get("PDF"));
+  if (!hist2D)
+    hist2D = dynamic_cast<TH2D *>(file->Get("MC"));
+  if (!hist2D)
+    hist2D = dynamic_cast<TH2D *>(file->Get("tResidAngle"));
+  if (!hist2D)
+    hist2D = dynamic_cast<TH2D *>(file->Get("newPDF"));
+  if (hist2D)
+  {
+    TH1D *projection = hist2D->ProjectionX("tResidProjection");
+    projection->SetTitle("Time Residual Projection;Time Residual, ns;Counts");
+    projection->SetDirectory(0);
+    return projection;
+  }
+
   return hist;
 }
 
@@ -169,6 +189,10 @@ TH2D *LoadAngleHist(TFile *file)
   TH2D *hist = dynamic_cast<TH2D *>(file->Get("tResidAngle"));
   if (!hist)
     hist = dynamic_cast<TH2D *>(file->Get("newPDF"));
+  if (!hist)
+    hist = dynamic_cast<TH2D *>(file->Get("PDF"));
+  if (!hist)
+    hist = dynamic_cast<TH2D *>(file->Get("MC"));
   return hist;
 }
 
@@ -222,6 +246,80 @@ void PlotAngles(const char *inputPattern)
   MakeTResidAngleFile(inputPattern, "timeResidAngle");
 }
 
+void DebugTResidFile(const char *inputFileName, const size_t maxEntries = 5)
+{
+  const std::string inputFile = ToString(inputFileName);
+  std::cout << "DebugTResidFile: input = " << inputFile << std::endl;
+
+  try
+  {
+    RAT::DB::Get()->SetAirplaneModeStatus(true);
+
+    std::cout << "DebugTResidFile: constructing DSReader" << std::endl;
+    RAT::DU::DSReader dsReader(inputFile);
+    std::cout << "DebugTResidFile: entries = " << dsReader.GetEntryCount() << std::endl;
+
+    std::cout << "DebugTResidFile: constructing TimeResidualCalculator" << std::endl;
+    RAT::DU::TimeResidualCalculator timeResCalc;
+    std::cout << "DebugTResidFile: beginning TimeResidualCalculator run" << std::endl;
+    timeResCalc.BeginOfRun();
+
+    std::cout << "DebugTResidFile: loading PMTInfo" << std::endl;
+    const RAT::DU::PMTInfo &pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
+
+    std::cout << "DebugTResidFile: loading innerPMT system id" << std::endl;
+    const size_t pmtSystemId = RAT::DU::Point3D::GetSystemId("innerPMT");
+    std::cout << "DebugTResidFile: innerPMT system id = " << pmtSystemId << std::endl;
+
+    const size_t entryLimit = std::min(maxEntries, dsReader.GetEntryCount());
+    for (size_t iEntry = 0; iEntry < entryLimit; iEntry++)
+    {
+      std::cout << "DebugTResidFile: reading entry " << iEntry << std::endl;
+      const RAT::DS::Entry &rDS = dsReader.GetEntry(iEntry);
+      std::cout << "DebugTResidFile: entry " << iEntry
+                << " MCExists=" << rDS.MCExists()
+                << " MCEVCount=" << rDS.GetMCEVCount()
+                << " EVCount=" << rDS.GetEVCount() << std::endl;
+
+      if (!rDS.MCExists() || rDS.GetMCEVCount() == 0 || rDS.GetEVCount() == 0 ||
+          rDS.GetMC().GetMCParticleCount() == 0)
+      {
+        std::cout << "DebugTResidFile: skipping entry " << iEntry << std::endl;
+        continue;
+      }
+
+      const TVector3 truePos = rDS.GetMC().GetMCParticle(0).GetPosition();
+      const TVector3 trueDirection = rDS.GetMC().GetMCParticle(0).GetMomentum().Unit();
+      const RAT::DU::Point3D truePoint(pmtSystemId, truePos);
+      const double trueTime = 390.0 - rDS.GetMCEV(0).GetGTTime();
+      const RAT::DS::EV &rEV = rDS.GetEV(0);
+      const RAT::DS::CalPMTs &calibratedPMTs = rEV.GetCalPMTs();
+      std::cout << "DebugTResidFile: entry " << iEntry
+                << " calibrated PMTs = " << calibratedPMTs.GetCount() << std::endl;
+
+      if (calibratedPMTs.GetCount() == 0)
+        continue;
+
+      const RAT::DS::PMTCal &pmtCal = calibratedPMTs.GetPMT(0);
+      std::cout << "DebugTResidFile: first PMT id = " << pmtCal.GetID() << std::endl;
+      const TVector3 pmtPos = pmtInfo.GetPosition(pmtCal.GetID());
+      const double timeResidual =
+          timeResCalc.CalcTimeResidual(pmtCal, truePoint, trueTime, true);
+      const double trueCosAngle = (pmtPos - truePos).Unit().Dot(trueDirection);
+      std::cout << "DebugTResidFile: first residual = " << timeResidual
+                << ", cos(theta) = " << trueCosAngle << std::endl;
+    }
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << "DebugTResidFile: caught std::exception: " << e.what() << std::endl;
+  }
+  catch (...)
+  {
+    std::cerr << "DebugTResidFile: caught non-std exception" << std::endl;
+  }
+}
+
 void CompareTResid(const char *fileName1, const char *fileName2, const char *label1, const char *label2)
 {
   std::vector<std::string> files;
@@ -245,8 +343,8 @@ void PlotTResidOverlay(const std::vector<std::string> &rootFiles,
     prefix = "tresid_overlay";
 
   TCanvas *canvas = new TCanvas((prefix + "_canvas").c_str(), "", 900, 700);
-  //TLegend *legend = new TLegend(0.68, 0.68, 0.88, 0.88);
-  TLegend *legend = new TLegend(0.48, 0.38, 0.88, 0.58);
+  TLegend *legend = new TLegend(0.63, 0.68, 0.83, 0.88);
+  //TLegend *legend = new TLegend(0.48, 0.38, 0.88, 0.58);
   bool first = true;
 
   const int colors[] = {kBlack, kRed + 1, kBlue + 1, kGreen + 2, kOrange + 7, kMagenta + 2, kCyan + 2};
@@ -270,12 +368,13 @@ void PlotTResidOverlay(const std::vector<std::string> &rootFiles,
     hist->SetLineStyle(1);
     hist->SetLineColor(colors[i % (sizeof(colors) / sizeof(colors[0]))]);
     hist->SetTitle("Normalised Time Residual Comparison;Time Residual, ns;Normalised Counts");
-    hist->GetXaxis()->SetRangeUser(-30,30);
+    hist->GetXaxis()->SetRangeUser(-5,15);
     hist->GetYaxis()->SetTitleOffset(1.2);
-    canvas->SetLogy();
+    //canvas->SetLogy();
 
     if (first)
     {
+      hist->GetYaxis()->SetRangeUser(0, hist->GetMaximum()*1.2);
       hist->Draw("hist");
       first = false;
     }
@@ -360,6 +459,7 @@ void CombineTResidOutputs(const std::vector<std::string> &rootFiles,
 
 void SaveAngleLegoPdf(const char *inputFileName, const char *outputName)
 {
+  gStyle->SetOptStat(0);
   const std::string inputFile = ToString(inputFileName);
   std::string outputBase = ToString(outputName);
   if (outputBase.empty())
@@ -375,11 +475,61 @@ void SaveAngleLegoPdf(const char *inputFileName, const char *outputName)
 
   TH2D *hist = static_cast<TH2D *>(source->Clone("tResidAngleLego"));
   hist->SetDirectory(0);
-  hist->GetXaxis()->SetRangeUser(-25,-5);
+  hist->GetXaxis()->SetRangeUser(-5,15);
   hist->GetXaxis()->SetTitleOffset(1.4);
   hist->GetYaxis()->SetTitleOffset(1.6);
 
   TCanvas *canvas = new TCanvas((outputBase + "_lego_canvas").c_str(), "", 1500, 800);
   hist->Draw("lego");
   canvas->SaveAs((outputBase + ".pdf").c_str());
+}
+
+void ConvertDirection2DToTResidAngleFile(const char *inputFileName,
+                                         const char *outputPrefix,
+                                         const char *histogramName = "MC")
+{
+  const std::string inputFile = ToString(inputFileName);
+  std::string prefix = ToString(outputPrefix);
+  if (prefix.empty())
+    prefix = BaseNameNoRoot(inputFile);
+
+  std::string sourceName = ToString(histogramName);
+  if (sourceName.empty())
+    sourceName = "MC";
+
+  TFile input(inputFile.c_str(), "READ");
+  TH2D *source = dynamic_cast<TH2D *>(input.Get(sourceName.c_str()));
+  if (!source)
+  {
+    std::cerr << "Could not find " << sourceName << " in " << inputFile << std::endl;
+    return;
+  }
+
+  TH2D *hAngle = static_cast<TH2D *>(source->Clone("tResidAngle"));
+  hAngle->SetDirectory(0);
+  hAngle->SetTitle("cos(#theta) vs Time Residual;Time Residual, ns;cos(#theta)");
+
+  TH1D *hTResid = hAngle->ProjectionX("tResid");
+  hTResid->SetDirectory(0);
+  hTResid->SetTitle("Time Residual;Time Residual, ns;Counts");
+
+  TH1D *hTResidNorm = static_cast<TH1D *>(hTResid->Clone("tResidNorm"));
+  hTResidNorm->SetDirectory(0);
+  hTResidNorm->SetTitle("Normalised Time Residual;Time Residual, ns;Normalised counts");
+  NormaliseHist(hTResidNorm);
+
+  TCanvas *c1 = new TCanvas((prefix + "_time_canvas").c_str(), "", 900, 700);
+  hTResidNorm->SetLineWidth(2);
+  hTResidNorm->Draw("hist");
+
+  TCanvas *c2 = new TCanvas((prefix + "_angle_canvas").c_str(), "", 1000, 800);
+  hAngle->Draw("lego");
+
+  TFile *outFile = new TFile((prefix + ".root").c_str(), "RECREATE");
+  hTResid->Write();
+  hTResidNorm->Write();
+  hAngle->Write();
+  c1->Write("timeResidualCanvas");
+  c2->Write("angleCanvas");
+  outFile->Close();
 }
