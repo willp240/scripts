@@ -1,7 +1,5 @@
 /rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
 
-#/rat/tracking/store full
-
 /rat/db/set GEO[inner_av] material "labppo_2p2_bismsb_2p2_scintillator"
 
 /run/initialize
@@ -17,16 +15,12 @@
 /rat/proc scintFitter
 
 /rat/proclast outroot
-/rat/procset file "{0}"
+/rat/procset file "test810.root"
 # END EVENTLOOP
 
-#/generator/add combo gun:point
-#/generator/vtx/set e- 0 0 0 2.5
-#/generator/pos/set 0 0 0
-
 /generator/add combo gun:point
-/generator/vtx/set mu+ 0 0 -1 100000
-/generator/pos/set 0 0 6000
+/generator/vtx/set e- 0 0 0 2.5
+/generator/pos/set 0 0 0
 
-/rat/run/start 1
+/rat/run/start 10
 exit

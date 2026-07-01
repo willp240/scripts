@@ -1,0 +1,33 @@
+# File: Template_Macro_DirectionTimeWindow_m3_p2.mac
+# Brief: Re-run Direction2D on pre-simulated MC with time residual window -3 to 2 ns
+
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
+
+/rat/inroot/load {1}
+
+/rat/db/set DETECTOR geo_file "geo/snoplusnative.geo"
+/rat/db/set GEO[inner_av] material "labppo_2p2_scintillator"
+/rat/db/set FIT_DIRECTION_2DPDF[parameters] time_window_min -3
+/rat/db/set FIT_DIRECTION_2DPDF[parameters] time_window_max 2
+
+/run/initialize
+
+/rat/proc count
+/rat/procset update 10
+
+/rat/proc fitter
+/rat/procset method "directionLikelihood-polar"
+/rat/procset optimiser "grid"
+/rat/procset pdf "Direction2D"
+/rat/procset pdf.index "labppo_2p2_scintillator_risetime0p85_TruePos_fullvolume"
+/rat/procset seed "multiPDFFit"
+/rat/procset seed.pass 0
+/rat/procset selector "null"
+/rat/procset name "directionFit_TW"
+
+/rat/proc outroot
+/rat/procset file "{0}"
+
+/rat/inroot/read
+exit
