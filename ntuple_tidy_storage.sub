@@ -1,0 +1,30 @@
+universe = vanilla
+executable = /home/parkerw/Software/rat_cpp17/user/ntuple_tidy_jobs/run_ntuple_tidy_benchmark.sh
+
+getenv = True
+initialdir = /home/parkerw/Software/rat_cpp17
+
+request_cpus = 1
+request_memory = 2 GB
+request_disk = 20 GB
+
+log = /data/snoplus3/parkerw/ntuple_tidy_20260629/condor/logs/$(Cluster).log
+output = /data/snoplus3/parkerw/ntuple_tidy_20260629/condor/logs/$(Cluster)_$(Process)_$(JobName).out
+error = /data/snoplus3/parkerw/ntuple_tidy_20260629/condor/logs/$(Cluster)_$(Process)_$(JobName).err
+
++JobFlavour = "longlunch"
+
+arguments = $(Compression) $(StartStep) $(StopStep) /data/snoplus3/parkerw/ntuple_tidy_20260629
+JobName = $(Name)
++JobName = "$(Name)"
+
+# Stages 0-7 do not depend on the final compression choice, so write them once.
+# Stage 8 is the final cumulative compression comparison.
+queue Compression, StartStep, StopStep, Name from (
+  ZLIB:1 0 7 common_steps0-7
+  ZLIB:1 8 8 final_ZLIB1
+  ZLIB:6 8 8 final_ZLIB6
+  ZSTD:3 8 8 final_ZSTD3
+  ZSTD:5 8 8 final_ZSTD5
+  LZMA:7 8 8 final_LZMA7
+)
